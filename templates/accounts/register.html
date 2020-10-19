@@ -3,6 +3,7 @@
 
 {% block title %}Create Account{% endblock %}
 {% block contet %}
+    <p>Only username, password and mail are required</p>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}

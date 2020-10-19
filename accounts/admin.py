@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
-from .forms import RegisterUserForm
+from .forms import RegisterUserFormAdmin
 
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    add_form = RegisterUserForm
+    add_form = RegisterUserFormAdmin
     prepopulated_fields = {'username': ('first_name', 'last_name'), }
 
     add_fieldsets = (
@@ -28,6 +28,7 @@ class CustomUserAdmin(UserAdmin):
                 'fields': (
                     'phone_number',
                     'address',
+                    'slug',
 
                 )
             }
