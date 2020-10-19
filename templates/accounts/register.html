@@ -1,12 +1,13 @@
 {% extends 'pages/base.html' %}
+{% load crispy_forms_tags %}
 {% load static %}
 
 {% block title %}Create Account{% endblock %}
 {% block contet %}
     <p>Only username, password and mail are required</p>
-    <form method="post">
+    <form method="post" class="uniForm">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form|crispy }}
         <button type="submit">Register</button>
     </form>
 {% endblock %}

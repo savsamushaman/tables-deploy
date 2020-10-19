@@ -1,0 +1,29 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+
+
+{% block title %} User Details{% endblock title %}
+
+{% block contet %}
+    <p>Name: {{ user.username }}</p>
+    <p>First Name : {{ user.first_name }}</p>
+    <p>Last Name : {{ user.last_name }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Phone Number : {{ user.phone_number }}</p>
+    <p>Address : {{ user.address }}</p>
+    <p>Joined {{ user.date_joined }}</p>
+    <p>Businesses:</p>
+    <div>
+        {% for business in businesses %}
+            <hr>
+            <p>Name: {{ business.business_name }}</p>
+            <p>Email : {{ business.email }}</p>
+            <p>Short Description : {{ business.short_description }}</p>
+            <p>Date Created : {{ business.date_created }}</p>
+            <p>All tables : {{ business.all_tables }}</p>
+            <p>Is active : {{ business.is_active }}</p>
+
+        {% endfor %}
+    </div>
+
+{% endblock contet %}

@@ -1,0 +1,18 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+
+{% block title %} Places to go {% endblock title %}
+
+{% block contet %}
+    <div>
+        {% for business in businesses %}
+            <h3>{{ business.business_name }}</h3>
+            <p>Owner: {{ business.manager.first_name }} {{ business.manager.last_name }}</p>
+            <p>Email : {{ business.email }}</p>
+            <p>Short Description : {{ business.short_description }}</p>
+            <p>All tables : {{ business.all_tables }}</p>
+            <p>Is open now : {{ business.is_active }}</p>
+            <hr style="color: red">
+        {% endfor %}
+    </div>
+{% endblock contet %}
