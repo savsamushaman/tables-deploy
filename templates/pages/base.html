@@ -10,12 +10,14 @@
 
 </head>
 <body>
+
+
 {% block contet %}
     <p style="size: 100px">Change me!</p>
 {% endblock %}
 
 <div class="footer">
-{% block footer %}
+    {% block footer %}
         <a href="{% url "home" %}">
             <button type="button">Home Page</button>
         </a>
@@ -31,7 +33,9 @@
             <a href="{% url "register" %}">
                 <button type="button">Register</button>
             </a>{% endif %}
-{% endblock %}
+    {% endblock %}
+    <br>
+    {% block greeter %} Greetings {% if user.is_authenticated %} {{ user.username }} {% endif %}! {% endblock greeter %}
 </div>
 </body>
 </html>

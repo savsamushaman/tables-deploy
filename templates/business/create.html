@@ -4,7 +4,7 @@
 
 {% block title %}Create Business{% endblock title %}
 {% block contet %}
-     <form method="post" class="uniForm">
+    <form method="post" class="uniForm">
         {% csrf_token %}
         {{ form|crispy }}
         <button type="submit">Create Business</button>
