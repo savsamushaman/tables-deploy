@@ -6,10 +6,10 @@ from accounts.models import CustomUser
 
 class BusinessModel(models.Model):
     manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    business_name = models.CharField(max_length=100, blank=False)
+    business_name = models.CharField(max_length=100, blank=False, unique=True)
     short_description = models.TextField()
-    email = models.EmailField(blank=False)
-    phone_nr = models.CharField(max_length=30, blank=False)
+    email = models.EmailField(blank=False, unique=True)
+    phone_nr = models.CharField(max_length=30, blank=False, unique=True)
     address = models.CharField(max_length=100, blank=False)
     slug = models.SlugField(blank=True)
     is_active = models.BooleanField(default=False)

@@ -18,8 +18,7 @@ class CreateBusinessView(LoginRequiredMixin, View):
             new_data = request.POST.dict()
             del new_data['csrfmiddlewaretoken']
             BusinessModel.objects.create(manager=request.user, **new_data)
-            return redirect('user_detail')
+            return redirect('user_business_details')
 
         else:
             return render(request, self.template_name, {'form': self.form()})
-
