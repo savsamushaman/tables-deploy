@@ -24,3 +24,14 @@ class BusinessModel(models.Model):
 
     def __str__(self):
         return str(self.business_name)
+
+
+class ProductModel(models.Model):
+    business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, blank=True, null=False)
+    description = models.TextField(max_length=500, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    service = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.name) + ' - ' + str(self.business)

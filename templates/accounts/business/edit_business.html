@@ -1,0 +1,20 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+{% block title %} Update {{ business.business_name }} {% endblock title %}
+
+{% block contet %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Update"/>
+    </form>
+
+    <h4>Products</h4>
+    <p>Click to update</p>
+    <div>
+        {% for product in products %}
+            <a href="{% url "update_product" product.pk %}"><p>{{ product.name }}</p></a>
+        {% endfor %}
+    </div>
+
+{% endblock contet %}

@@ -14,7 +14,14 @@
     <p>All tables > {{ place.all_tables }}</p>
     <p>Available tables > {{ place.available_tables }}</p>
     <p>Owner > {{ place.manager }}</p>
-
+    <h4>Products</h4>
+    <div>
+        {% for product in products %}
+            <p>{{ product.name }}</p>
+            <p>{{ product.description }}</p>
+            <hr>
+        {% endfor %}
+    </div>
 {% endblock contet %}
 
 {% block footer %}

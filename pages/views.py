@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
-from business.models import BusinessModel
+from business.models import BusinessModel, ProductModel
 
 
 def test_view(request):
@@ -18,3 +18,8 @@ class BusinessDetailView(DetailView):
     model = BusinessModel
     template_name = 'pages/place_details.html'
     context_object_name = 'place'
+
+    def get_context_data(self, **kwargs):
+        context = super(BusinessDetailView, self).get_context_data(**kwargs)
+        context['products'] = ProductModel.objects.filter(business=kwargs['object'])
+        return context

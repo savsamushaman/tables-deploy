@@ -21,6 +21,7 @@
             <p>Date Created : {{ business.date_created }}</p>
             <p>All tables : {{ business.all_tables }}</p>
             <p>Is active : {{ business.is_active }}</p>
+            <a href="{% url 'business_update' business.slug %}"><button>Update</button></a>
 
         {% endfor %}
     </div>
