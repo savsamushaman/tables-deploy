@@ -10,10 +10,11 @@
     </form>
 
     <h4>Products</h4>
+    <a href="{% url 'create_product' business.slug %}"><p>Add new</p></a>
     <p>Click to update</p>
     <div>
         {% for product in products %}
-            <a href="{% url "update_product" product.pk %}"><p>{{ product.name }}</p></a>
+            <a href="{% url "update_product" business.slug product.pk %}"><p>{{ product.name }}</p></a>
         {% endfor %}
     </div>
 

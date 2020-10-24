@@ -4,7 +4,7 @@ from .models import BusinessModel
 from .forms import CreateBusinessForm
 from django.views import View
 
-
+# add createview def get post
 class CreateBusinessView(LoginRequiredMixin, View):
     template_name = 'business/create.html'
     form = CreateBusinessForm
