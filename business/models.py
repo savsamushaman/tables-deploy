@@ -26,6 +26,16 @@ class BusinessModel(models.Model):
         return str(self.business_name)
 
 
+class TableModel(models.Model):
+    business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
+    table_nr = models.IntegerField()
+    current_customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    is_available = models.BooleanField(default=True)
+
+    def __str__(self):
+        return str(self.business) + ' - ' + str(self.table_nr)
+
+
 class ProductModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=True, null=False)

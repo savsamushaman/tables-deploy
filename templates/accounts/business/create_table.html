@@ -1,0 +1,12 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+{% block title %} Create Table {% endblock title %}
+
+
+{% block contet %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Create Table">
+    </form>
+{% endblock %}

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'pages',
     'business',
+    'tray',
     # addons
     'crispy_forms',
 
