@@ -23,4 +23,3 @@ class CreateProductForm(ModelForm):
         model = ProductModel
         fields = '__all__'
         exclude = ['business']
-

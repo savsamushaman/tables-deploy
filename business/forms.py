@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import BusinessModel, ProductModel
+from .models import BusinessModel
 
 
 class CreateBusinessForm(ModelForm):
@@ -7,6 +7,3 @@ class CreateBusinessForm(ModelForm):
         model = BusinessModel
         fields = '__all__'
         exclude = ['manager', 'slug', 'date_created', 'available_tables', 'is_active', 'is_open_now']
-
-
-
