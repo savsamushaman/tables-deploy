@@ -6,10 +6,14 @@
 {% block contet %}
     <h3>Tables</h3>
     <a href="{% url 'create_table' slug %}"><h4>Add new</h4></a>
-    <p> Click table to update</p>
-    <ul>
-        {% for table in tables %}
-            <li><a href="{% url 'update_table' table.business.slug table.pk %}">{{ table.table_nr }}</a></li>
-        {% endfor %}
-    </ul>
+    {% if tables %}
+        <p> Click table to update</p>
+        <ul>
+            {% for table in tables %}
+                <li><a href="{% url 'update_table' table.business.slug table.pk %}">{{ table.table_nr }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>This place does not have any tables</p>
+    {% endif %}
 {% endblock contet %}

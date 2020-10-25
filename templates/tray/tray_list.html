@@ -1,0 +1,16 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+{% block title %} Tray {% endblock title %}
+
+{% block contet %}
+    <h3>Order</h3>
+    {% if items %}
+        <ul>
+            {% for item in items %}
+                <li>{{ item.product }} - {{ item.quantity }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Your tray is empty mate</p>
+    {% endif %}
+{% endblock contet %}

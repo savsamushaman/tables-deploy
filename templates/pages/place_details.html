@@ -5,6 +5,7 @@
 {% block title %} {{ place.business_name }} {% endblock title %}
 
 {% block contet %}
+    <a href="#">Place Order</a>
     <p>Name > {{ place.business_name }}</p>
     <p>{% if place.is_open_now %}Open Now {% else %}Closed{% endif %}</p>
     <p>Address > {{ place.address }}</p>

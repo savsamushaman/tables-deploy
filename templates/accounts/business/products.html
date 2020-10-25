@@ -5,10 +5,14 @@
 {% block contet %}
     <h3>Products</h3>
     <a href="{% url 'create_product' slug %}"><h4>Add new</h4></a>
-    <p> Click product to update</p>
-    <ul>
-        {% for product in products %}
-            <li><a href="{% url 'update_product' product.business.slug product.pk %}">{{ product.name }}</a></li>
-        {% endfor %}
-    </ul>
+    {% if products %}
+        <p> Click product to update</p>
+        <ul>
+            {% for product in products %}
+                <li><a href="{% url 'update_product' product.business.slug product.pk %}">{{ product.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>This place does not have any products yet.</p>
+    {% endif %}
 {% endblock contet %}
