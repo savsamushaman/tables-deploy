@@ -7,11 +7,16 @@ from django.views import View
 from django.views.generic import ListView, DetailView
 
 from business.models import BusinessModel, ProductModel, TableModel
-from tray.models import OrderModel
+from tray.models import OrderModel, OrderItem
 
 
 def test_view(request):
     template_name = 'pages/index.html'
+    a = request.session.get('tray', 'Nay')
+    b = request.session.get('ordering_from', 'None')
+    print(a)
+    print(b)
+
     return render(request, template_name, {})
 
 
@@ -20,14 +25,16 @@ class BusinessListView(ListView):
     template_name = 'pages/list.html'
     context_object_name = 'businesses'
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(BusinessListView, self).get_context_data(**kwargs)
+        context['current_order'] = self.request.session.get('ordering_from', '')
+        return context
+
 
 class BusinessDetailView(DetailView):
     model = BusinessModel
     template_name = 'pages/place_details.html'
     context_object_name = 'place'
-
-    def get(self, request, *args, **kwargs):
-        return super(BusinessDetailView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(BusinessDetailView, self).get_context_data(**kwargs)
@@ -41,8 +48,20 @@ class GenerateOrder(LoginRequiredMixin, View):
         slug = self.kwargs['slug']
         tables = TableModel.objects.filter(business__slug=slug)
         table = choice(tables)
-        business = BusinessModel.objects.get(slug=slug)
-        order = OrderModel.objects.create(customer=request.user, business=business, order_id=str(randint(5, 500)),
-                                          table=table)
-        self.request.session['ordering_from'] = model_to_dict(order)['business']
+        order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
+        self.request.session['ordering_from'] = order
+        self.request.session['tray'] = []
         return redirect('place_detail', slug=slug)
+
+
+class AddToTray(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # !!! self.request.session['tray].append(order_item) DOES NOT WORK PROPERLY
+        order_item = self.kwargs['pk']
+        all_items = self.request.session['tray']
+
+        if order_item not in all_items:
+            all_items.append(order_item)
+            self.request.session['tray'] = all_items
+
+        return redirect('place_detail', slug=self.kwargs['slug'])

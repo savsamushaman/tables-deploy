@@ -10,7 +10,13 @@
                 <li>{{ item.product }} - {{ item.quantity }}</li>
             {% endfor %}
         </ul>
+
     {% else %}
         <p>Your tray is empty mate</p>
+
     {% endif %}
+    <a href="{% url 'place_order' %}">
+        <button>Place order</button>
+    </a>
+
 {% endblock contet %}
