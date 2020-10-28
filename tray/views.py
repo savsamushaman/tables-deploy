@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
+from random import randint
+
+from django.http import HttpResponseRedirect
 from django.views.generic import View, TemplateView
-from .models import OrderItem, OrderModel
+
 from business.models import BusinessModel, ProductModel, TableModel
-from accounts.models import CustomUser
+from .models import OrderItem, OrderModel
 
 
 class TrayListView(TemplateView):
@@ -10,24 +12,32 @@ class TrayListView(TemplateView):
     template_name = 'tray/tray_list.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        slug = self.request.session['ordering_from']['business']
-        table = self.request.session['ordering_from']['table']
+        try:
+            slug = self.request.session['ordering_from']['business']
+            table = self.request.session['ordering_from']['table']
 
-        business = BusinessModel.objects.get(slug=slug)
-        table = TableModel.objects.get(business=business, table_nr=table)
-        customer = CustomUser.objects.get(username=self.request.session['ordering_from']['customer'])
+            business = BusinessModel.objects.get(slug=slug)
+            table = TableModel.objects.get(business=business, table_nr=table)
+            customer = self.request.user
 
-        order = OrderModel(business=business, customer=customer, table=table)
+            if customer.is_authenticated:
+                order = OrderModel(business=business, customer=customer, table=table, order_id=randint(1, 500))
+            else:
+                order = OrderModel(business=business, table=table, order_id=randint(1, 500))
 
-        on_the_tray = []
+            on_the_tray = []
 
-        for item in self.request.session['tray']:
-            product = ProductModel.objects.get(id=item, business__slug=slug)
-            on_the_tray.append(OrderItem(product=product, order=order))
+            for item in self.request.session['tray']:
+                product = ProductModel.objects.get(id=item, business__slug=slug)
+                on_the_tray.append(OrderItem(product=product, order=order))
 
-        context = super(TrayListView, self).get_context_data(**kwargs)
-        context['items'] = on_the_tray
-        return context
+            context = super(TrayListView, self).get_context_data(**kwargs)
+            context['items'] = on_the_tray
+            return context
+        except TypeError:
+            return super(TrayListView, self).get_context_data(**kwargs)
+        except KeyError:
+            return super(TrayListView, self).get_context_data(**kwargs)
 
 
 class PlaceOrderView(View):
@@ -37,9 +47,13 @@ class PlaceOrderView(View):
 
         business = BusinessModel.objects.get(slug=slug)
         table = TableModel.objects.get(business=business, table_nr=table)
-        customer = CustomUser.objects.get(username=self.request.session['ordering_from']['customer'])
+        customer = self.request.user
 
-        order = OrderModel.objects.create(business=business, customer=customer, table=table)
+        if customer.is_authenticated:
+            order = OrderModel.objects.create(business=business, customer=customer, table=table,
+                                              order_id=randint(1, 500))
+        else:
+            order = OrderModel.objects.create(business=business, table=table, order_id=randint(1, 500))
 
         for item in self.request.session['tray']:
             product = ProductModel.objects.get(id=item, business__slug=slug)
@@ -47,4 +61,20 @@ class PlaceOrderView(View):
 
         self.request.session['tray'] = []
 
-        return redirect('my_tray')
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+class CancelOrder(View):
+    def get(self, request, *args, **kwargs):
+        self.request.session['ordering_from'] = None
+        self.request.session['tray'] = []
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+class RemoveItemFromOrder(View):
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        order_items = self.request.session['tray']
+        order_items.remove(pk)
+        self.request.session['tray'] = order_items
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

@@ -5,8 +5,8 @@ from business.models import ProductModel, TableModel, BusinessModel
 
 
 class OrderModel(models.Model):
+    customer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, blank=True, null=True, )
     business = models.ForeignKey(BusinessModel, on_delete=models.DO_NOTHING, null=True)
-    customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, blank=True, null=True)
     table = models.ForeignKey(TableModel, on_delete=models.DO_NOTHING, null=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=False, null=True, blank=True)

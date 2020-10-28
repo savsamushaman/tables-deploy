@@ -7,16 +7,23 @@
     {% if items %}
         <ul>
             {% for item in items %}
-                <li>{{ item.product }} - {{ item.quantity }}</li>
+                <li>{{ item.product }} - {{ item.quantity }} <a href="{% url 'tray:remove_item' item.product.id %}">Remove
+                    from order</a></li>
             {% endfor %}
         </ul>
 
+        <a href="{% url 'tray:place_order' %}">
+            <button>Place order</button>
+        </a>
+
+        <a href="{% url 'tray:cancel_order' %}">
+            <button>Cancel order</button>
+        </a>
     {% else %}
         <p>Your tray is empty mate</p>
 
     {% endif %}
-    <a href="{% url 'place_order' %}">
-        <button>Place order</button>
-    </a>
+
+
 
 {% endblock contet %}

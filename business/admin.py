@@ -8,6 +8,11 @@ class BusinessAdmin(admin.ModelAdmin):
     )
 
 
+class TableAdmin(admin.ModelAdmin):
+    list_display = ('table_nr', 'business')
+    search_fields = ('table_nr', 'business__business_name')
+
+
 admin.site.register(BusinessModel, BusinessAdmin)
 admin.site.register(ProductModel)
-admin.site.register(TableModel)
+admin.site.register(TableModel, TableAdmin)

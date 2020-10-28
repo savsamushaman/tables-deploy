@@ -11,7 +11,7 @@ class BusinessModel(models.Model):
     email = models.EmailField(blank=False, unique=True)
     phone_nr = models.CharField(max_length=30, blank=False, unique=True)
     address = models.CharField(max_length=100, blank=False)
-    slug = models.SlugField(blank=True)
+    slug = models.SlugField(blank=True, unique=True)
     is_active = models.BooleanField(default=False)
     date_created = models.DateTimeField(default=timezone.now)
     all_tables = models.IntegerField(blank=True, default=0)
@@ -31,7 +31,7 @@ class TableModel(models.Model):
     table_nr = models.IntegerField()
 
     def __str__(self):
-        return str(self.business) + ' - ' + str(self.table_nr)
+        return str(self.table_nr)
 
 
 class ProductModel(models.Model):

@@ -1,13 +1,11 @@
-from random import randint, choice
+from random import choice
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.forms import model_to_dict
-from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView, DetailView
 
 from business.models import BusinessModel, ProductModel, TableModel
-from tray.models import OrderModel, OrderItem
 
 
 def test_view(request):
@@ -40,10 +38,11 @@ class BusinessDetailView(DetailView):
         context = super(BusinessDetailView, self).get_context_data(**kwargs)
         context['products'] = ProductModel.objects.filter(business=kwargs['object'])
         context['ordering_from'] = self.request.session.get('ordering_from', '')
+        context['tray'] = self.request.session.get('tray', '')
         return context
 
 
-class GenerateOrder(LoginRequiredMixin, View):
+class GenerateOrder(View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs['slug']
         tables = TableModel.objects.filter(business__slug=slug)
@@ -51,10 +50,10 @@ class GenerateOrder(LoginRequiredMixin, View):
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['ordering_from'] = order
         self.request.session['tray'] = []
-        return redirect('place_detail', slug=slug)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-class AddToTray(LoginRequiredMixin, View):
+class AddToTray(View):
     def get(self, request, *args, **kwargs):
         # !!! self.request.session['tray].append(order_item) DOES NOT WORK PROPERLY
         order_item = self.kwargs['pk']
@@ -64,4 +63,4 @@ class AddToTray(LoginRequiredMixin, View):
             all_items.append(order_item)
             self.request.session['tray'] = all_items
 
-        return redirect('place_detail', slug=self.kwargs['slug'])
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

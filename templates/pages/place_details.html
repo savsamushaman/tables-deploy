@@ -9,6 +9,7 @@
         <a href="{% url 'generate_order' place.slug %}">Place Order</a>
     {% else %}
         <p>Currently ordering from <b>{{ place.business_name }}</b></p>
+        <p><a href="{% url 'tray:cancel_order' %}">Cancel</a> order</p>
     {% endif %}
     <p>Name > {{ place.business_name }}</p>
     <p>{% if place.is_open_now %}Open Now {% else %}Closed{% endif %}</p>
@@ -25,17 +26,12 @@
             <p>{{ product.name }}</p>
             <p>{{ product.description }}</p>
             {% if ordering_from.business == place.slug %}
-                <a href="{% url 'add_to_tray' place.slug product.pk %}">Add to order</a>
+                {% if product.pk not in tray %}
+                    <a href="{% url 'add_to_tray' place.slug product.pk %}">Add to order</a>
+                {% else %}
+                    <p>On the tray</p>{% endif %}
             {% endif %}
             <hr>
         {% endfor %}
     </div>
 {% endblock contet %}
-
-{% block footer %}
-    {{ block.super }}
-    <a href="{% url "places" %}">
-        <button type="button">Back to Places</button>
-    </a>
-
-{% endblock footer %}

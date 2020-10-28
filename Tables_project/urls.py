@@ -20,7 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pages.urls')),
     path('accounts/', include('accounts.urls')),
-    path('business/', include('business.urls')),
-    path('tray/', include('tray.urls'))
+    path('tray/', include('tray.urls', namespace='tray')),
 
 ]

@@ -1,13 +1,15 @@
-from django.shortcuts import render
-from django.views import View
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, ListView
-from django.contrib.auth.views import LogoutView, LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import CustomUser
-from .forms import RegisterUserForm
+from django.contrib.auth.views import LogoutView, LoginView
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views import View
+from django.views.generic import CreateView, UpdateView, ListView
+
+from business.forms import CreateBusinessForm
 from business.models import BusinessModel, ProductModel, TableModel
-from django.http import Http404
+from .forms import RegisterUserForm
+from .models import CustomUser
 
 
 class RegisterUserView(CreateView):
@@ -32,6 +34,17 @@ class UserDetailView(LoginRequiredMixin, View):
         business = BusinessModel.objects.filter(manager=request.user)
         context = {'user': user_details, 'businesses': business}
         return render(request, template_name, context)
+
+
+class CreateBusinessView(LoginRequiredMixin, CreateView):
+    model = BusinessModel
+    template_name = 'accounts/business/create_business.html'
+    form_class = CreateBusinessForm
+    success_url = reverse_lazy('user_details')
+
+    def form_valid(self, form):
+        form.instance.manager = self.request.user
+        return super().form_valid(form)
 
 
 # Edit Business
@@ -65,9 +78,13 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
         context['slug'] = self.kwargs['slug']
         return context
 
+    def form_valid(self, form):
+        form.instance.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
 
 # Product list
-class ProductListView(ListView):
+class ProductListView(LoginRequiredMixin, ListView):
     model = ProductModel
     template_name = 'accounts/business/products.html'
     context_object_name = 'products'
@@ -114,7 +131,8 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
-        return super().form_valid(form)
+        form.instance.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
 # Edit a product ####
@@ -141,9 +159,13 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
         else:
             raise Http404
 
+    def form_valid(self, form):
+        form.instance.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
 
 # table list
-class TableListView(ListView):
+class TableListView(LoginRequiredMixin, ListView):
     model = TableModel
     template_name = 'accounts/business/tables_list.html'
     context_object_name = 'tables'
@@ -190,7 +212,8 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
-        return super().form_valid(form)
+        form.instance.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
 # update table
@@ -216,3 +239,7 @@ class TableEditView(LoginRequiredMixin, UpdateView):
             return super(TableEditView, self).post(request, *args, **kwargs)
         else:
             raise Http404
+
+    def form_valid(self, form):
+        form.instance.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
