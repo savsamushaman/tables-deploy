@@ -1,13 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, UpdateView, ListView
 
 from business.forms import CreateBusinessForm
 from business.models import BusinessModel, ProductModel, TableModel
+from tray.models import OrderModel, OrderItem
 from .forms import RegisterUserForm
 from .models import CustomUser
 
@@ -134,6 +135,11 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         form.instance.save()
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
+    def get_context_data(self, **kwargs):
+        context = super(CreateProductView, self).get_context_data(**kwargs)
+        context['slug'] = self.kwargs['slug']
+        return context
+
 
 # Edit a product ####
 class ProductEditView(LoginRequiredMixin, UpdateView):
@@ -162,6 +168,17 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         form.instance.save()
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+
+class ProductDeleteView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk']).delete()
+            return redirect('products_list', slug=slug)
+        else:
+            raise Http404
 
 
 # table list
@@ -215,6 +232,11 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         form.instance.save()
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
+    def get_context_data(self, **kwargs):
+        context = super(CreateTableView, self).get_context_data(**kwargs)
+        context['slug'] = self.kwargs['slug']
+        return context
+
 
 # update table
 class TableEditView(LoginRequiredMixin, UpdateView):
@@ -243,3 +265,39 @@ class TableEditView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         form.instance.save()
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+    def get_context_data(self, **kwargs):
+        context = super(TableEditView, self).get_context_data(**kwargs)
+        context['slug'] = self.kwargs['slug']
+        return context
+
+
+class TableDeleteView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk']).delete()
+            return redirect('tables_list', slug=slug)
+        else:
+            raise Http404
+
+
+class FeedView(LoginRequiredMixin, View):
+    template_name = 'accounts/feed/feed.html'
+
+    def get(self, request, *args, **kwargs):
+        order_models = OrderModel.objects.filter(business__slug=self.kwargs['slug'], status__regex='U|PL')
+
+        order_information = []
+        for order in order_models:
+            entry = {'customer': order.customer,
+                     'id': order.order_id,
+                     'table': order.table,
+                     'items': OrderItem.objects.filter(order=order)}
+
+            order_information.append(entry)
+
+        context = {'orders': order_information}
+
+        return render(request, self.template_name, context)

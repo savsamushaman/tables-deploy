@@ -21,18 +21,24 @@ class TrayListView(TemplateView):
             customer = self.request.user
 
             if customer.is_authenticated:
-                order = OrderModel(business=business, customer=customer, table=table, order_id=randint(1, 500))
+                order = OrderModel(business=business, customer=customer, table=table, order_id=randint(1, 500),
+                                   status='U')
             else:
-                order = OrderModel(business=business, table=table, order_id=randint(1, 500))
+                order = OrderModel(business=business, table=table, order_id=randint(1, 500), status='U')
 
             on_the_tray = []
+            total = 0
 
             for item in self.request.session['tray']:
                 product = ProductModel.objects.get(id=item, business__slug=slug)
-                on_the_tray.append(OrderItem(product=product, order=order))
+                order_item = OrderItem(product=product, order=order)
+                total += order_item.price()
+                on_the_tray.append(order_item)
 
             context = super(TrayListView, self).get_context_data(**kwargs)
             context['items'] = on_the_tray
+            context['order_status'] = order.status
+            context['total'] = total
             return context
         except TypeError:
             return super(TrayListView, self).get_context_data(**kwargs)
@@ -40,7 +46,7 @@ class TrayListView(TemplateView):
             return super(TrayListView, self).get_context_data(**kwargs)
 
 
-class PlaceOrderView(View):
+class PlaceOrder(View):
     def get(self, request, *args, **kwargs):
         slug = self.request.session['ordering_from']['business']
         table = self.request.session['ordering_from']['table']
@@ -51,9 +57,9 @@ class PlaceOrderView(View):
 
         if customer.is_authenticated:
             order = OrderModel.objects.create(business=business, customer=customer, table=table,
-                                              order_id=randint(1, 500))
+                                              order_id=randint(1, 500), status='PL')
         else:
-            order = OrderModel.objects.create(business=business, table=table, order_id=randint(1, 500))
+            order = OrderModel.objects.create(business=business, table=table, order_id=randint(1, 500), status='PL')
 
         for item in self.request.session['tray']:
             product = ProductModel.objects.get(id=item, business__slug=slug)

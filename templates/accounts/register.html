@@ -7,7 +7,7 @@
     <p>Only username, password and mail are required</p>
     <form method="post" class="uniForm">
         {% csrf_token %}
-        {{ form|crispy }}
+        {{ form | crispy }}
         <button type="submit">Register</button>
     </form>
 {% endblock %}

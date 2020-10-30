@@ -11,6 +11,8 @@
                     from order</a></li>
             {% endfor %}
         </ul>
+        <p>Order total : {{ total }}</p>
+        <p>Order status : {{ order_status }}</p>
 
         <a href="{% url 'tray:place_order' %}">
             <button>Place order</button>

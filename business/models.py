@@ -42,4 +42,4 @@ class ProductModel(models.Model):
     service = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.name) + ' - ' + str(self.business)
+        return '1x' + str(self.name)

@@ -22,6 +22,7 @@
             <p>All tables : {{ business.all_tables }}</p>
             <p>Is active : {{ business.is_active }}</p>
             <a href="{% url 'business_update' business.slug %}"><button>Update</button></a>
+            <a href="{% url 'feed' business.slug %}"><button>Feed</button></a>
 
         {% endfor %}
     </div>

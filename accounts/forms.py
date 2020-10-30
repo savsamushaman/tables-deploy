@@ -7,7 +7,7 @@ from django.forms import ModelForm
 class RegisterUserForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'username', 'email', 'phone_number', 'address', 'password1', 'password2']
+        fields = "__all__"
         exclude = ['is_superuser', 'is_active', 'is_staff', 'groups', 'user_permissions', 'slug', 'date_joined',
                    'last_login', 'password']
 

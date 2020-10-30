@@ -1,0 +1,15 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+{% block title %} Feed {% endblock title %}
+
+{% block contet %}
+    {% for order in orders %}
+        <p>Table : {{ order.table }}</p>
+        <p>Customer : {{ order.customer }}</p>
+        <p>Order (id = {{ order.id }}) :</p>
+        {% for x in order.items %}
+            <p>{{ x.product }}</p>
+        {% endfor %}
+        <br/>
+    {% endfor %}
+{% endblock %}
