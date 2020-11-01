@@ -43,3 +43,9 @@ class ProductModel(models.Model):
 
     def __str__(self):
         return '1x' + str(self.name)
+
+
+class GenericValueModel(models.Model):
+    assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)

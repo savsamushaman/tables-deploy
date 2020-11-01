@@ -64,3 +64,5 @@ class AddToTray(View):
             self.request.session['tray'] = all_items
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+

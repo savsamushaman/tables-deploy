@@ -18,14 +18,30 @@
             <button>Place order</button>
         </a>
 
-        <a href="{% url 'tray:cancel_order' %}">
-            <button>Cancel order</button>
+        <a href="{% url 'tray:cancel_order' clear=1 %}">
+            <button>Clear Tray</button>
         </a>
     {% else %}
         <p>Your tray is empty mate</p>
 
     {% endif %}
+    <br>
 
+    {% if active %}
+        <p>Active</p>
+        {% for ord in active %}
+            <p>Order > {{ ord }}</p>
+            {% if ord.status == "PL" %}
+                <p>Status > Placed</p>
+            {% elif ord.status == "S" %}
+                <p>Status > On the way ! / Delivered</p>
+            {% endif %}
+            <br>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>No active orders</p>
+    {% endif %}
 
 
 {% endblock contet %}

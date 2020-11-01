@@ -39,6 +39,8 @@ class TrayListView(TemplateView):
             context['items'] = on_the_tray
             context['order_status'] = order.status
             context['total'] = total
+            context['active'] = OrderModel.objects.filter(business=business, customer=customer,
+                                                          status__regex='PL|S').order_by('date_ordered')
             return context
         except TypeError:
             return super(TrayListView, self).get_context_data(**kwargs)
@@ -72,7 +74,8 @@ class PlaceOrder(View):
 
 class CancelOrder(View):
     def get(self, request, *args, **kwargs):
-        self.request.session['ordering_from'] = None
+        if not self.kwargs['clear']:
+            self.request.session['ordering_from'] = None
         self.request.session['tray'] = []
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 

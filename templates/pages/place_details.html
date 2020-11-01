@@ -9,7 +9,7 @@
         <a href="{% url 'generate_order' place.slug %}">Place Order</a>
     {% else %}
         <p>Currently ordering from <b>{{ place.business_name }}</b></p>
-        <p><a href="{% url 'tray:cancel_order' %}">Cancel</a> order</p>
+        <p><a href="{% url 'tray:cancel_order' clear=0 %}">Cancel</a> order</p>
     {% endif %}
     <p>Name > {{ place.business_name }}</p>
     <p>{% if place.is_open_now %}Open Now {% else %}Closed{% endif %}</p>

@@ -93,7 +93,7 @@ class ProductListView(LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user.pk == business.manager.pk:
             return super(ProductListView, self).get(request, *args, **kwargs)
         else:
             raise Http404
@@ -287,17 +287,30 @@ class FeedView(LoginRequiredMixin, View):
     template_name = 'accounts/feed/feed.html'
 
     def get(self, request, *args, **kwargs):
-        order_models = OrderModel.objects.filter(business__slug=self.kwargs['slug'], status__regex='U|PL')
+        order_models = OrderModel.objects.filter(business__slug=self.kwargs['slug'], status__regex='PL|S')
 
         order_information = []
         for order in order_models:
             entry = {'customer': order.customer,
                      'id': order.order_id,
                      'table': order.table,
-                     'items': OrderItem.objects.filter(order=order)}
+                     'pk': order.pk,
+                     'status': order.status,
+                     'items': OrderItem.objects.filter(order=order), }
 
             order_information.append(entry)
 
         context = {'orders': order_information}
+        context['slug'] = self.kwargs['slug']
 
         return render(request, self.template_name, context)
+
+
+class ProcessOrder(View):
+    def get(self, request, *args, **kwargs):
+        print(self.kwargs)
+        order_pk = self.kwargs['pk']
+        order = OrderModel.objects.get(pk=order_pk)
+        order.status = 'S'
+        order.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))

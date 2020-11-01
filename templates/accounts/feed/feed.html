@@ -4,12 +4,18 @@
 
 {% block contet %}
     {% for order in orders %}
+        {% if order.status == "PL" %}
+            <a href="{% url 'process_order' slug order.pk %}">
+                <button>Process Order</button>
+            </a>
+        {% elif order.status == "S" %} <h4>Not paid yet</h4>
+        {% endif %}
         <p>Table : {{ order.table }}</p>
         <p>Customer : {{ order.customer }}</p>
         <p>Order (id = {{ order.id }}) :</p>
         {% for x in order.items %}
             <p>{{ x.product }}</p>
         {% endfor %}
-        <br/>
+        <hr/>
     {% endfor %}
 {% endblock %}
