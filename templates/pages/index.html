@@ -1,39 +1,23 @@
-{% extends 'index.html' %}
+{% extends 'page_parts/base.html' %}
 {% load static %}
 
+
 {% block topbar %}
+    {% include 'page_parts/topbar.html' %}
 {% endblock topbar %}
 
+
 {% block navbar %}
-    <li><a href="{% url 'home' %}">Home</a></li>
-    <li><a href="#about">About Us</a></li>
-    <li><a href="{% url 'places' %}">Places</a></li>
-    <li><a href="#gallery">The Author</a></li>
-    <li><a href="#contact">Contact</a></li>
-    {% if not user.is_authenticated %}
-        <li><a href="{% url 'register' %}">Register</a></li>
-        <li><a href="{% url 'login' %}">Login</a></li>
-    {% endif %}
-    <li><a href="#specials">Your orders</a></li>
+    {% include 'page_parts/navbar.html' %}
 {% endblock navbar %}
 
-{% block limit %}
-{% endblock limit %}
+
+{% block content %}
+    {% include 'page_parts/welcome_page.html' %}
+    {% include 'page_parts/about.html' %}
+{% endblock content %}
 
 
-
-
-{#{% block footer %}#}
-{##}
-{##}
-{#    {% if user.is_authenticated %}#}
-{#        <a href="{% url "user_details" %}">#}
-{#            <button type="button">Your businesses</button>#}
-{#        </a>#}
-{#    {% endif %}#}
-{##}
-{#    <a href="{% url "places" %}">#}
-{#        <button type="button">Places</button>#}
-{#    </a>#}
-{##}
-{#{% endblock footer %}#}
+{% block footer %}
+    {% include 'page_parts/footer.html' %}
+{% endblock footer %}

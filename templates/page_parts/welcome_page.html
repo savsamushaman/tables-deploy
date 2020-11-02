@@ -1,0 +1,25 @@
+<!-- ======= Hero Section ======= -->
+<section id="hero" class="d-flex align-items-center">
+    <div class="container position-relative text-center text-lg-left" data-aos="zoom-in" data-aos-delay="100">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1>Welcome to <span>Tables</span></h1>
+                <h2>All your favorite places under one roof.</h2>
+                <br/>
+                {% if not user.is_authenticated %}
+                    <h2>With registration, <span>You :</span></h2>
+                    <p>- get to see your order history</p>
+                    <p>- can leave reviews</p>
+                    <p>- access one touch pay (lie, not implemented yet)</p>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-lg-10">
+                        <h3>Explore all the jolly places around you.</h3>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- End Hero -->
