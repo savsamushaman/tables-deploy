@@ -14,13 +14,14 @@ def test_view(request):
     b = request.session.get('ordering_from', 'None')
     print(a)
     print(b)
+    print(request.COOKIES)
 
     return render(request, template_name, {})
 
 
 class BusinessListView(ListView):
     model = BusinessModel
-    template_name = 'pages/list.html'
+    template_name = 'pages/places_list.html'
     context_object_name = 'businesses'
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -56,7 +57,7 @@ class GenerateOrder(View):
 class AddToTray(View):
     def get(self, request, *args, **kwargs):
         # !!! self.request.session['tray].append(order_item) DOES NOT WORK PROPERLY
-        order_item = self.kwargs['pk']
+        order_item = {'item': self.kwargs['pk'], 'quantity': 1}
         all_items = self.request.session['tray']
 
         if order_item not in all_items:
@@ -64,5 +65,3 @@ class AddToTray(View):
             self.request.session['tray'] = all_items
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-

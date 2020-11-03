@@ -7,8 +7,18 @@
     {% if items %}
         <ul>
             {% for item in items %}
-                <li>{{ item.product }} - {{ item.quantity }} <a href="{% url 'tray:remove_item' item.product.id %}">Remove
-                    from order</a></li>
+                <li id="{{ item.product.id }}">
+                    <button data-productid="{{ item.product.id }}" data-action="remove" data-price="{{ item.price }}"
+                            class="update_button">
+                        {{ item.quantity }}
+                    </button>
+                    {{ item.product }} <a
+                        href="{% url 'tray:remove_item' item.product.id %}">Remove
+                    from order</a>
+                    <button data-productid="{{ item.product.id }}" data-action="add" class="update_button">
+                        {{ item.quantity }}
+                    </button>
+                </li>
             {% endfor %}
         </ul>
         <p>Order total : {{ total }}</p>
@@ -43,5 +53,8 @@
         <p>No active orders</p>
     {% endif %}
 
-
 {% endblock contet %}
+
+{% block script %}
+    <script src="{% static 'js/listener_to_buttons.js' %}"></script>
+{% endblock script %}
