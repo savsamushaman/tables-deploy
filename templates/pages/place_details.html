@@ -1,37 +1,189 @@
-{% extends 'pages/base.html' %}
+{% extends 'page_parts/base.html' %}
 {% load static %}
 
+{% block title %} {{ place.business_name }} - UNDER CONSTRUCTION {% endblock title %}
 
-{% block title %} {{ place.business_name }} {% endblock title %}
+{% block topbar %}
+{% endblock topbar %}
 
-{% block contet %}
-    {% if not ordering_from.business == place.slug %}
-        <a href="{% url 'generate_order' place.slug %}">Place Order</a>
-    {% else %}
-        <p>Currently ordering from <b>{{ place.business_name }}</b></p>
-        <p><a href="{% url 'tray:cancel_order' clear=0 %}">Cancel</a> order</p>
-    {% endif %}
-    <p>Name > {{ place.business_name }}</p>
-    <p>{% if place.is_open_now %}Open Now {% else %}Closed{% endif %}</p>
-    <p>Address > {{ place.address }}</p>
-    <p>Description > {{ place.short_description }}</p>
-    <p>Phone nr. > {{ place.phone_nr }}</p>
-    <p>Email > {{ place.email }}</p>
-    <p>All tables > {{ place.all_tables }}</p>
-    <p>Available tables > {{ place.available_tables }}</p>
-    <p>Owner > {{ place.manager }}</p>
-    <h4>Products</h4>
-    <div>
-        {% for product in products %}
-            <p>{{ product.name }}</p>
-            <p>{{ product.description }}</p>
-            {% if ordering_from.business == place.slug %}
-                {% if product.pk not in tray %}
-                    <a href="{% url 'add_to_tray' place.slug product.pk %}">Add to order</a>
-                {% else %}
-                    <p>On the tray</p>{% endif %}
-            {% endif %}
-            <hr>
-        {% endfor %}
-    </div>
-{% endblock contet %}
+
+{% block headspace %}
+    <link href="{% static 'places/place_detail.css' %}" rel="stylesheet">
+{% endblock headspace %}
+{% block navbar %}
+    <header id="header" class="fixed-top">
+        <div class="container d-flex align-items-center">
+
+            <h1 class="logo mr-auto"><a href="{% url 'home' %}">Tables</a></h1>
+            <!-- Uncomment below if you prefer to use an image logo -->
+            <!-- <a href="index.html" class="logo mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+
+            <nav class="nav-menu d-none d-lg-block">
+                <ul>
+
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'places' %}">Places</a></li>
+                    <li><a href="{% url 'tray:my_tray' %}">Your orders</a></li>
+
+                    {% if not user.is_authenticated %}
+                        <li><a href="{% url 'register' %}">Register</a></li>
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                    {% else %}
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+
+                </ul>
+            </nav><!-- .nav-menu -->
+        </div>
+    </header><!-- End Header -->
+
+{% endblock navbar %}
+
+
+{% block content %}
+    <!-- ======= Menu Section ======= -->
+    <section id="menu" class="menu section-bg">
+        <div class="container" data-aos="fade-up">
+
+            <div class="section-title">
+                <h2 style="margin-top: 20px;margin-bottom: 20px;">{{ place.business_name }}</h2>
+                <a href="{% url 'generate_order' place.slug %}">Generate order</a>
+                <br>
+                <p>Take a look at our menü</p>
+            </div>
+
+            <div class="row" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-lg-12 d-flex justify-content-center">
+                    <ul id="menu-flters">
+                        <li data-filter="*" class="filter-active">All</li>
+                        <li data-filter=".filter-starters">Starters</li>
+                        <li data-filter=".filter-salads">Salads</li>
+                        <li data-filter=".filter-specialty">Specialty</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row menu-container" data-aos="fade-up" data-aos-delay="200">
+
+                {% for product in products %}
+                    <div class="col-lg-6 menu-item filter-specialty">
+                        <img src="{% static 'Ry/img/menu/lobster-roll.jpg' %}" class="menu-img" alt="">
+                        <div class="menu-content">
+                            <a href="#">{{ product.name }}</a><span>{{ product.price }}</span>
+                        </div>
+                        <div class="menu-ingredients">
+                            {{ product.description }}
+                        </div>
+                        {% if ordering_from.business == place.slug %}
+                            {% if product.pk not in prod %}
+                                <a href="{% url 'add_to_tray' place.slug product.pk %}">
+                                    <button class="text-center" id="add-to-tray">Add to order</button>
+                                </a>
+
+                            {% else %}
+                                <p style="color: black; margin-left: 90px">On the tray</p>{% endif %}
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section><!-- End Menu Section -->
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container" data-aos="fade-up">
+
+            <div class="row">
+                <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="about-img">
+                        <img src="{% static 'Ry/img/about.jpg' %}" alt="">
+                    </div>
+                </div>
+                <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content">
+                    <h3 style='font-family: "Playfair Display", serif;'>{{ place.business_name }}</h3>
+                    <p style='font-family: "Playfair Display", serif; font-size: 1.2em'>
+
+                        {{ place.short_description }}<br>
+
+                        profile pic =============><br>
+                        <br>
+                        longer description goes here
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </section><!-- End About Section -->
+
+    <!-- ======= Gallery Section ======= -->
+    <section id="gallery" class="gallery">
+
+        <div class="container" data-aos="fade-up">
+            <div class="section-title">
+                <p>Gallery</p>
+            </div>
+        </div>
+
+        <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row no-gutters">
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="gallery-item">
+                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
+                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="gallery-item">
+                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
+                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="gallery-item">
+                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
+                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="gallery-item">
+                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
+                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="gallery-item">
+                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
+                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="gallery-item">
+                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
+                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section><!-- End Gallery Section -->
+
+{% endblock content %}
+
+{% block footer %}
+{% endblock footer %}

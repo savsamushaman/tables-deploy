@@ -1,9 +1,10 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %} Pick a place {% endblock %}
+{% block title %} Pick a place - Under Construction{% endblock %}
 
 {% block headspace %}
+    <link href="{% static 'places/places_list_style.css' %}" rel="stylesheet">
 {% endblock headspace %}
 
 {% block topbar %}
@@ -46,9 +47,7 @@
 
         <div class="container" data-aos="fade-up">
 
-            <div class="section-title">
-
-                <h2>Restaurants & Bars & Pubs </h2>
+            <div style="margin-bottom: 30px" class="section-title">
                 <p class="font-italic">Pick a place, we'll do the rest.</p>
             </div>
 
@@ -68,9 +67,9 @@
                         <div class="tab-pane active show" id="">
                             <div class="row">
                                 <div class="col-lg-8 details order-2 order-lg-1">
-                                    <h3>Select places to see stuff about them</h3>
-                                    <p class="font-italic">Witty Short description</p>
-                                    <p>A longer elaborate description</p>
+                                    <h3>Search for a place</h3>
+                                    <p class="font-italic">Tap on the name !</p>
+                                    <p>A short description about the place will pop up.</p>
 
                                 </div>
                                 <div class="col-lg-4 text-center order-1 order-lg-2">
@@ -88,23 +87,17 @@
                                         <p class="font-italic">Qui laudantium consequatur laborum sit qui ad sapiente
                                             dila
                                             parde sonata raqer a videna mareta paulona marka</p>
-                                        <p>Et nobis maiores eius. Voluptatibus ut enim blanditiis atque harum sint.
-                                            Laborum
-                                            eos ipsum ipsa odit magni. Incidunt hic ut molestiae aut qui. Est repellat
-                                            minima eveniet eius et quis magni nihil. Consequatur dolorem quaerat quos
-                                            qui
-                                            similique accusamus nostrum rem vero</p>
+                                        <iframe style="margin-top: 3%;border:0; width: 100%; height: 400px; border-radius: 50px"
+                                                src=https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2733.0840368311538!2d23.57561470090341!3d46.76323998011658!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47490e86d9a75745%3A0xe238939d9f80bf9f!2zU3RyYWRhIFBpZXppyJnEgywgQ2x1ai1OYXBvY2EsIFJvbcOhbmlh!5e0!3m2!1shu!2sbg!4v1604306306997!5m2!1shu!2sbg"
+                                                frameborder="0" allowfullscreen></iframe>
+                                        <!-- stuff in plus goes here GEOLOC -->
 
                                     </div>
                                     <div class="col-lg-4 text-center order-1 order-lg-2">
-                                        <img src="{% static 'Ry/img/about-bg.jpg' %}" alt="" class="img-fluid"
+                                        <img src="{% static 'img/coffee.png' %}" alt="" class="img-fluid"
                                              style="border-radius: 50px;margin-bottom: 5%; height: 30vh">
                                     </div>
                                 </div>
-                                <iframe style="margin-top: 3%;border:0; width: 100%; height: 400px; border-radius: 50px"
-                                        src=https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2733.0840368311538!2d23.57561470090341!3d46.76323998011658!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47490e86d9a75745%3A0xe238939d9f80bf9f!2zU3RyYWRhIFBpZXppyJnEgywgQ2x1ai1OYXBvY2EsIFJvbcOhbmlh!5e0!3m2!1shu!2sbg!4v1604306306997!5m2!1shu!2sbg"
-                                        frameborder="0" allowfullscreen></iframe>
-                                <!-- stuff in plus goes here GEOLOC -->
                             </div>
                         {% endfor %}
                     </div>
