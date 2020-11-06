@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView, DetailView
 
-from business.models import BusinessModel, ProductModel, TableModel
+from business.models import BusinessModel, ProductModel, TableModel, ProductCategory
 
 
 def test_view(request):
@@ -35,14 +35,17 @@ class BusinessDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BusinessDetailView, self).get_context_data(**kwargs)
+        context['categories'] = ProductCategory.objects.filter(business=kwargs['object'])
         context['products'] = ProductModel.objects.filter(business=kwargs['object'])
         context['ordering_from'] = self.request.session.get('ordering_from', '')
         context['tray'] = self.request.session.get('tray', '')
         # temporary solution!!!!!!!!!!
+
         prod = []
         for item in context['tray']:
             prod.append(item['item'])
         context['prod'] = prod
+
         return context
 
 

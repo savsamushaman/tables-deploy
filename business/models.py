@@ -11,9 +11,18 @@ BUSINESS_CATEGORY_CHOICES = (
 )
 
 
+class BusinessCategory(models.Model):
+    category_name = models.CharField(choices=BUSINESS_CATEGORY_CHOICES, default='Other', max_length=20)
+    icon = models.ImageField(null=True, blank=True)
+
+    def __str__(self):
+        return str(self.category_name)
+
+
 class BusinessModel(models.Model):
     manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     business_name = models.CharField(max_length=100, blank=False, unique=True)
+    category = models.ForeignKey(BusinessCategory, on_delete=models.DO_NOTHING, null=True, blank=True)
     short_description = models.TextField()
     email = models.EmailField(blank=False, unique=True)
     phone_nr = models.CharField(max_length=30, blank=False, unique=True)
@@ -41,25 +50,32 @@ class TableModel(models.Model):
         return str(self.table_nr)
 
 
+class ProductCategory(models.Model):
+    business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE, null=True, blank=True)
+    category_name = models.CharField(max_length=25)
+    slug = models.SlugField(blank=True, null=True)
+    icon = models.ImageField(default='beer.png', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.category_name)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.category_name)
+        super(ProductCategory, self).save(*args, **kwargs)
+
+
 class ProductModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=True, null=False)
     description = models.TextField(max_length=500, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     service = models.BooleanField(default=False)
+    category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
         return '1x' + str(self.name)
-
 
 # class GenericValueModel(models.Model):
 #     assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
 #     name = models.CharField(max_length=255)
 #     value = models.CharField(max_length=255)
-
-class BusinessCategory(models.Model):
-    business = models.ForeignKey(BusinessModel, on_delete=models.DO_NOTHING)
-    category_name = models.CharField(choices=BUSINESS_CATEGORY_CHOICES, default='Other', max_length=20)
-    if category_name == 'bar':
-        category_icon = models.ImageField()
-

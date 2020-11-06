@@ -13,6 +13,7 @@ class TrayListView(TemplateView):
     template_name = 'tray/tray_list.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
+
         try:
             slug = self.request.session['ordering_from']['business']
             table = self.request.session['ordering_from']['table']

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BusinessModel, ProductModel, TableModel
+from .models import BusinessModel, ProductModel,ProductCategory, TableModel, BusinessCategory
 
 
 class BusinessAdmin(admin.ModelAdmin):
@@ -16,3 +16,5 @@ class TableAdmin(admin.ModelAdmin):
 admin.site.register(BusinessModel, BusinessAdmin)
 admin.site.register(ProductModel)
 admin.site.register(TableModel, TableAdmin)
+admin.site.register(BusinessCategory)
+admin.site.register(ProductCategory)

@@ -146,7 +146,7 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
     model = ProductModel
     template_name = 'accounts/business/edit_product.html'
     context_object_name = 'product'
-    fields = ['name', 'description', 'price', 'service']
+    fields = ['name', 'description', 'price', 'service', 'category']
     success_url = reverse_lazy('user_details')
 
     def get(self, request, *args, **kwargs):
