@@ -47,8 +47,15 @@
 
             <div class="section-title">
                 <h2 style="margin-top: 20px;margin-bottom: 20px;">{{ place.business_name }}</h2>
-                <a href="{% url 'generate_order' place.slug %}">Generate order</a>
-                <br>
+
+                {% if not ordering_from.business == place.slug %}
+                    <h2 style="text-decoration: none"><a href="{% url 'generate_order' place.slug %}">Generate Order</a>
+                    </h2>
+                {% else %}
+                    <h2 style="text-decoration: none"><a href="{% url 'tray:cancel_order' clear=0 %}">Cancel order</a>
+                    </h2>
+                {% endif %}
+
                 <p>Take a look at our menü</p>
             </div>
 
@@ -75,15 +82,18 @@
                             {{ product.description }}
                         </div>
                         {% if ordering_from.business == place.slug %}
+
                             {% if product.pk not in prod %}
-                                <a href="{% url 'add_to_tray' place.slug product.pk %}">
-                                    <button class="text-center" id="add-to-tray">Add to order</button>
-                                </a>
-
+                                <button data-productid="{{ product.id }}" data-action="add"
+                                        class="add-to-tray" id="add-to-tray">Add to order
+                                </button>
                             {% else %}
-                                <p style="color: black; margin-left: 90px">On the tray</p>{% endif %}
-                        {% endif %}
+                                <button data-productid="{{ product.id }}" data-action="remove"
+                                        class="add-to-tray" id="add-to-tray" style="background: red">Remove from order
+                                </button>
+                            {% endif %}
 
+                        {% endif %}
                     </div>
                 {% endfor %}
 
@@ -187,3 +197,8 @@
 
 {% block footer %}
 {% endblock footer %}
+
+{% block bottomscript %}
+    <script src="{% static 'js/place_details.js' %}"></script>
+    <script src={% static 'js/listener_to_buttons.js' %}></script>
+{% endblock bottomscript %}

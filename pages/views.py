@@ -14,8 +14,6 @@ def test_view(request):
     b = request.session.get('ordering_from', 'None')
     print(a)
     print(b)
-    print(request.COOKIES)
-
     return render(request, template_name, {})
 
 
@@ -49,6 +47,7 @@ class BusinessDetailView(DetailView):
 
 
 class GenerateOrder(View):
+
     def get(self, request, *args, **kwargs):
         slug = self.kwargs['slug']
         tables = TableModel.objects.filter(business__slug=slug)
@@ -56,17 +55,4 @@ class GenerateOrder(View):
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['ordering_from'] = order
         self.request.session['tray'] = []
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-
-class AddToTray(View):
-    def get(self, request, *args, **kwargs):
-        # !!! self.request.session['tray].append(order_item) DOES NOT WORK PROPERLY
-        order_item = {'item': self.kwargs['pk'], 'quantity': 1}
-        all_items = self.request.session['tray']
-
-        if order_item not in all_items:
-            all_items.append(order_item)
-            self.request.session['tray'] = all_items
-
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

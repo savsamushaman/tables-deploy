@@ -3,6 +3,13 @@ from django.utils import timezone
 from django.utils.text import slugify
 from accounts.models import CustomUser
 
+BUSINESS_CATEGORY_CHOICES = (
+    ('bar', 'Bar'),
+    ('restaurant', 'Restaurant'),
+    ('cafe', 'Café'),
+    ('other', 'Other')
+)
+
 
 class BusinessModel(models.Model):
     manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
@@ -45,7 +52,14 @@ class ProductModel(models.Model):
         return '1x' + str(self.name)
 
 
-class GenericValueModel(models.Model):
-    assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
+# class GenericValueModel(models.Model):
+#     assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+#     name = models.CharField(max_length=255)
+#     value = models.CharField(max_length=255)
+
+class BusinessCategory(models.Model):
+    business = models.ForeignKey(BusinessModel, on_delete=models.DO_NOTHING)
+    category_name = models.CharField(choices=BUSINESS_CATEGORY_CHOICES, default='Other', max_length=20)
+    if category_name == 'bar':
+        category_icon = models.ImageField()
+

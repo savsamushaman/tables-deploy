@@ -123,3 +123,30 @@ def update_tray(request):
     payload = {'id': product_id, 'new_value': new_value}
 
     return JsonResponse(payload)
+
+
+def add_remove_from_tray(request):
+    if not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    data = json.loads(request.body)
+
+    product_id = int(data['id'])
+    action = data['action']
+    all_items = request.session['tray']
+    all_ids = {key['item'] for key in all_items}
+
+    if action == 'add' and product_id not in all_ids:
+        new_item = {'item': product_id, 'quantity': 1}
+        all_items.append(new_item)
+        request.session['tray'] = all_items
+    elif action == 'remove' and product_id in all_ids:
+        for item in all_items:
+            if item['item'] == product_id:
+                all_items.remove(item)
+                break
+        request.session['tray'] = all_items
+
+    payload = {'id': product_id, 'action': action, 'status': '200'}
+
+    return JsonResponse(payload)
