@@ -23,6 +23,7 @@ class MyLoginView(LoginView):
     template_name = "accounts/login.html"
 
 
+
 class MyLogoutView(LogoutView):
     template_name = "accounts/logout.html"
 

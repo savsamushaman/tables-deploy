@@ -4,7 +4,7 @@
 {% block title %} Pick a place - Under Construction{% endblock %}
 
 {% block headspace %}
-    <link href="{% static 'places/places_list_style.css' %}" rel="stylesheet">
+    <link href="{% static 'places/css/places_list_style.css' %}" rel="stylesheet">
 {% endblock headspace %}
 
 {% block topbar %}
@@ -16,15 +16,15 @@
     <header id="header" class="fixed-top">
         <div class="container d-flex align-items-center">
 
-            <h1 class="logo mr-auto"><a href="{% url 'home' %}">Tables</a></h1>
+            <h1 class="logo mr-auto"><a href="{% url 'pages:home' %}">Tables</a></h1>
             <!-- Uncomment below if you prefer to use an image logo -->
             <!-- <a href="index.html" class="logo mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
 
             <nav class="nav-menu d-none d-lg-block">
                 <ul>
 
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'places' %}">Places</a></li>
+                    <li><a href="{% url 'pages:home' %}">Home</a></li>
+                    <li><a href="{% url 'pages:places' %}">Places</a></li>
                     <li><a href="{% url 'tray:my_tray' %}">Your orders</a></li>
 
                     {% if not user.is_authenticated %}
@@ -53,8 +53,8 @@
 
 
             <div class="row" data-aos="fade-up" data-aos-delay="100">
-                <div class="col-lg-3" style="border-radius: 50px">
-                    <ul class="nav nav-tabs flex-column">
+                <div class="col-lg-4">
+                    <ul class="nav nav-tabs flex-column ">
                         {% for business in businesses %}
                             <li class="nav-item">
                             <a class="nav-link" data-toggle="tab"
@@ -62,7 +62,7 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <div class="col-lg-9 mt-4 mt-lg-0">
+                <div class="col-lg-8 mt-4 mt-lg-0">
                     <div class="tab-content">
                         <div class="tab-pane active show" id="">
                             <div class="row">
@@ -81,7 +81,7 @@
                                 <div class="row">
                                     <div class="col-lg-8 details order-2 order-lg-1">
                                         <h3>
-                                            <a href="{% url 'place_detail' business.slug %}">{{ business.business_name }}</a>
+                                            <a href="{% url 'pages:place_detail' business.slug %}">{{ business.business_name }}</a>
                                         </h3>
                                         <p class="font-italic">Qui laudantium consequatur laborum sit qui ad sapiente
                                             dila

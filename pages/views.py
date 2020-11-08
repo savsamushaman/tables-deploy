@@ -39,11 +39,7 @@ class BusinessDetailView(DetailView):
         context['products'] = ProductModel.objects.filter(business=kwargs['object'])
         context['ordering_from'] = self.request.session.get('ordering_from', '')
         context['tray'] = self.request.session.get('tray', '')
-        # temporary solution!!!!!!!!!!
-
-        prod = []
-        for item in context['tray']:
-            prod.append(item['item'])
+        prod = [item['item'] for item in context['tray']]
         context['prod'] = prod
 
         return context

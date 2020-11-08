@@ -17,7 +17,7 @@
 
 <div class="footer">
     {% block footer %}
-        <a href="{% url "home" %}">
+        <a href="{% url "pages:home" %}">
             <button type="button">Home Page</button>
         </a>
         {% if not user.is_authenticated %}
@@ -35,7 +35,7 @@
                 <button type="button">Logout</button>
             </a>{% endif %}
 
-        <a href="{% url "places" %}">
+        <a href="{% url "pages:places" %}">
             <button type="button">Back to Places</button>
         </a>
 

@@ -8,21 +8,22 @@
 
 
 {% block headspace %}
-    <link href="{% static 'places/place_detail.css' %}" rel="stylesheet">
+    <link href="{% static 'places/css/place_detail.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
 {% endblock headspace %}
 {% block navbar %}
     <header id="header" class="fixed-top">
         <div class="container d-flex align-items-center">
 
-            <h1 class="logo mr-auto"><a href="{% url 'home' %}">Tables</a></h1>
+            <h1 class="logo mr-auto"><a href="{% url 'pages:home' %}">Tables</a></h1>
             <!-- Uncomment below if you prefer to use an image logo -->
             <!-- <a href="index.html" class="logo mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
 
             <nav class="nav-menu d-none d-lg-block">
                 <ul>
 
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'places' %}">Places</a></li>
+                    <li><a href="{% url 'pages:home' %}">Home</a></li>
+                    <li><a href="{% url 'pages:places' %}">Places</a></li>
                     <li><a href="{% url 'tray:my_tray' %}">Your orders</a></li>
 
                     {% if not user.is_authenticated %}
@@ -46,17 +47,26 @@
         <div class="container" data-aos="fade-up">
 
             <div class="section-title">
-                <h2 style="margin-top: 20px;margin-bottom: 20px;">{{ place.business_name }}</h2>
-
+                <h2 style="margin-top: 200px;margin-bottom: 20px">{{ place.business_name }}</h2>
+                <br>
                 {% if not ordering_from.business == place.slug %}
-                    <h2 style="text-decoration: none"><a href="{% url 'generate_order' place.slug %}">Generate Order</a>
-                    </h2>
+                    <div class="d-flex justify-content-start" style="margin-top: 5px">
+                        <a href="{% url 'pages:generate_order' place.slug %}">
+                            <button style="background: #FFE4B5;color: orangered" id="redirect_button">Generate order
+                            </button>
+                        </a>
+                    </div>
                 {% else %}
-                    <h2 style="text-decoration: none"><a href="{% url 'tray:cancel_order' clear=0 %}">Cancel order</a>
-                    </h2>
+                    <div class="d-flex justify-content-center" style="margin-top: 5px">
+                        <a href="{% url 'tray:cancel_order' clear=0 %}">
+                            <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
+                                    class="fas fa-power-off"></i>
+                                Free Table
+                            </button>
+                        </a>
+                    </div>
                 {% endif %}
 
-                <p>Take a look at our menü</p>
             </div>
 
             <div class="row" data-aos="fade-up" data-aos-delay="100">
@@ -70,7 +80,15 @@
                         {% endfor %}
                     </ul>
                 </div>
+
             </div>
+            {% if ordering_from %}
+                <div class="d-flex justify-content-center">
+                    <a id='next-link' href="{% url 'tray:my_tray' %}">
+                        <button id='redirect_button'>Order Summary<i class="fas fa-forward"></i></button>
+                    </a>
+                </div>
+            {% endif %}
 
             <div class="row menu-container" data-aos="fade-up" data-aos-delay="200">
 
@@ -78,7 +96,7 @@
                     <div class="col-lg-6 menu-item filter-{{ product.category.slug }}">
                         <img src="{% static 'restaurant.png' %}" class="menu-img" alt="">
                         <div class="menu-content">
-                            <a href="#">{{ product.name }}</a><span>{{ product.price }}</span>
+                            <a href="#">{{ product.name }}</a><span style="color: black">{{ product.price }}</span>
                         </div>
                         <div class="menu-ingredients">
                             {{ product.description }}
@@ -91,7 +109,8 @@
                                 </button>
                             {% else %}
                                 <button data-productid="{{ product.id }}" data-action="remove"
-                                        class="add-to-tray" id="add-to-tray" style="background: red">Remove from order
+                                        class="add-to-tray" id="add-to-tray" style="background: orangered">Remove from
+                                    order
                                 </button>
                             {% endif %}
 
@@ -102,6 +121,7 @@
             </div>
         </div>
     </section><!-- End Menu Section -->
+
 
     <!-- About Section -->
     <section id="about" class="about">
@@ -201,6 +221,6 @@
 {% endblock footer %}
 
 {% block bottomscript %}
-    <script src="{% static 'js/place_details.js' %}"></script>
+    <script src="{% static 'js/add_remove_product.js' %}"></script>
     <script src={% static 'js/listener_to_buttons.js' %}></script>
 {% endblock bottomscript %}

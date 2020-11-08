@@ -27,7 +27,7 @@ class BusinessModel(models.Model):
     email = models.EmailField(blank=False, unique=True)
     phone_nr = models.CharField(max_length=30, blank=False, unique=True)
     address = models.CharField(max_length=100, blank=False)
-    slug = models.SlugField(blank=True, unique=True)
+    slug = models.SlugField(blank=True, unique=True, max_length=120)
     is_active = models.BooleanField(default=False)
     date_created = models.DateTimeField(default=timezone.now)
     all_tables = models.IntegerField(blank=True, default=0)
@@ -73,7 +73,7 @@ class ProductModel(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
-        return '1x' + str(self.name)
+        return str(self.name)
 
 # class GenericValueModel(models.Model):
 #     assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)

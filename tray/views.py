@@ -10,7 +10,7 @@ from .models import OrderItem, OrderModel
 
 class TrayListView(TemplateView):
     context_object_name = 'items'
-    template_name = 'tray/tray_list.html'
+    template_name = 'tray/tray_page.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
 
@@ -34,7 +34,7 @@ class TrayListView(TemplateView):
             for item in self.request.session['tray']:
                 product = ProductModel.objects.get(id=item['item'], business__slug=slug)
                 order_item = OrderItem(product=product, order=order, quantity=item['quantity'])
-                total += order_item.price()
+                total += order_item.total_price()
                 on_the_tray.append(order_item)
 
             context = super(TrayListView, self).get_context_data(**kwargs)
@@ -44,6 +44,7 @@ class TrayListView(TemplateView):
             context['active'] = OrderModel.objects.filter(business=business, customer=customer,
                                                           status__regex='PL|S').order_by('date_ordered')
             context['tray'] = self.request.session['tray']
+            context['ordering_from'] = business
 
             return context
         except TypeError:
@@ -88,7 +89,10 @@ class RemoveItemFromOrder(View):
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
         order_items = self.request.session['tray']
-        order_items.remove(pk)
+        for item in order_items:
+            if item['item'] == pk:
+                order_items.remove(item)
+                break
         self.request.session['tray'] = order_items
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 

@@ -13,7 +13,7 @@
     <header id="header" class="fixed-top">
         <div class="container d-flex align-items-center">
 
-            <h1 class="logo mr-auto"><a href="{% url 'home' %}">Tables</a></h1>
+            <h1 class="logo mr-auto"><a href="{% url 'pages:home' %}">Tables</a></h1>
             <!-- Uncomment below if you prefer to use an image logo -->
             <!-- <a href="index.html" class="logo mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
 
@@ -22,7 +22,7 @@
                     <li><a href="#hero">Home</a></li>
                     <li><a href="#about">What is Tables ?</a></li>
                     <li><a href="#footer">Contact</a></li>
-                    <li><a href="{% url 'places' %}">Places</a></li>
+                    <li><a href="{% url 'pages:places' %}">Places</a></li>
                     <li><a href="{% url 'tray:my_tray' %}">Your orders</a></li>
                     {% if not user.is_authenticated %}
                         <li><a href="{% url 'register' %}">Register</a></li>
