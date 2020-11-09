@@ -4,6 +4,8 @@ from .views import RegisterUserView, MyLoginView, MyLogoutView, UserDetailView, 
     CreateProductView, ProductListView, TableListView, CreateTableView, TableEditView, ProductDeleteView, \
     TableDeleteView, FeedView, ProcessOrder
 
+app_name = 'accounts'
+
 urlpatterns = [
     path('register/', RegisterUserView.as_view(), name="register"),
     path('login/', MyLoginView.as_view(), name='login'),

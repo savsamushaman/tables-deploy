@@ -9,35 +9,9 @@
 
 {% block headspace %}
     <link href="{% static 'places/css/place_detail.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
 {% endblock headspace %}
 {% block navbar %}
-    <header id="header" class="fixed-top">
-        <div class="container d-flex align-items-center">
-
-            <h1 class="logo mr-auto"><a href="{% url 'pages:home' %}">Tables</a></h1>
-            <!-- Uncomment below if you prefer to use an image logo -->
-            <!-- <a href="index.html" class="logo mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
-
-            <nav class="nav-menu d-none d-lg-block">
-                <ul>
-
-                    <li><a href="{% url 'pages:home' %}">Home</a></li>
-                    <li><a href="{% url 'pages:places' %}">Places</a></li>
-                    <li><a href="{% url 'tray:my_tray' %}">Your orders</a></li>
-
-                    {% if not user.is_authenticated %}
-                        <li><a href="{% url 'register' %}">Register</a></li>
-                        <li><a href="{% url 'login' %}">Login</a></li>
-                    {% else %}
-                        <li><a href="{% url 'logout' %}">Logout</a></li>
-                    {% endif %}
-
-                </ul>
-            </nav><!-- .nav-menu -->
-        </div>
-    </header><!-- End Header -->
-
+    {% include 'page_parts/navbar.html' %}
 {% endblock navbar %}
 
 
@@ -47,17 +21,17 @@
         <div class="container" data-aos="fade-up">
 
             <div class="section-title">
-                <h2 style="margin-top: 200px;margin-bottom: 20px">{{ place.business_name }}</h2>
+                <h2>{{ place.business_name }}</h2>
                 <br>
                 {% if not ordering_from.business == place.slug %}
-                    <div class="d-flex justify-content-start" style="margin-top: 5px">
+                    <div class="simulation d-flex justify-content-center">
                         <a href="{% url 'pages:generate_order' place.slug %}">
-                            <button style="background: #FFE4B5;color: orangered" id="redirect_button">Generate order
+                            <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i class="fas fa-cog"></i> Generate order
                             </button>
                         </a>
                     </div>
                 {% else %}
-                    <div class="d-flex justify-content-center" style="margin-top: 5px">
+                    <div class=" simulation d-flex justify-content-center">
                         <a href="{% url 'tray:cancel_order' clear=0 %}">
                             <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
                                     class="fas fa-power-off"></i>
@@ -96,7 +70,7 @@
                     <div class="col-lg-6 menu-item filter-{{ product.category.slug }}">
                         <img src="{% static 'restaurant.png' %}" class="menu-img" alt="">
                         <div class="menu-content">
-                            <a href="#">{{ product.name }}</a><span style="color: black">{{ product.price }}</span>
+                            <a href="#">{{ product.name }}</a><span>{{ product.price }}</span>
                         </div>
                         <div class="menu-ingredients">
                             {{ product.description }}
@@ -134,8 +108,8 @@
                     </div>
                 </div>
                 <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content">
-                    <h3 style='font-family: "Playfair Display", serif;'>{{ place.business_name }}</h3>
-                    <p style='font-family: "Playfair Display", serif; font-size: 1.2em'>
+                    <h3>{{ place.business_name }}</h3>
+                    <p>
 
                         {{ place.short_description }}<br>
 

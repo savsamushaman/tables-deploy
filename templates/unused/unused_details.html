@@ -6,7 +6,7 @@
 
 {% block contet %}
     {% if not ordering_from.business == place.slug %}
-        <a href="{% url 'generate_order' place.slug %}">Place Order</a>
+        <a href="{% url 'pages:generate_order' place.slug %}">Place Order</a>
     {% else %}
         <p>Currently ordering from <b>{{ place.business_name }}</b></p>
         <p><a href="{% url 'tray:cancel_order' clear=0 %}">Cancel</a> order</p>
@@ -27,7 +27,7 @@
             <p>{{ product.description }}</p>
             {% if ordering_from.business == place.slug %}
                 {% if product.pk not in tray %}
-                    <a href="{% url 'add_to_tray' place.slug product.pk %}">Add to order</a>
+                    <a href="{% url 'tray:add_remove' place.slug product.pk %}">Add to order</a>
                 {% else %}
                     <p>On the tray</p>{% endif %}
             {% endif %}

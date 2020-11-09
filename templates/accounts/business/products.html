@@ -4,13 +4,13 @@
 
 {% block contet %}
     <h3>Products</h3>
-    <a href="{% url 'create_product' slug %}"><h4>Add new</h4></a>
+    <a href="{% url 'accounts:create_product' slug %}"><h4>Add new</h4></a>
 
     {% if products %}
         <p> Click product to update</p>
         <ul>
             {% for product in products %}
-                <li><a href="{% url 'update_product' product.business.slug product.pk %}">{{ product.name }}</a></li>
+                <li><a href="{% url 'accounts:update_product' product.business.slug product.pk %}">{{ product.name }}</a></li>
                 <br/>
             {% endfor %}
         </ul>
