@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, UpdateView, ListView
 
+from accounts.forms import CreateProductForm
 from business.forms import CreateBusinessForm
 from business.models import BusinessModel, ProductModel, TableModel
 from tray.models import OrderModel, OrderItem
@@ -21,7 +22,6 @@ class RegisterUserView(CreateView):
 
 class MyLoginView(LoginView):
     template_name = "accounts/login.html"
-
 
 
 class MyLogoutView(LogoutView):
@@ -110,8 +110,8 @@ class ProductListView(LoginRequiredMixin, ListView):
 class CreateProductView(LoginRequiredMixin, CreateView):
     model = ProductModel
     template_name = 'accounts/business/create_product.html'
-    fields = ['name', 'description', 'price', 'service']
     success_url = reverse_lazy('user_details')
+    form_class = CreateProductForm
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -141,14 +141,19 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         context['slug'] = self.kwargs['slug']
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(CreateProductView, self).get_form_kwargs()
+        kwargs['slug'] = self.kwargs.get('slug')
+        return kwargs
+
 
 # Edit a product ####
 class ProductEditView(LoginRequiredMixin, UpdateView):
     model = ProductModel
     template_name = 'accounts/business/edit_product.html'
     context_object_name = 'product'
-    fields = ['name', 'description', 'price', 'service', 'category']
     success_url = reverse_lazy('user_details')
+    form_class = CreateProductForm
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -169,6 +174,11 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         form.instance.save()
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+    def get_form_kwargs(self):
+        kwargs = super(ProductEditView, self).get_form_kwargs()
+        kwargs['slug'] = self.kwargs.get('slug')
+        return kwargs
 
 
 class ProductDeleteView(LoginRequiredMixin, View):

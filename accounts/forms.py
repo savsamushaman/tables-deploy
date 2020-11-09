@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm
 from accounts.models import CustomUser
-from business.models import ProductModel
+from business.models import ProductModel, ProductCategory
 from django.forms import ModelForm
+from django import forms
 
 
 class RegisterUserForm(UserCreationForm):
@@ -23,3 +24,11 @@ class CreateProductForm(ModelForm):
         model = ProductModel
         fields = '__all__'
         exclude = ['business']
+
+    def __init__(self, *args, **kwargs):
+        slug = kwargs.pop('slug', None)
+        super(CreateProductForm, self).__init__(*args, **kwargs)
+
+        if slug:
+            self.fields['category'].queryset = ProductCategory.objects.filter(business__slug=slug)
+
