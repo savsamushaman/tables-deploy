@@ -8,11 +8,11 @@
         {{ form.as_p }}
         <input type="submit" value="Update"/>
     </form>
-    <a href="{% url 'accounts:delete_product' product.business.slug product.pk %}">
+    <a href="{% url 'owned:delete_product' product.business.slug product.pk %}">
         <button value="Delete" class="del-button">Delete Product</button>
     </a>
 
-    <a href="{% url 'accounts:products_list' product.business.slug %}">
+    <a href="{% url 'owned:products_list' product.business.slug %}">
         <button value="Delete" class="del-button">Back</button>
     </a>
 

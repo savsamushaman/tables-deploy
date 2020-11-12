@@ -69,7 +69,6 @@ class ProductModel(models.Model):
     name = models.CharField(max_length=100, blank=True, null=False)
     description = models.TextField(max_length=500, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    service = models.BooleanField(default=False)
     category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):

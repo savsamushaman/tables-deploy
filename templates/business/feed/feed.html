@@ -5,7 +5,7 @@
 {% block contet %}
     {% for order in orders %}
         {% if order.status == "PL" %}
-            <a href="{% url 'accounts:process_order' slug order.pk %}">
+            <a href="{% url 'owned:process_order' slug order.pk %}">
                 <button>Process Order</button>
             </a>
         {% elif order.status == "S" %} <h4>Not paid yet</h4>

@@ -1,18 +1,16 @@
 {% extends 'pages/base.html' %}
 {% load static %}
+{% block title %} Create Table {% endblock title %}
 
-{% block title %} Create a product {% endblock %}
 
 {% block contet %}
-
     <form action="" method="POST">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Create Product">
+        <input type="submit" value="Create Table">
     </form>
 
-    <a href="{% url 'accounts:products_list' slug %}">
+    <a href="{% url 'owned:tables_list' slug %}">
         <button class="del-button">Back</button>
     </a>
-
 {% endblock %}

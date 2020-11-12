@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %} Update {{ business.business_name }} {% endblock title %}
 
+
 {% block contet %}
     <form action="" method="post">
         {% csrf_token %}
@@ -9,8 +10,8 @@
         <input type="submit" value="Update"/>
     </form>
 
-    <a href="{% url 'accounts:products_list' slug %}"><h4>Products</h4></a>
-    <a href="{% url 'accounts:tables_list' slug %}"><h4>Tables</h4></a>
+    <a href="{% url 'owned:products_list' slug %}"><h4>Products</h4></a>
+    <a href="{% url 'owned:tables_list' slug %}"><h4>Tables</h4></a>
 
 
 {% endblock contet %}
