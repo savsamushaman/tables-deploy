@@ -1,5 +1,5 @@
 import json
-from random import randint
+from random import randint, choice
 
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, HttpResponse, JsonResponse
 from django.views.generic import View, TemplateView
@@ -51,6 +51,18 @@ class TrayListView(TemplateView):
             return super(TrayListView, self).get_context_data(**kwargs)
         except KeyError:
             return super(TrayListView, self).get_context_data(**kwargs)
+
+
+class GenerateOrder(View):
+
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs['slug']
+        tables = TableModel.objects.filter(business__slug=slug)
+        table = choice(tables)
+        order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
+        self.request.session['ordering_from'] = order
+        self.request.session['tray'] = []
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 class PlaceOrder(View):

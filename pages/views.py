@@ -1,11 +1,10 @@
-from random import choice
+import json
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
-from django.views import View
 from django.views.generic import ListView, DetailView
 
-from business.models import BusinessModel, ProductModel, TableModel, ProductCategory
+from business.models import BusinessModel, ProductModel, ProductCategory
 
 
 def test_view(request):
@@ -45,13 +44,13 @@ class BusinessDetailView(DetailView):
         return context
 
 
-class GenerateOrder(View):
+def filter_places(request):
+    if not request.method == "POST":
+        return HttpResponseNotAllowed('POST')
 
-    def get(self, request, *args, **kwargs):
-        slug = self.kwargs['slug']
-        tables = TableModel.objects.filter(business__slug=slug)
-        table = choice(tables)
-        order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
-        self.request.session['ordering_from'] = order
-        self.request.session['tray'] = []
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    data = json.loads(request.body)
+    results = BusinessModel.objects.filter(business_name__contains=data['search_value']).values('business_name')
+    results = [result['business_name'] for result in results]
+    payload = {'results': results}
+
+    return JsonResponse(payload)

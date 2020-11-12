@@ -25,7 +25,7 @@
                 <br>
                 {% if not ordering_from.business == place.slug %}
                     <div class="simulation d-flex justify-content-center">
-                        <a href="{% url 'pages:generate_order' place.slug %}">
+                        <a href="{% url 'tray:generate_order' place.slug %}">
                             <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i class="fas fa-cog"></i> Generate order
                             </button>
                         </a>
@@ -196,5 +196,4 @@
 
 {% block bottomscript %}
     <script src="{% static 'js/add_remove_product.js' %}"></script>
-    <script src={% static 'js/listener_to_buttons.js' %}></script>
 {% endblock bottomscript %}
