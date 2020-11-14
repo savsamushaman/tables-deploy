@@ -12,7 +12,7 @@ class GenerateOrder(View):
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs['place']
-        table = TableModel.objects.get(table_nr=self.kwargs['table_nr'])
+        table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['current_order'] = order
         self.request.session['tray'] = []

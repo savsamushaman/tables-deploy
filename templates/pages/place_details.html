@@ -29,7 +29,7 @@
                         {% for table in tables %}
                             <a href="{% url 'tray:generate_order' place.slug table.table_nr %}">
                                 <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
-                                        class="fas fa-cog"></i> Generate order - {{ table.table_nr }}
+                                        class="fas fa-cog"></i> Generate order - Table {{ table.table_nr }}
                                 </button>
                             </a>
                         {% endfor %}

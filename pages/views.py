@@ -43,7 +43,7 @@ class PlaceDetailView(DetailView):
         context = super(PlaceDetailView, self).get_context_data(**kwargs)
 
         try:
-            on_the_tray = [item['item'] for item in self.request.session.get('tray', None)]
+            on_the_tray = [item['item_id'] for item in self.request.session.get('tray', None)]
         except TypeError:
             on_the_tray = []
 

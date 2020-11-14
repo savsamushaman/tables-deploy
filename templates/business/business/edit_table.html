@@ -5,7 +5,13 @@
 {% block contet %}
     <form action="" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.table_nr }}
+        <br>
+        <br>
+        <br>
+        <img src="{{ table.qr_code.url }}">
+        <br>
+        {{ form.qr_code}}
         <input type="submit" value="Update"/>
     </form>
 

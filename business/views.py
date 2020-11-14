@@ -40,7 +40,8 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
     model = BusinessModel
     template_name = 'business/business/edit_business.html'
     context_object_name = 'business'
-    fields = ['business_name', 'short_description', 'email', 'phone_nr', 'address', 'all_tables', 'available_tables',
+    fields = ['business_name', 'short_description', 'email', 'phone_nr', 'displayed_address', 'all_tables',
+              'available_tables',
               'is_open_now']
     success_url = reverse_lazy('owned:owned_list')
 
@@ -242,7 +243,7 @@ class TableEditView(LoginRequiredMixin, UpdateView):
     model = TableModel
     template_name = 'business/business/edit_table.html'
     context_object_name = 'table'
-    fields = ['table_nr']
+    fields = ['table_nr', 'qr_code']
     success_url = reverse_lazy('user_details')
 
     def get(self, request, *args, **kwargs):
@@ -263,11 +264,12 @@ class TableEditView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+        return redirect('owned:tables_list', slug=self.kwargs['slug'])
 
     def get_context_data(self, **kwargs):
         context = super(TableEditView, self).get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
+        context['table'] = TableModel.objects.get(pk=self.kwargs['pk'], business__slug=self.kwargs['slug'])
         return context
 
 
