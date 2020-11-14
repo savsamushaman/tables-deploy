@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
-from accounts.models import CustomUser
+from accounts.models import CustomUser, CountryModel
 
 BUSINESS_CATEGORY_CHOICES = (
     ('bar', 'Bar'),
@@ -26,7 +26,9 @@ class BusinessModel(models.Model):
     short_description = models.TextField()
     email = models.EmailField(blank=False, unique=True)
     phone_nr = models.CharField(max_length=30, blank=False, unique=True)
-    address = models.CharField(max_length=100, blank=False)
+    country = models.ForeignKey(CountryModel, on_delete=models.DO_NOTHING, null=True, blank=True)
+    maps_address = models.CharField(max_length=100, blank=False)
+    displayed_address = models.CharField(max_length=100, blank=True, null=True)
     slug = models.SlugField(blank=True, unique=True, max_length=120)
     is_active = models.BooleanField(default=False)
     date_created = models.DateTimeField(default=timezone.now)

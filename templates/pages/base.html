@@ -6,6 +6,9 @@
     <meta charset="UTF-8">
     <title>{% block title %}Change me!{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static '/css/base.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {% block head %}
+    {% endblock head %}
 
 </head>
 <body>
@@ -46,6 +49,7 @@
     {% endblock %}
     <br>
     {% block greeter %} Greetings {% if user.is_authenticated %} {{ user.username }} {% endif %}! {% endblock greeter %}
+
 
     <script src="{% static 'Ry/vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'Ry/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>

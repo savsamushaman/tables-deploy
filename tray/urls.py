@@ -6,7 +6,7 @@ app_name = 'tray'
 
 urlpatterns = [
     path('', TrayListView.as_view(), name='my_tray'),
-    path('generate_order/<slug:slug>', GenerateOrder.as_view(), name='generate_order'),
+    path('generate_order/<slug:place>/<int:table_nr>', GenerateOrder.as_view(), name='generate_order'),
     path('place_order/', PlaceOrder.as_view(), name='place_order'),
     path('cancel_order/<int:clear>', CancelOrder.as_view(), name='cancel_order'),
     path('add_remove/', add_remove_from_tray, name='add_remove'),

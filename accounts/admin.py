@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from .models import CustomUser, CountryModel
 from .forms import RegisterUserFormAdmin
 
 
@@ -29,6 +29,7 @@ class CustomUserAdmin(UserAdmin):
                     'phone_number',
                     'address',
                     'slug',
+                    'country',
 
                 )
             }
@@ -38,3 +39,4 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(CountryModel)

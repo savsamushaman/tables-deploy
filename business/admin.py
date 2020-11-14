@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import BusinessModel, ProductModel,ProductCategory, TableModel, BusinessCategory
+from .models import BusinessModel, ProductModel, ProductCategory, TableModel, BusinessCategory
 
 
 class BusinessAdmin(admin.ModelAdmin):
     list_display = (
-        'business_name', 'manager', 'address', 'is_open_now',
+        'business_name', 'manager', 'maps_address', 'displayed_address', 'is_open_now',
     )
 
 

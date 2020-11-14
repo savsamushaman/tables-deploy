@@ -23,13 +23,18 @@
             <div class="section-title">
                 <h2>{{ place.business_name }}</h2>
                 <br>
-                {% if not ordering_from.business == place.slug %}
+                {% if not current_order.business == place.slug %}
+
                     <div class="simulation d-flex justify-content-center">
-                        <a href="{% url 'tray:generate_order' place.slug %}">
-                            <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i class="fas fa-cog"></i> Generate order
-                            </button>
-                        </a>
+                        {% for table in tables %}
+                            <a href="{% url 'tray:generate_order' place.slug table.table_nr %}">
+                                <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
+                                        class="fas fa-cog"></i> Generate order - {{ table.table_nr }}
+                                </button>
+                            </a>
+                        {% endfor %}
                     </div>
+
                 {% else %}
                     <div class=" simulation d-flex justify-content-center">
                         <a href="{% url 'tray:cancel_order' clear=0 %}">
@@ -56,7 +61,7 @@
                 </div>
 
             </div>
-            {% if ordering_from %}
+            {% if current_order %}
                 <div class="d-flex justify-content-center">
                     <a id='next-link' href="{% url 'tray:my_tray' %}">
                         <button id='redirect_button'>Order Summary<i class="fas fa-forward"></i></button>
@@ -75,9 +80,9 @@
                         <div class="menu-ingredients">
                             {{ product.description }}
                         </div>
-                        {% if ordering_from.business == place.slug %}
+                        {% if current_order.business == place.slug %}
 
-                            {% if product.pk not in prod %}
+                            {% if product.pk not in on_the_tray %}
                                 <button data-productid="{{ product.id }}" data-action="add"
                                         class="add-to-tray" id="add-to-tray">Add to order
                                 </button>
