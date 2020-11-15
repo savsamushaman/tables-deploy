@@ -46,7 +46,8 @@
                 <div class="col-lg-4">
                     <ul class="nav nav-tabs flex-column">
                         {% for business in businesses %}
-                            <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item">
+                            <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
+                                data-aos="fade-left" data-aos-delay="200">
                             <a class="nav-link" data-toggle="tab"
                                href="#{{ business.slug }}">{{ business.business_name }}</a>
                         {% endfor %}

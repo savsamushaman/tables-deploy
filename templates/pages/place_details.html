@@ -20,14 +20,14 @@
     <section id="menu" class="menu section-bg">
         <div class="container" data-aos="fade-up">
 
-            <div class="section-title">
+            <div class="section-title" data-aos="fade-right">
                 <h2>{{ place.business_name }}</h2>
                 <br>
                 {% if not current_order.business == place.slug %}
 
-                    <div class="simulation d-flex justify-content-center">
+                    <div class="simulation d-flex justify-content-center" data-aos='fade-left' data-aos-delay="200">
                         {% for table in tables %}
-                            <a href="{% url 'tray:generate_order' place.slug table.table_nr %}">
+                            <a href="{% url 'tray:generate_order' place.slug table.table_nr %} ">
                                 <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
                                         class="fas fa-cog"></i> Generate order - Table {{ table.table_nr }}
                                 </button>
@@ -48,7 +48,7 @@
 
             </div>
 
-            <div class="row" data-aos="fade-up" data-aos-delay="100">
+            <div class="row" data-aos="fade-up" data-aos-delay="200">
                 <div class="col-lg-12 d-flex justify-content-center">
                     <ul id="menu-flters">
 
@@ -107,7 +107,7 @@
         <div class="container" data-aos="fade-up">
 
             <div class="row">
-                <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="100">
+                <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="200">
                     <div class="about-img">
                         <img src="{% static 'Ry/img/about.jpg' %}" alt="">
                     </div>
