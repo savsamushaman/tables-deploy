@@ -20,12 +20,12 @@
     <section id="menu" class="menu section-bg">
         <div class="container" data-aos="fade-up">
 
-            <div class="section-title" data-aos="fade-right">
+            <div class="section-title" data-aos="fade-up">
                 <h2>{{ place.business_name }}</h2>
                 <br>
                 {% if not current_order.business == place.slug %}
 
-                    <div class="simulation d-flex justify-content-center" data-aos='fade-left' data-aos-delay="200">
+                    <div class="simulation d-flex justify-content-center" data-aos='fade-up' data-aos-delay="200">
                         {% for table in tables %}
                             <a href="{% url 'tray:generate_order' place.slug table.table_nr %} ">
                                 <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i

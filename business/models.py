@@ -45,6 +45,7 @@ class BusinessModel(models.Model):
     def __str__(self):
         return str(self.business_name)
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ must change URL ON RELEASE
 class TableModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
@@ -67,6 +68,9 @@ class TableModel(models.Model):
         super(TableModel, self).save(*args, **kwargs)
 
     def __str__(self):
+        return str(self.table_nr)
+
+    def str_table_nr(self):
         return str(self.table_nr)
 
 

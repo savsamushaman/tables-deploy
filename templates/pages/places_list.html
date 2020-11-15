@@ -26,7 +26,7 @@
             </div>
 
             {#SEARCH BAR#}
-            <div class="s130">
+            <div class="s130" data-aos="fade-down" data-aos-delay="600">
                 <form onkeydown="return event.key !== 'Enter'">
                     <div class="inner-form">
                         <div class="input-field first-wrap">
@@ -42,12 +42,12 @@
             </div>
             {#  END OF SEARCHBAR  #}
 
-            <div class="bigbox row" data-aos="fade-up" data-aos-delay="100">
+            <div class="bigbox row" data-aos="fade-up" data-aos-delay="600">
                 <div class="col-lg-4">
                     <ul class="nav nav-tabs flex-column">
                         {% for business in businesses %}
                             <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
-                                data-aos="fade-left" data-aos-delay="200">
+                                data-aos="fade-up">
                             <a class="nav-link" data-toggle="tab"
                                href="#{{ business.slug }}">{{ business.business_name }}</a>
                         {% endfor %}

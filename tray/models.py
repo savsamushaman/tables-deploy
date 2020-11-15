@@ -18,9 +18,10 @@ class OrderModel(models.Model):
     date_ordered = models.DateTimeField(auto_now_add=True)
     status = models.CharField(choices=ORDER_STATUS_CHOICES, default='Unplaced', max_length=2)
     order_id = models.CharField(max_length=200, null=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
-        return f'{self.id} - {self.table} - {self.customer}'
+        return f'OrderId: {self.id} / Table: {self.table} / Customer: {self.customer}'
 
 
 class OrderItem(models.Model):

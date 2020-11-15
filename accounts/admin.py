@@ -8,6 +8,7 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     add_form = RegisterUserFormAdmin
     prepopulated_fields = {'username': ('first_name', 'last_name'), }
+    ordering = ('id', 'email')
 
     add_fieldsets = (
         ("User Data", {
@@ -30,13 +31,21 @@ class CustomUserAdmin(UserAdmin):
                     'address',
                     'slug',
                     'country',
+                    'device'
 
                 )
             }
 
         )
     )
+    list_display = ('id', 'username', 'device', 'email', 'first_name', 'last_name', 'is_staff')
+    search_fields = ('username__contains', 'device__contains', 'email__contains',)
+
+
+class CountryModelAdmin(admin.ModelAdmin):
+    list_display = ('name', 'currency')
+    search_fields = ('name__contains', 'currency')
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(CountryModel)
+admin.site.register(CountryModel, CountryModelAdmin)

@@ -7,7 +7,7 @@ class RegisterUserForm(UserCreationForm):
         model = CustomUser
         fields = "__all__"
         exclude = ['is_superuser', 'is_active', 'is_staff', 'groups', 'user_permissions', 'slug', 'date_joined',
-                   'last_login', 'password']
+                   'last_login', 'password', 'device']
 
 
 class RegisterUserFormAdmin(UserCreationForm):

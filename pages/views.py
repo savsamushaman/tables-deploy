@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
-from django.db.models import Q
+
 
 from business.models import BusinessModel, ProductModel, ProductCategory, TableModel
 
