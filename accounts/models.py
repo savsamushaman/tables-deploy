@@ -13,11 +13,10 @@ class CountryModel(models.Model):
 
 class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=30, blank=True, null=True)
-    address = models.CharField(max_length=150, blank=True, null=True)
     slug = models.SlugField(blank=True, null=True)
     email = models.EmailField(blank=False, null=True)
     country = models.ForeignKey(CountryModel, on_delete=models.DO_NOTHING, null=True, blank=True)
-    device = models.CharField(max_length=16, blank=True)
+    device = models.CharField(max_length=16, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.username)

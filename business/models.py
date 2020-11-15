@@ -23,18 +23,18 @@ class BusinessCategory(models.Model):
 
 class BusinessModel(models.Model):
     manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
-    business_name = models.CharField(max_length=100, blank=False, unique=True)
-    category = models.ForeignKey(BusinessCategory, on_delete=models.DO_NOTHING, null=True, blank=True)
+    business_name = models.CharField(max_length=200, blank=False, unique=True)
+    category = models.ForeignKey(BusinessCategory, on_delete=models.DO_NOTHING)
     short_description = models.TextField()
-    email = models.EmailField(blank=False, unique=True)
-    phone_nr = models.CharField(max_length=30, blank=False, unique=True)
-    country = models.ForeignKey(CountryModel, on_delete=models.SET_NULL, null=True, blank=True)
-    maps_address = models.CharField(max_length=100, blank=False)
-    displayed_address = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(unique=True)
+    phone_nr = models.CharField(max_length=30, unique=True)
+    country = models.ForeignKey(CountryModel, on_delete=models.DO_NOTHING)
+    maps_address = models.CharField(max_length=100)
+    displayed_address = models.CharField(max_length=100)
     slug = models.SlugField(blank=True, unique=True, max_length=120)
     is_active = models.BooleanField(default=False)
     date_created = models.DateTimeField(default=timezone.now)
-    all_tables = models.IntegerField(blank=True, default=0)
+    all_tables = models.IntegerField(default=0)
     available_tables = models.IntegerField(blank=True, null=True, default=0)
     is_open_now = models.BooleanField(default=False)
 
@@ -50,7 +50,7 @@ class BusinessModel(models.Model):
 class TableModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     table_nr = models.IntegerField()
-    qr_code = models.ImageField(null=True, blank=True)
+    qr_code = models.ImageField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.qr_code:
@@ -75,7 +75,7 @@ class TableModel(models.Model):
 
 
 class ProductCategory(models.Model):
-    business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE, null=True, blank=True)
+    business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     category_name = models.CharField(max_length=25)
     slug = models.SlugField(blank=True, null=True)
     icon = models.ImageField(default='beer.png', null=True, blank=True)
@@ -90,10 +90,10 @@ class ProductCategory(models.Model):
 
 class ProductModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, blank=True, null=False)
+    name = models.CharField(max_length=100)
     description = models.TextField(max_length=500, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, blank=True, null=True)
+    category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return str(self.name)

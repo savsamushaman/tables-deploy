@@ -295,7 +295,6 @@ class FeedView(LoginRequiredMixin, View):
         order_information = []
         for order in order_models:
             entry = {'customer': order.customer,
-                     'id': order.order_id,
                      'table': order.table,
                      'pk': order.pk,
                      'status': order.status,

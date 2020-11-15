@@ -14,7 +14,7 @@ class CustomUserAdmin(UserAdmin):
         ("User Data", {
             'classes': ('wide',),
             'fields': (
-                'first_name', 'last_name', 'username', 'password1', 'password2', 'email', 'phone_number', 'address',
+                'first_name', 'last_name', 'username', 'password1', 'password2', 'email', 'phone_number',
             ),
         }),
         ('User Privileges', {'classes': ('wide'),
@@ -28,7 +28,6 @@ class CustomUserAdmin(UserAdmin):
             {
                 'fields': (
                     'phone_number',
-                    'address',
                     'slug',
                     'country',
                     'device'

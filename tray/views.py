@@ -1,5 +1,5 @@
 import json
-from random import randint
+
 
 from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import redirect
@@ -51,8 +51,7 @@ class PlaceOrder(View):
                     return HttpResponseBadRequest
             business = BusinessModel.objects.get(slug=slug)
             table = TableModel.objects.get(business=business, table_nr=table)
-            order = OrderModel.objects.create(business=business, customer=customer, table=table,
-                                              order_id=randint(1, 500), status='PL')
+            order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
 
             total = 0
 
@@ -168,8 +167,7 @@ class TrayListView(TemplateView):
                 else:
                     return HttpResponseBadRequest
 
-            order = OrderModel(business=business, customer=customer, table=table, order_id=randint(1, 500),
-                               status='U')
+            order = OrderModel(business=business, customer=customer, table=table)
 
             on_the_tray = []
             total = 0
