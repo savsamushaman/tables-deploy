@@ -4,7 +4,6 @@ from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 
-
 from business.models import BusinessModel, ProductModel, ProductCategory, TableModel
 
 
@@ -62,9 +61,10 @@ def filter_places(request):
         return HttpResponseNotAllowed('POST')
 
     data = json.loads(request.body)
-    results = BusinessModel.objects.filter(business_name__contains=data['search_value']).values(
-        'business_name') | BusinessModel.objects.filter(
-        displayed_address__contains=data['search_value']).values('business_name')
+    search_value = data['search_value']
+    results = BusinessModel.objects.filter(business_name__contains=search_value).values('business_name') | \
+              BusinessModel.objects.filter(displayed_address__contains=search_value).values('business_name') | \
+              BusinessModel.objects.filter(category__category_name__contains=search_value).values('business_name')
 
     results = [result['business_name'] for result in results]
     payload = {'results': results}
