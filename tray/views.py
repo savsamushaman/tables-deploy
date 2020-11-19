@@ -85,7 +85,6 @@ class RemoveItemFromOrder(View):
 def update_tray(request):
     if not request.method == 'POST':
         return HttpResponseNotAllowed(['POST'])
-
     data = json.loads(request.body)
     try:
         product_id = int(data['id'])

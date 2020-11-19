@@ -19,8 +19,26 @@ class OrderModel(models.Model):
     status = models.CharField(choices=ORDER_STATUS_CHOICES, default='Unplaced', max_length=2)
     total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
+    def return_username(self):
+        if self.customer.username:
+            return str(self.customer.username)
+        else:
+            return 'Anonymous User'
+
+    def return_total(self):
+        return float(self.total)
+
     def __str__(self):
         return f'OrderId: {self.id} / Table: {self.table} / Customer: {self.customer}'
+
+    def __repr__(self):
+        return {
+            'orderid': self.pk,
+            'customer': self.return_username(),
+            'table': self.table.table_nr,
+            'status': self.status,
+            'total': self.return_total()
+        }
 
 
 class OrderItem(models.Model):
@@ -33,3 +51,9 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.product}'
+
+    def __repr__(self):
+        return {
+            'product_name': self.product.name,
+            'quantity': self.quantity
+        }

@@ -1,5 +1,7 @@
+import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -302,8 +304,7 @@ class FeedView(LoginRequiredMixin, View):
 
             order_information.append(entry)
 
-        context = {'orders': order_information}
-        context['slug'] = self.kwargs['slug']
+        context = {'orders': order_information, 'slug': self.kwargs['slug']}
 
         return render(request, self.template_name, context)
 
@@ -317,3 +318,26 @@ class ProcessOrder(View):
         order.status = 'S'
         order.save()
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+
+class ReturnOrders(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed('POST')
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(self.request.body)
+        business_slug = data.get('business', None)
+        if business_slug:
+            if self.request.user == BusinessModel.objects.get(slug=business_slug).manager:
+                response = OrderModel.objects.filter(business__slug=business_slug)
+                response = [result.__repr__() for result in response]
+
+                items = dict()
+                for order in response:
+                    items[f'{order["orderid"]}'] = OrderItem.objects.filter(order_id=order['orderid'])
+                    items[f'{order["orderid"]}'] = [result.__repr__() for result in items[f'{order["orderid"]}']]
+                    order['items'] = items[f'{order["orderid"]}']
+
+                return JsonResponse({'results': response})
+        else:
+            return HttpResponseBadRequest

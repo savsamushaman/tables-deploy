@@ -3,19 +3,30 @@
 {% block title %} Feed {% endblock title %}
 
 {% block contet %}
-    {% for order in orders %}
-        {% if order.status == "PL" %}
-            <a href="{% url 'owned:process_order' slug order.pk %}">
-                <button>Process Order</button>
-            </a>
-        {% elif order.status == "S" %} <h4>Not paid yet</h4>
-        {% endif %}
-        <p>Table : {{ order.table }}</p>
-        <p>Customer : {{ order.customer }}</p>
-        <p>Order (id = {{ order.id }}) :</p>
-        {% for x in order.items %}
-            <p>{{ x.product }}</p>
+    <h1 id="title" data-place="{{ slug }}">{{ slug }}</h1>
+    <div id="order_list">
+        {% for order in orders %}
+            <div data-orderid="{{ order.pk }}" class="order-div">
+                {% if order.status == "PL" %}
+
+                    <a href="{% url 'owned:process_order' slug order.pk %}">
+                        <button>Process Order</button>
+                    </a>
+                {% elif order.status == "S" %} <h4>Not paid yet</h4>
+                {% endif %}
+                <p>Table : {{ order.table }}</p>
+                <p>Customer : {{ order.customer }}</p>
+                <p>Order (id = {{ order.pk }}) :</p>
+                {% for x in order.items %}
+                    <p>{{ x.product }}</p>
+                {% endfor %}
+                <hr/>
+            </div>
         {% endfor %}
-        <hr/>
-    {% endfor %}
+    </div>
 {% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/poll.js' %}"></script>
+{% endblock script %}
+
