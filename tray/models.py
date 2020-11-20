@@ -7,7 +7,8 @@ ORDER_STATUS_CHOICES = (
     ('U', 'Unplaced'),
     ('PL', 'Placed'),
     ('S', 'Serving'),
-    ('P', 'Paid')
+    ('P', 'Paid'),
+    ('C', 'Cancelled')
 )
 
 
@@ -27,6 +28,9 @@ class OrderModel(models.Model):
 
     def return_total(self):
         return float(self.total)
+
+    def return_date(self):
+        return self.date_ordered.date()
 
     def __str__(self):
         return f'OrderId: {self.id} / Table: {self.table} / Customer: {self.customer}'

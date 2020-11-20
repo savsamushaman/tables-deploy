@@ -54,6 +54,10 @@
             : {% if user.phone_number %} {{ user.phone_number }} {% else %} - {% endif %}</p>
         <p class="masthead-subheading font-weight-light mb-0"><i class="fas fa-handshake"></i> Date joined
             : {{ user.date_joined }}</p>
+        <p class="masthead-subheading font-weight-light mb-0"><i class="fas fa-comments"></i> Real Name
+            : {% if user.first_name and user.last_name %}{{ user.first_name }} {{ user.last_name }} {% else %}
+                -  {% endif %}</p>
+
     </div>
 </header>
 
@@ -61,27 +65,53 @@
 <section class="page-section bg-primary text-white mb-0" id="about" data-aos="fade-up">
     <div class="container">
         <!-- About Section Heading-->
-        <h2 class="page-section-heading text-center text-uppercase text-white">Order History <i
-                class="fas fa-scroll"></i></h2>
-        <!-- Icon Divider-->
-        <div class="divider-custom divider-light">
-            <div class="divider-custom-line"></div>
-            <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-            <div class="divider-custom-line"></div>
-        </div>
-        <!-- About Section Content-->
-        <div class="container d-flex align-items-center flex-column bifont">
-            <p class="masthead-subheading font-weight-light mb-0">ORDER</p>
-            <p class="masthead-subheading font-weight-light mb-0">ORDER</p>
-            <p class="masthead-subheading font-weight-light mb-0">ORDER</p>
-            <p class="masthead-subheading font-weight-light mb-0">ORDER</p>
-        </div>
-        <!-- Icon Divider-->
-        <div class="divider-custom divider-light">
-            <div class="divider-custom-line"></div>
-            <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-            <div class="divider-custom-line"></div>
-        </div>
+        {% if order_history %}
+            <h2 class="page-section-heading text-center text-uppercase text-white">Order History <i
+                    class="fas fa-scroll"></i></h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom divider-light">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+            <!-- About Section Content-->
+            {% for order in order_history %}
+                <div id="order-history-div" class="container d-flex align-items-center flex-column bifont bigbox"
+                     data-aos="fade-up">
+
+                    <p id="from-p" class="masthead-subheading mb-0">From : {{ order.business }}</p>
+                    <p class="masthead-subheading mb-0">Order Id : {{ order.order_id }}</p>
+                    <p class="masthead-subheading mb-0">By : {{ order.customer }}</p>
+                    <p class="masthead-subheading mb-0">On : {{ order.date_ordered }}</p>
+                    <p class="masthead-subheading mb-0">Status : {% if order.status == "P" %}
+                        <span class="paid"> Paid </span> {% else %}
+                        <span class="cancelled"> Cancelled </span> {% endif %}
+                    </p>
+                    <p class="masthead-subheading mb-0">Total : {{ order.total }}</p>
+                    <p style="font-weight: 600">You ordered the following:</p>
+                    <div id="order-items-div">
+                        {% for item in order.items %}
+                            <p>{{ item.quantity }}x {{ item.product }} </p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="divider-custom divider-light">
+                        <div class="divider-custom-line"></div>
+                        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                        <div class="divider-custom-line"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h2 class="page-section-heading text-center text-uppercase text-white">No finished orders yet <i
+                    class="fas fa-scroll"></i></h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom divider-light">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+        {% endif %}
     </div>
 </section>
 

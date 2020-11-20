@@ -1,6 +1,5 @@
 import json
 
-
 from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import View, TemplateView
@@ -38,36 +37,33 @@ class CancelOrder(View):
 
 class PlaceOrder(View):
     def get(self, request, *args, **kwargs):
-        try:
-            slug = self.request.session['current_order']['business']
-            table = self.request.session['current_order']['table']
-            if self.request.user.is_authenticated:
-                customer = self.request.user
+        slug = self.request.session['current_order']['business']
+        table = self.request.session['current_order']['table']
+        if self.request.user.is_authenticated:
+            customer = self.request.user
+        else:
+            if self.request.COOKIES['device']:
+                device = self.request.COOKIES['device']
+                customer, created = CustomUser.objects.get_or_create(device=device)
             else:
-                if self.request.COOKIES['device']:
-                    device = self.request.COOKIES['device']
-                    customer, created = CustomUser.objects.get_or_create(device=device)
-                else:
-                    return HttpResponseBadRequest
-            business = BusinessModel.objects.get(slug=slug)
-            table = TableModel.objects.get(business=business, table_nr=table)
-            order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
+                return HttpResponseBadRequest
+        business = BusinessModel.objects.get(slug=slug)
+        table = TableModel.objects.get(business=business, table_nr=table)
+        order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
 
-            total = 0
+        total = 0
 
-            for item in self.request.session['tray']:
-                product = ProductModel.objects.get(id=item['item_id'], business__slug=slug)
-                order_item = OrderItem.objects.create(product=product, order=order, quantity=item['quantity'])
-                total += order_item.total_price()
+        for item in self.request.session['tray']:
+            product = ProductModel.objects.get(id=item['item_id'], business__slug=slug)
+            order_item = OrderItem.objects.create(product=product, order=order, quantity=item['quantity'])
+            total += order_item.total_price()
 
-            order.total = total
+        order.total = total
+        order.save()
 
-            self.request.session['tray'] = []
+        self.request.session['tray'] = []
 
-            return redirect('tray:my_tray')
-
-        except KeyError:
-            return HttpResponseBadRequest
+        return redirect('tray:my_tray')
 
 
 class RemoveItemFromOrder(View):

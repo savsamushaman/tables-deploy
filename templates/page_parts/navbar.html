@@ -10,13 +10,14 @@
         <nav class="nav-menu d-none d-lg-block" data-aos-delay="250">
             <ul>
                 <li><a href="{% url 'pages:places' %}"> <i class="fas fa-chair"> </i> Places</a></li>
-                <li><a href="{% url 'tray:my_tray' %}"><i class="fas fa-dollar-sign"></i> Your orders</a></li>
+                <li><a href="{% url 'tray:my_tray' %}"><i class="fas fa-dollar-sign"></i> Your order</a></li>
                 {% if not user.is_authenticated %}
                     <li><a href="{% url 'accounts:register' %}"><i class="fas fa-feather-alt"></i> Register</a></li>
                     <li><a href="{% url 'accounts:login' %}"><i class="far fa-handshake"></i> Login</a></li>
                 {% else %}
                     <li><a href="{% url 'accounts:user_details' %}"><i class="fas fa-user-circle"></i> Account </a></li>
-                    <li><a href="{% url 'owned:owned_list' %}"><i class="fas fa-balance-scale"></i> Owned Places</a></li>
+                    <li><a href="{% url 'owned:owned_list' %}"><i class="fas fa-balance-scale"></i> Owned Places</a>
+                    </li>
                     <li><a href="{% url 'accounts:logout' %}"><i class="fas fa-door-open"></i> Logout</a></li>
                 {% endif %}
                 <li><a href="{% url 'pages:home' %}"><i class="fas fa-info-circle"></i> About Us</a></li>
