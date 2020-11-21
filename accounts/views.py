@@ -6,7 +6,7 @@ from django.views import View
 from django.views.generic import CreateView
 
 from tray.models import OrderModel, OrderItem
-from .forms import RegisterUserForm
+from .forms import RegisterUserForm, LoginForm
 from .models import CustomUser
 
 
@@ -23,7 +23,8 @@ class RegisterUserView(CreateView):
 
 
 class MyLoginView(LoginView):
-    template_name = "accounts/login.html"
+    template_name = "accounts/index.html"
+    form_class = LoginForm
 
 
 class MyLogoutView(LogoutView):
