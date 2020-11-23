@@ -329,7 +329,7 @@ class ReturnOrders(View):
         business_slug = data.get('business', None)
         if business_slug:
             if self.request.user == BusinessModel.objects.get(slug=business_slug).manager:
-                response = OrderModel.objects.filter(business__slug=business_slug)
+                response = OrderModel.objects.filter(business__slug=business_slug,status__regex='PL|S')
                 response = [result.__repr__() for result in response]
 
                 items = dict()

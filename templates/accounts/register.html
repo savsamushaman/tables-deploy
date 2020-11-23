@@ -71,6 +71,7 @@
                                 <div class="col-2">
                                     <div class="input-group-desc">
                                         {{ form.username }}
+                                        {{ form.username.errors }}
                                     </div>
                                 </div>
                             </div>
@@ -82,6 +83,7 @@
                         <div class="value">
                             <div class="input-group">
                                 {{ form.email }}
+                                {{ form.email.errors }}
                             </div>
                         </div>
                     </div>
@@ -116,11 +118,13 @@
                                 <div class="col-2">
                                     <div class="input-group-desc">
                                         {{ form.password1 }}
+                                        {{ form.password1.errors }}
                                     </div>
                                 </div>
                                 <div class="col-2">
                                     <div class="input-group-desc">
                                         {{ form.password2 }}
+                                        {{ form.password2.errors }}
                                     </div>
                                 </div>
                             </div>

@@ -1,10 +1,17 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from accounts.models import CustomUser
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+
+from accounts.models import CustomUser
+
+
+class SelfClearField(forms.TextInput):
+    def get_context(self, name, value, attrs):
+        value = None
+        return super(SelfClearField, self).get_context(name, value, attrs)
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'input100'}))
+    username = forms.CharField(widget=SelfClearField(attrs={'class': 'input100'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input100'}))
 
 

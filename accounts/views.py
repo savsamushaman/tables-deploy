@@ -1,3 +1,4 @@
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView
 from django.shortcuts import render, redirect
@@ -23,8 +24,14 @@ class RegisterUserView(CreateView):
 
 
 class MyLoginView(LoginView):
-    template_name = "accounts/index.html"
+    template_name = "accounts/login.html"
     form_class = LoginForm
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('accounts:user_details')
+        else:
+            return super(MyLoginView, self).get(request, *args, **kwargs)
 
 
 class MyLogoutView(LogoutView):
@@ -54,3 +61,22 @@ class UserDetailView(LoginRequiredMixin, View):
 
         context = {'user': user_details, 'order_history': order_history}
         return render(request, template_name, context)
+
+
+class CustomPasswordResetView(auth_views.PasswordResetView):
+    template_name = 'accounts/password_reset.html'
+    success_url = reverse_lazy('accounts:password_reset_done')
+    email_template_name = 'accounts/password_reset_mail.html'
+
+
+class CustomPasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = 'accounts/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('accounts:password_reset_complete')
+
+
+class CustomPasswordResetComplete(auth_views.PasswordResetCompleteView):
+    template_name = 'accounts/password_reset_complete.html'
