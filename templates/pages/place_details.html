@@ -1,7 +1,7 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %} {{ place.business_name }} - UNDER CONSTRUCTION {% endblock title %}
+{% block title %} Tables - {{ place.business_name }}{% endblock title %}
 
 {% block topbar %}
 {% endblock topbar %}
@@ -40,7 +40,7 @@
                         <a href="{% url 'tray:cancel_order' clear=0 %}">
                             <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
                                     class="fas fa-power-off"></i>
-                                Free Table
+                                Leave Table
                             </button>
                         </a>
                     </div>
@@ -73,7 +73,7 @@
 
                 {% for product in products %}
                     <div class="col-lg-6 menu-item filter-{{ product.category.slug }}">
-                        <img src="{% static 'restaurant.png' %}" class="menu-img" alt="">
+                        <img src="{{ place.category.icon.url }}" class="menu-img" alt="">
                         <div class="menu-content">
                             <a>{{ product.name }}</a><span>{{ product.price }}</span>
                         </div>
@@ -117,7 +117,6 @@
 
         </div>
 
-        <p style="margin-top: 20px;color: black;font-size: 1.7em" align="center">~~~~~~~~~~~~~~~~~~~~~~</p>
 
     </section><!-- End About Section -->
     <!-- ======= Gallery Section ======= -->

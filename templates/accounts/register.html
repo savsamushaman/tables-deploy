@@ -11,7 +11,7 @@
     <meta name="keywords" content="Colorlib Templates">
 
     <!-- Title Page-->
-    <title>Au Register Forms by Colorlib</title>
+    <title>{% block title %}Tables - Register{% endblock title %}</title>
     <link href="{% static 'register/vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet"
           media="all">
     <!-- Icons font CSS-->
@@ -36,110 +36,112 @@
 
 
 <body>
-<div class="page-wrapper bg-gra-03 p-t-45 p-b-50" data-aos="fade-up" data-aos-delay="300">
-    <div class="wrapper wrapper--w790">
-        <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
-            <div class="card-heading">
-                <h2 class="title"><i class="fas fa-scroll"></i> Join Tables <i class="fas fa-feather-alt"></i></h2>
-            </div>
-            <div class="card-body">
-                <form method="POST">
-                    {% csrf_token %}
-                    <div id="optional-div"><p id="optional-text">*optional</p></div>
+{% block content %}
+    <div class="page-wrapper bg-gra-03 p-t-45 p-b-50" data-aos="fade-up" data-aos-delay="300">
+        <div class="wrapper wrapper--w790">
+            <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
+                <div class="card-heading">
+                    <h2 class="title"><i class="fas fa-scroll"></i> Join Tables <i class="fas fa-feather-alt"></i></h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div id="optional-div"><p id="optional-text">*optional</p></div>
 
-                    <div class="form-row m-b-55">
-                        <div class="name">Name*</div>
-                        <div class="value">
-                            <div class="row row-space">
-                                <div class="col-2">
-                                    <div class="input-group-desc">
-                                        {{ form.first_name }}
+                        <div class="form-row m-b-55">
+                            <div class="name">Name*</div>
+                            <div class="value">
+                                <div class="row row-space">
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.first_name }}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="input-group-desc">
-                                        {{ form.last_name }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-row m-b-55">
-                        <div class="name">Username</div>
-                        <div class="value">
-                            <div class="row row-space">
-                                <div class="col-2">
-                                    <div class="input-group-desc">
-                                        {{ form.username }}
-                                        {{ form.username.errors }}
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.last_name }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="form-row m-b-55">
+                            <div class="name">Username</div>
+                            <div class="value">
+                                <div class="row row-space">
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.username }}
+                                            {{ form.username.errors }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="form-row">
-                        <div class="name">Email</div>
-                        <div class="value">
-                            <div class="input-group">
-                                {{ form.email }}
-                                {{ form.email.errors }}
+                        <div class="form-row">
+                            <div class="name">Email</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.email }}
+                                    {{ form.email.errors }}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-row m-b-55">
-                        <div class="name">Phone*</div>
-                        <div class="value">
-                            <div class="row row-refine">
-                                <div class="col-9">
-                                    <div class="input-group-desc">
-                                        {{ form.phone }}
+                        <div class="form-row m-b-55">
+                            <div class="name">Phone*</div>
+                            <div class="value">
+                                <div class="row row-refine">
+                                    <div class="col-9">
+                                        <div class="input-group-desc">
+                                            {{ form.phone }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="name">Country*</div>
-                        <div class="value">
-                            <div class="input-group">
-                                <div class="rs-select2 js-select-simple ">
-                                    {{ form.country }}
-                                    <div class="select-dropdown"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row m-b-55">
-                        <div class="name">Password</div>
-                        <div class="value">
-                            <div class="row row-space">
-                                <div class="col-2">
-                                    <div class="input-group-desc">
-                                        {{ form.password1 }}
-                                        {{ form.password1.errors }}
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="input-group-desc">
-                                        {{ form.password2 }}
-                                        {{ form.password2.errors }}
+                        <div class="form-row">
+                            <div class="name">Country*</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <div class="rs-select2 js-select-simple ">
+                                        {{ form.country }}
+                                        <div class="select-dropdown"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="form-row m-b-55">
+                            <div class="name">Password</div>
+                            <div class="value">
+                                <div class="row row-space">
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.password1 }}
+                                            {{ form.password1.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.password2 }}
+                                            {{ form.password2.errors }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
 
-                    <div class="button-div">
-                        <button class="register-button btn btn--radius-2 btn--red" type="submit">Register</button>
-                    </div>
-                </form>
+                        <div class="button-div">
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Register</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+{% endblock content %}
 
 <a href="{% url 'pages:places' %}" class="back-arrow"><i class="fas fa-chevron-left"></i></a>
 
@@ -159,7 +161,6 @@
 <script src="{% static 'Ry/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
 <script src="{% static 'Ry/vendor/aos/aos.js' %}"></script>
 <script src="{% static 'Ry/js/main.js' %}"></script>
-
 
 
 </body><!-- This templates was made by Colorlib (https://colorlib.com) -->

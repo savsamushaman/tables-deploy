@@ -1,0 +1,86 @@
+{% extends 'accounts/register.html' %}
+{% load static %}
+{% block title %} Update Information - {{ user.username }} {% endblock title %}
+
+
+{% block content %}
+    <div class="page-wrapper bg-gra-03 p-t-45 p-b-50" data-aos="fade-up" data-aos-delay="300">
+        <div class="wrapper wrapper--w790">
+            <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
+                <div class="card-heading">
+                    <h2 class="title"><i class="fas fa-scroll"></i> Update Your Information <i
+                            class="fas fa-feather-alt"></i></h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div style="text-align: center">
+                            <a href="{% url 'accounts:change_password' %}">Tap here to change password </a> <i
+                                class="fas fa-user-lock"></i>
+                        </div>
+                        <div id="optional-div"><p id="optional-text">*optional</p></div>
+                        <div class="form-row m-b-55">
+                            <div class="name">Name*</div>
+                            <div class="value">
+                                <div class="row row-space">
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.first_name }}
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            {{ form.last_name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">Email</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.email }}
+                                    {{ form.email.errors }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row m-b-55">
+                            <div class="name">Phone*</div>
+                            <div class="value">
+                                <div class="row row-refine">
+                                    <div class="col-9">
+                                        <div class="input-group-desc">
+                                            {{ form.phone_number }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name">Country*</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <div class="rs-select2 js-select-simple ">
+                                        {{ form.country }}
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="button-div">
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Update</button>
+                            <a href="{% url 'accounts:user_details' %}">
+                                <button class="register-button btn btn--radius-2" type="submit">Cancel</button>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+

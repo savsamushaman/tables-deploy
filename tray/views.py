@@ -1,12 +1,29 @@
 import json
 
-from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, HttpResponse
+from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, HttpResponse, \
+    HttpResponseForbidden
 from django.shortcuts import redirect
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, DetailView
 
 from accounts.models import CustomUser
 from business.models import BusinessModel, ProductModel, TableModel
 from .models import OrderItem, OrderModel
+
+
+def check_user(request):
+    if request.user.is_authenticated:
+        customer = request.user
+        return customer
+    else:
+        device = request.COOKIES.get('device', None)
+        if device:
+            try:
+                customer = CustomUser.objects.get(device=device)
+                return customer
+            except:
+                return None
+        else:
+            return HttpResponseBadRequest
 
 
 class GenerateOrder(View):
@@ -23,15 +40,29 @@ class GenerateOrder(View):
 class CancelOrder(View):
     def get(self, request, *args, **kwargs):
 
-        try:
-            redirect_to = self.request.session['current_order']['business']
-        except TypeError:
-            return HttpResponseBadRequest
+        customer = check_user(request)
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
 
-        if not self.kwargs['clear']:
+        try:
+            business_slug = self.request.session['current_order']['business']
+        except TypeError:
+            return HttpResponseBadRequest()
+
+        if not self.kwargs['clear'] and customer:
+            business = BusinessModel.objects.get(slug=business_slug)
+            active_orders = OrderModel.objects.filter(customer=customer, business=business,
+                                                      status='PL')
+            for order in active_orders:
+                order.status = 'C'
+                order.save()
             self.request.session['current_order'] = None
-            return redirect('pages:place_detail', slug=redirect_to)
+            return redirect('pages:place_detail', slug=business_slug)
+        else:
+            self.request.session['current_order'] = None
+
         self.request.session['tray'] = []
+
         return redirect('tray:my_tray')
 
 
@@ -42,11 +73,11 @@ class PlaceOrder(View):
         if self.request.user.is_authenticated:
             customer = self.request.user
         else:
-            if self.request.COOKIES['device']:
-                device = self.request.COOKIES['device']
+            device = self.request.COOKIES.get('device', None)
+            if device:
                 customer, created = CustomUser.objects.get_or_create(device=device)
             else:
-                return HttpResponseBadRequest
+                return HttpResponseBadRequest()
         business = BusinessModel.objects.get(slug=slug)
         table = TableModel.objects.get(business=business, table_nr=table)
         order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
@@ -109,7 +140,7 @@ def update_tray(request):
 
         return JsonResponse(payload)
     except KeyError:
-        return HttpResponseBadRequest
+        return HttpResponseBadRequest()
 
 
 def add_remove_from_tray(request):
@@ -136,7 +167,7 @@ def add_remove_from_tray(request):
             request.session['tray'] = all_items
         response = HttpResponse(status=200)
     except KeyError:
-        return HttpResponseBadRequest
+        return HttpResponseBadRequest()
 
     return response
 
@@ -144,6 +175,13 @@ def add_remove_from_tray(request):
 class TrayListView(TemplateView):
     context_object_name = 'items'
     template_name = 'tray/tray_page.html'
+
+    def get(self, request, *args, **kwargs):
+        customer = check_user(request)
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
+        else:
+            return super(TrayListView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         try:
@@ -156,11 +194,11 @@ class TrayListView(TemplateView):
             if self.request.user.is_authenticated:
                 customer = self.request.user
             else:
-                if self.request.COOKIES['device']:
-                    device = self.request.COOKIES['device']
+                device = self.request.COOKIES.get('device', None)
+                if device:
                     customer, created = CustomUser.objects.get_or_create(device=device)
                 else:
-                    return HttpResponseBadRequest
+                    customer = None
 
             order = OrderModel(business=business, customer=customer, table=table)
 
@@ -185,3 +223,47 @@ class TrayListView(TemplateView):
             return super(TrayListView, self).get_context_data(**kwargs)
         except KeyError:
             return super(TrayListView, self).get_context_data(**kwargs)
+
+
+class OrderDetailView(DetailView):
+    model = OrderModel
+    template_name = 'tray/order_details.html'
+    context_object_name = 'order'
+
+    def get(self, request, *args, **kwargs):
+
+        customer = check_user(request)
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
+
+        if customer:
+            if customer == OrderModel.objects.get(id=self.kwargs['pk']).customer:
+                return super(OrderDetailView, self).get(request, *args, **kwargs)
+            else:
+                return HttpResponseForbidden()
+        else:
+            return HttpResponseBadRequest()
+
+    def get_context_data(self, **kwargs):
+        order_id = self.kwargs['pk']
+        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        context['order_items'] = OrderItem.objects.filter(order=order_id)
+        return context
+
+
+class CancelActiveOrder(View):
+    def get(self, request, *args, **kwargs):
+
+        customer = check_user(request)
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
+
+        pk = self.kwargs['pk']
+        order = OrderModel.objects.get(id=pk)
+
+        if customer == order.customer:
+            order.status = 'C'
+            order.save()
+            return redirect('tray:my_tray')
+        else:
+            return HttpResponseForbidden()

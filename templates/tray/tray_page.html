@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Your orders</title>
+    <title>Tables - Your orders</title>
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
 
@@ -47,7 +47,7 @@
                 {% if order %}
 
                     <h3 style="color: black;font-family: 'Playfair Display',sans-serif; margin-bottom: 30px!important;"
-                        class="mb-0">Order Summary - {{ order.business.business_name }} <br> -
+                        class="mb-0">Order Summary - {{ order.business.business_name }} <br>
                         Table {{ order.table.table_nr }} </h3>
 
                     <div class="d-flex justify-content-center">
@@ -116,8 +116,8 @@
                                     <div id="{{ item.product.id }}" class="row mb-4">
                                         <div class="col-md-5 col-lg-3 col-xl-3">
                                             <div class="view overlay rounded mb-3 mb-md-0">
-                                                <img class="img-fluid w-100"
-                                                     src="{% static 'restaurant.png' %}"
+                                                <img class="img-fluid w-100 rounded mx-auto d-block"
+                                                     src="{{ order.business.category.icon.url }}"
                                                      alt="Sample">
                                             </div>
                                         </div>
@@ -217,7 +217,7 @@
 
                             {% if items %}
                                 <a href="{% url 'tray:place_order' %}">
-                                    <button style="border-radius: 50px;"
+                                    <button style="border-radius: 50px; color: #FFE4B5"
                                             type="button"
                                             class="btn btn-primary btn-block waves-effect waves-light">Place
                                         Order
@@ -230,11 +230,38 @@
 
                             {% endif %}
                         </div>
+
                     </div>
                     <!-- Card -->
                 </div>
                 <!--Grid column-->
             </div>
+            {% if active %}
+                <div class="card mb-4 m-t-50"
+                     style="background: #FFE4B5; border-radius: 50px; text-align: center;    box-shadow: 5px 5px 15px 5px rgba(80, 0, 0, 0.15); ">
+                    <div class="card-body" style="border-radius: 50px">
+                        <!--  -->
+                        <p style="color: steelblue!important;" class="text-primary mb-0"><i
+                                class="fas fa-info-circle mr-1"></i>Active orders</p>
+                        <p class="font-italic">Tap for more details</p>
+
+                        <div style="margin-top: 10px; font-weight: bolder" class="mt-10">
+                            <ul style="list-style-type: none">
+                                {% for order in active %}
+                                    <a href="{% url 'tray:order_detail' order.id %}">
+                                        <li style="margin-top: 5px">ID : {{ order.id }} - Table : {{ order.table }}
+                                            - Total : {{ order.total }} - Status : {% if order.status == 'PL' %}
+                                                Placed {% else %}
+                                                Serving{% endif %}</li>
+                                    </a>
+                                {% endfor %}
+                            </ul>
+
+                        </div>
+
+                    </div>
+                </div>
+            {% endif %}
             <!--Grid row-->
         </section>
         <!--Section: Block Content-->

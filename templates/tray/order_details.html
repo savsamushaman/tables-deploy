@@ -1,0 +1,51 @@
+{% extends 'page_parts/base.html' %}
+{% load static %}
+{% block title %} Tables - Order Details - {{ order.id }} {% endblock title %}
+{% block headspace %}
+    <link rel="stylesheet" type="text/css" href="{% static 'login/css/util.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'login/css/main.css' %}">
+{% endblock headspace %}
+
+{% block navbar %}
+    {% include 'page_parts/navbar.html' %}
+{% endblock navbar %}
+
+
+
+{% block content %}
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100 p-t-40 p-b-20" data-aos="fade-up" data-aos-delay="300">
+                <span class="login100-form-avatar">
+						<img src="{% static 'img/tray.png' %}" alt="AVATAR">
+                </span>
+
+                <span class="login100-form-title p-b-30" style="font-size:1.5em;margin-top: 20px">
+						ID : {{ order.id }} - Table : {{ order.table }}
+                                            - Total : {{ order.total }} - Status : {% if order.status == 'PL' %}
+                    Placed {% else %}
+                    Serving{% endif %}
+                </span>
+                <ul style="margin-top: 2px">
+                    {% for order_item in order_items %}
+                        <li style="text-align: center">{{ order_item.quantity }}x - {{ order_item.product }}</li>
+                    {% endfor %}
+
+                </ul>
+
+                {% if order.status == 'PL' %}
+
+                    <a href="{% url 'tray:cancel_active_order' order.id %}">
+                        <div class="container-login100-form-btn m-t-10">
+                            <button class="login100-form-btn">
+                                Cancel
+                            </button>
+                        </div>
+                    </a>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

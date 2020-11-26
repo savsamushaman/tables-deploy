@@ -1,13 +1,14 @@
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LogoutView, LoginView
+from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView, TemplateView
 
 from tray.models import OrderModel, OrderItem
-from .forms import RegisterUserForm, LoginForm
+from .forms import RegisterUserForm, LoginForm, UpdateUserForm, ChangePasswordForm
 from .models import CustomUser
 
 
@@ -63,6 +64,19 @@ class UserDetailView(LoginRequiredMixin, View):
         return render(request, template_name, context)
 
 
+class UpdateUserView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    template_name = 'accounts/update_user.html'
+    form_class = UpdateUserForm
+    success_url = reverse_lazy('accounts:user_details')
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user == CustomUser.objects.get(slug=self.kwargs['slug']):
+            return super(UpdateUserView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+
 class CustomPasswordResetView(auth_views.PasswordResetView):
     template_name = 'accounts/password_reset.html'
     success_url = reverse_lazy('accounts:password_reset_done')
@@ -80,3 +94,13 @@ class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
 class CustomPasswordResetComplete(auth_views.PasswordResetCompleteView):
     template_name = 'accounts/password_reset_complete.html'
+
+
+class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
+    success_url = reverse_lazy('accounts:change_password_done')
+    template_name = 'accounts/change_password_form.html'
+    form_class = ChangePasswordForm
+
+
+class ChangePasswordDoneView(TemplateView):
+    template_name = 'accounts/change_password_done.html'

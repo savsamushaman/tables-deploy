@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 
 from accounts.models import CustomUser
 
@@ -46,3 +46,30 @@ class RegisterUserFormAdmin(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = '__all__'
+
+
+class UpdateUserForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'phone_number', 'email', 'country']
+
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'input--style-5', 'placeholder': 'First Name', }),
+        required=False)
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'input--style-5', 'placeholder': 'Last Name', }),
+        required=False)
+    phone_number = forms.CharField(widget=forms.TextInput({'class': 'input--style-5', 'placeholder': 'Phone Number', }),
+                                   required=False)
+    email = forms.CharField(
+        widget=forms.EmailInput(attrs={'class': 'input--style-5', 'placeholder': 'Email address', }))
+
+
+class ChangePasswordForm(PasswordChangeForm):
+    class Meta:
+        model = CustomUser
+        fields = ["old_password", 'new_password1', 'new_password2']
+
+    old_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input100', }))
+    new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input100', }))
+    new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input100', }))

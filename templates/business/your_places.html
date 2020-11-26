@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Freebie: 12 Practical Templates For List Pages</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'business/list_page/css/article-list-vertical.css' %}">
+
+    <link href="{% static 'Ry/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/vendor/icofont/icofont.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/vendor/animate.css/animate.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/vendor/owl.carousel/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/vendor/venobox/venobox.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/vendor/aos/aos.css' %}" rel="stylesheet">
+    <link href="{% static 'Ry/css/style.css' %}" rel="stylesheet">
+    <script src="{% static 'js/main.js' %}"></script>
+    <link href="{% static 'Ry/img/favicon.png' %}" rel="icon">
+    <link href="{% static 'Ry/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+</head>
+
+{% include 'page_parts/navbar.html' %}
+
+<body>
+
+
+<ul class="article-list-vertical" data-aos="fade-up" data-aos-delay="300">
+    <h2 style="margin-bottom: 30px" class="empty-list"><i class="fas fa-user-tie"></i> Your places <i
+            class="fas fa-chair"></i></h2>
+    <a href="{% url "owned:create_business" %}">
+        <button class="create-business" type="button">Create a new business</button>
+    </a>
+    {% if owned %}
+        {% for business in owned %}
+            <li data-aos="fade-up" data-aos-delay="300">
+                <a href="{% url 'owned:business_update' business.slug %}"
+                   style="background-image: url('{{ business.category.icon.url }}')"></a>
+                <div>
+                    <h2><a href="{% url 'owned:business_update' business.slug %}">{{ business.business_name }}</a></h2>
+                    <a href="{% url 'owned:feed' business.slug %}">
+                        <button>Feed</button>
+                    </a>
+                    <p>{% if business.is_open_now %}OPEN NOW {% else %}CLOSED{% endif %}</p>
+                    <p>{{ business.email }}</p>
+                    <p>{{ business.phone_nr }}</p>
+                    <p>{{ business.short_description | slice:100 }}</p>
+                    <a href="{% url 'owned:business_update' business.slug %}" class="read-more">Details &rarr;</a>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <img class="empty-list-img" src="{% static 'img/confuse.png' %}">
+        <h2 class="empty-list">Looks like there are no business associated with your name</h2>
+        <a href="{% url "owned:create_business" %}">
+            <button class="create-business" type="button">Create a new business</button>
+        </a>
+    {% endif %}
+<!-- Vendor JS Files -->
+<script src="{% static 'Ry/vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'Ry/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'Ry/vendor/jquery.easing/jquery.easing.min.js' %}"></script>
+<script src="{% static 'Ry/vendor/owl.carousel/owl.carousel.min.js' %}"></script>
+<script src="{% static 'Ry/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+<script src="{% static 'Ry/vendor/venobox/venobox.min.js' %}"></script>
+<script src="{% static 'Ry/vendor/aos/aos.js' %}"></script>
+
+<!-- Template Main JS File -->
+<script src="{% static 'Ry/js/main.js' %}"></script>
+
+</body>
+
+</html>

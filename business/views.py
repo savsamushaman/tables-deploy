@@ -16,7 +16,7 @@ from .models import BusinessModel, ProductModel, TableModel
 # List
 class BusinessListView(LoginRequiredMixin, ListView):
     context_object_name = 'owned'
-    template_name = 'business/business/business_list.html'
+    template_name = 'business/your_places.html'
     model = BusinessModel
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -329,7 +329,7 @@ class ReturnOrders(View):
         business_slug = data.get('business', None)
         if business_slug:
             if self.request.user == BusinessModel.objects.get(slug=business_slug).manager:
-                response = OrderModel.objects.filter(business__slug=business_slug,status__regex='PL|S')
+                response = OrderModel.objects.filter(business__slug=business_slug, status__regex='PL|S')
                 response = [result.__repr__() for result in response]
 
                 items = dict()
@@ -340,4 +340,4 @@ class ReturnOrders(View):
 
                 return JsonResponse({'results': response})
         else:
-            return HttpResponseBadRequest
+            return HttpResponseBadRequest()
