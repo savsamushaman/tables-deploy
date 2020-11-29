@@ -1,7 +1,7 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %} Tables - New Place {% endblock title %}
+{% block title %} Tables - Update Product{{ business.business_name }} {% endblock title %}
 
 {% block headspace %}
     {{ block.super }}
@@ -22,7 +22,7 @@
 
     <!-- Main CSS-->
     <link href="{% static 'business/update_page/business_items/css/styles.css' %}" rel="stylesheet"/>
-    <link href="{% static 'business/create_page/css/style.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'business/articles/update/style.css' %}" rel="stylesheet" media="all">
 
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
@@ -43,13 +43,47 @@
 {% block content %}
 
     <!-- Portfolio Section-->
-    <section class="page-section portfolio" id="portfolio" data-aos="fade-down" data-aos-delay="300">
+    <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
         <div class="container">
-            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">A new place is opening!</h2>
+            <div class="cancel-button-div">
+                <a style="text-align: center" href="{% url 'owned:products_list' product.business.slug %}">
+                    <button class="register-button btn btn--radius-2">Back</button>
+                </a>
+            </div>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Update product Details</h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+
+
+            <div class="row justify-content-center">
+
+                <!-- Food Tab -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="portfolio-item mx-auto">
+                        <div class=" d-flex align-items-center justify-content-center h-100 w-100">
+                            <div class="text-center text-white"></div>
+                        </div>
+                        <img class="img-fluid"
+                             src="{% static 'img/food.png' %}"
+                             alt=""/>
+                    </div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <h4 style="font-size: 25px"
+                                class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5">
+                                <span class="font-weight-bold">{{ message }}</span></h4>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </section>
 
-    <div class="divider-custom" data-aos="fade-down" data-aos-delay="300">
+    <div class="divider-custom" data-aos="fade-up" data-aos-delay="300">
         <div class="divider-custom-line"></div>
         <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
         <div class="divider-custom-line"></div>
@@ -58,7 +92,7 @@
         <div class="wrapper wrapper--w790">
             <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
                 <div class="card-heading">
-                    <h2 class="title"><i class="fas fa-scroll"></i>Register your place here<i
+                    <h2 class="title"><i class="fas fa-scroll"></i> Product details <i
                             class="fas fa-feather-alt"></i></h2>
 
                 </div>
@@ -70,11 +104,12 @@
                             <div class="name">Name</div>
                             <div class="value">
                                 <div class="input-group">
-                                    {{ form.business_name }}
-                                    {{ form.business_name.errors }}
+                                    {{ form.name }}
+                                    {{ form.name.errors }}
                                 </div>
                             </div>
                         </div>
+
 
                         <div class="form-row">
                             <div class="name">Category</div>
@@ -94,80 +129,42 @@
                             <div class="name">Short description</div>
                             <div class="value">
                                 <div class="input-group">
-                                    {{ form.short_description }}
-                                    {{ form.short_description.errors }}
+                                    {{ form.description }}
+                                    {{ form.errors }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-row">
-                            <div class="name">Email</div>
+                            <div class="name">Price</div>
                             <div class="value">
                                 <div class="input-group">
-                                    {{ form.email }}
-                                    {{ form.email.errors }}
+                                    {{ form.price }}
+                                    {{ form.price.errors }}
                                 </div>
                             </div>
 
                         </div>
-                        <div class="form-row">
-                            <div class="name">Phone</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    {{ form.phone_nr }}
-                                    {{ form.phone_nr.errors }}
-                                </div>
-                            </div>
-                        </div>
 
-
-                        <div class="form-row">
-                            <div class="name">Country</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    <div class="rs-select2 js-select-simple">
-                                        {{ form.country }}
-                                        {{ form.country.errors }}
-                                        <div class="select-dropdown"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="name">Maps Address</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    {{ form.maps_address }}
-                                    {{ form.maps_address.errors }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="name">Display Address</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    {{ form.displayed_address }}
-                                    {{ form.displayed_address.errors }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="name">All tables</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    {{ form.all_tables }}
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="button-div">
-                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Register my place
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Update Product
                             </button>
                         </div>
+
                     </form>
+                    <div class="cancel-button-div">
+                        <a style="text-align: center" href="{% url 'owned:products_list' product.business.slug %}">
+                            <button class="register-button btn btn--radius-2">Cancel</button>
+                        </a>
+                    </div>
+
+                    <div style="margin-top: 50px;" class="cancel-button-div">
+                        <a style="text-align: center"
+                           href="{% url 'owned:delete_product' product.business.slug product.pk %}">
+                            <button class="register-button btn btn--radius-2">Delete Product</button>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -183,7 +180,7 @@
 {% endblock content %}
 
 {% block preloader %}
-{% endblock preloader %}
+{% endblock %}
 
 
 {% block bottomscript %}

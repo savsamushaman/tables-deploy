@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from accounts.models import CustomUser, CountryModel
 import requests
 from pathlib import Path
+from decimal import Decimal
 
 BUSINESS_CATEGORY_CHOICES = (
     ('Bar', 'Bar'),
@@ -96,6 +97,11 @@ class ProductModel(models.Model):
     description = models.TextField(max_length=500, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(price__gt=Decimal('0')), name='price_gt_0'),
+        ]
 
     def __str__(self):
         return str(self.name)

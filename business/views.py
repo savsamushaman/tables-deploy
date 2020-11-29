@@ -1,5 +1,6 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
@@ -16,7 +17,7 @@ from .models import BusinessModel, ProductModel, TableModel
 # List
 class BusinessListView(LoginRequiredMixin, ListView):
     context_object_name = 'owned'
-    template_name = 'business/business_list.html'
+    template_name = 'business/business/business_list.html'
     model = BusinessModel
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -40,7 +41,7 @@ class CreateBusinessView(LoginRequiredMixin, CreateView):
 # Edit
 class BusinessEditView(LoginRequiredMixin, UpdateView):
     model = BusinessModel
-    template_name = 'business/update_business.html'
+    template_name = 'business/business/update_business.html'
     context_object_name = 'business'
     success_url = reverse_lazy('owned:owned_list')
     form_class = UpdateBusinessForm
@@ -75,7 +76,7 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
 # List
 class ProductListView(LoginRequiredMixin, ListView):
     model = ProductModel
-    template_name = 'business/business/products.html'
+    template_name = 'business/product_list.html'
     context_object_name = 'products'
 
     def get(self, request, *args, **kwargs):
@@ -88,16 +89,16 @@ class ProductListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ProductListView, self).get_context_data(**kwargs)
-        context['products'] = ProductModel.objects.filter(business__slug=self.kwargs['slug'])
-        context['slug'] = self.kwargs['slug']
+        slug = self.kwargs['slug']
+        context['products'] = ProductModel.objects.filter(business__slug=slug).order_by('category')
+        context['slug'] = slug
         return context
 
 
 # Create
 class CreateProductView(LoginRequiredMixin, CreateView):
     model = ProductModel
-    template_name = 'business/business/create_product.html'
-    success_url = reverse_lazy('user_details')
+    template_name = 'business/create_product.html'
     form_class = CreateProductForm
 
     def get(self, request, *args, **kwargs):
@@ -121,7 +122,8 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
         form.instance.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+        messages.add_message(self.request, level=messages.INFO, message=f'Product {form.instance.name} was created')
+        return super(CreateProductView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super(CreateProductView, self).get_context_data(**kwargs)
@@ -133,13 +135,16 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         kwargs['slug'] = self.kwargs.get('slug')
         return kwargs
 
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:create_product', kwargs={'slug': slug})
+
 
 # Edit
 class ProductEditView(LoginRequiredMixin, UpdateView):
     model = ProductModel
-    template_name = 'business/business/edit_product.html'
+    template_name = 'business/update_product.html'
     context_object_name = 'product'
-    success_url = reverse_lazy('user_details')
     form_class = CreateProductForm
 
     def get(self, request, *args, **kwargs):
@@ -160,12 +165,17 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+        messages.add_message(self.request, level=messages.INFO, message=f'Product {form.instance.name} was updated')
+        return super(ProductEditView, self).form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super(ProductEditView, self).get_form_kwargs()
         kwargs['slug'] = self.kwargs.get('slug')
         return kwargs
+
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:products_list', kwargs={'slug': slug})
 
 
 # Delete
@@ -174,7 +184,9 @@ class ProductDeleteView(LoginRequiredMixin, View):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager:
-            ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk']).delete()
+            product = ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            messages.add_message(request, level=messages.INFO, message=f'Product {product.name} was deleted')
+            product.delete()
             return redirect('owned:products_list', slug=slug)
         else:
             raise Http404

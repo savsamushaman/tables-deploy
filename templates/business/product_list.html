@@ -1,0 +1,152 @@
+{% extends 'page_parts/base.html' %}
+{% load static %}
+
+{% block title %} Tables - Create Product {{ business.business_name }} {% endblock title %}
+
+{% block headspace %}
+    {{ block.super }}
+    <link href="{% static 'register/vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet"
+          media="all">
+    <!-- Icons font CSS-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+    <link href="" rel="stylesheet" media="all">
+    <link href="{% static 'register/vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS-->
+
+    <link href="{% static 'register/vendor/select2/select2.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'register/vendor/datepicker/daterangepicker.css' %}" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+    <link href="{% static 'business/articles/list/upper/styles.css' %}" rel="stylesheet"/>
+    <link href="{% static 'business/articles/list/table/style.css' %}" rel="stylesheet" media="all">
+
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+          type="text/css"/>
+    <!-- Core theme CSS (includes Bootstrap)-->
+
+
+
+{% endblock headspace %}
+
+{% block navbar %}
+    {% include 'page_parts/navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+
+    <!-- Portfolio Section-->
+    <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
+        <div class="container">
+            <div class="cancel-button-div">
+                <a style="text-align: center" href="{% url 'owned:business_update' slug %}">
+                    <button class="register-button btn btn--radius-2">Back</button>
+                </a>
+            </div>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Create a Product</h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+
+
+            <div class="row justify-content-center">
+
+                <!-- Food Tab -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal6">
+                        <a href="{% url 'owned:create_product' slug %}">
+                            <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+                                <div class="portfolio-item-caption-content text-center text-white"><i
+                                        class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                        </a>
+                        <img class="img-fluid"
+                             src="{% static 'img/food.png' %}"
+                             alt=""/>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="divider-custom" data-aos="fade-up" data-aos-delay="300">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+        <div class="divider-custom-line"></div>
+
+    </div>
+
+    <div class="page-wrapper bg-gra-03 " data-aos="fade-up" data-aos-delay="300">
+        {% if messages %}
+            {% for message in messages %}
+                <h4 style="font-size: 25px"
+                    class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5">
+                    <span class="font-weight-bold">{{ message }}</span></h4>
+            {% endfor %}
+        {% endif %}
+        <h4 style="font-size: 25px"
+            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if products %}Existing
+            products {% else %} No products created yet {% endif %}</h4>
+        {% if products %}
+            <div class="wrapper wrapper--w790">
+                <table id="article-table" class="table table-dark article-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <th scope="row">{{ product.id }}</th>
+                            <td>{% if product.category %}{{ product.category }} {% else %} - {% endif %}</td>
+                            <td>
+                                <a href="{% url 'owned:update_product' product.business.slug product.pk %}">{{ product.name }}</a>
+                            </td>
+                            <td>{{ product.price }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+        {% endif %}
+
+
+{% endblock content %}
+
+{% block preloader %}
+{% endblock %}
+
+
+{% block bottomscript %}
+    <!-- Jquery JS-->
+    <script src="{% static 'register/vendor/jquery/jquery.min.js' %}"></script>
+    <!-- Vendor JS-->
+    <script src="{% static 'register/vendor/select2/select2.min.js' %}"></script>
+    <script src="{% static 'register/vendor/datepicker/moment.min.js' %}"></script>
+    <script src="{% static 'register/vendor/datepicker/daterangepicker.js' %}"></script>
+
+    <script src="{% static 'register/js/global.js' %}"></script>
+
+{% endblock bottomscript %}

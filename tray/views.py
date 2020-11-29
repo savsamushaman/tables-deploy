@@ -58,8 +58,6 @@ class CancelOrder(View):
                 order.save()
             self.request.session['current_order'] = None
             return redirect('pages:place_detail', slug=business_slug)
-        else:
-            self.request.session['current_order'] = None
 
         self.request.session['tray'] = []
 
