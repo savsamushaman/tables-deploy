@@ -6,11 +6,11 @@ import requests
 from pathlib import Path
 
 BUSINESS_CATEGORY_CHOICES = (
-    ('bar', 'Bar'),
-    ('restaurant', 'Restaurant'),
-    ('cafe', 'Café'),
-    ('club', 'Club'),
-    ('other', 'Other')
+    ('Bar', 'Bar'),
+    ('Restaurant', 'Restaurant'),
+    ('Café', 'Cafe'),
+    ('Club', 'Club'),
+    ('Other', 'Other')
 
 )
 

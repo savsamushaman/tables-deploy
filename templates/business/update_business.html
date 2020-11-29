@@ -1,0 +1,257 @@
+{% extends 'page_parts/base.html' %}
+{% load static %}
+
+{% block title %} Tables - Manage {{ business.business_name }} {% endblock title %}
+
+{% block headspace %}
+    {{ block.super }}
+    <link href="{% static 'register/vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet"
+          media="all">
+    <!-- Icons font CSS-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+    <link href="" rel="stylesheet" media="all">
+    <link href="{% static 'register/vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS-->
+
+    <link href="{% static 'register/vendor/select2/select2.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'register/vendor/datepicker/daterangepicker.css' %}" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+    <link href="{% static 'business/update_page/business_items/css/styles.css' %}" rel="stylesheet"/>
+    <link href="{% static 'business/update_page/form_css/form_style.css' %}" rel="stylesheet" media="all">
+
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+          type="text/css"/>
+    <!-- Core theme CSS (includes Bootstrap)-->
+
+
+
+{% endblock headspace %}
+
+{% block navbar %}
+    {% include 'page_parts/navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+
+    <!-- Portfolio Section-->
+    <section class="page-section portfolio" id="portfolio">
+        <div class="container">
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Manage Stuff</h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+
+
+            <div class="row justify-content-center">
+                <!-- Table Tab -->
+                <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal4">
+                        <a href="{% url 'owned:tables_list' slug %}">
+                            <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+                                <div class="portfolio-item-caption-content text-center text-white"><i
+                                        class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                        </a>
+                        <img class="img-fluid"
+                             src="{% static 'img/table.png' %}"
+                             alt=""/>
+                    </div>
+                </div>
+                <!-- Menu Tab -->
+                <div class="col-md-6 col-lg-4 mb-5 mb-md-0">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal5">
+                        <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+                            <div class="portfolio-item-caption-content text-center text-white"><i
+                                    class="fas fa-plus fa-3x"></i></div>
+                        </div>
+                        <img class="img-fluid"
+                             src="{% static 'img/menu.png' %}"
+                             alt=""/>
+                    </div>
+                </div>
+                <!-- Food Tab -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal6">
+                        <a href="{% url 'owned:products_list' slug %}">
+                            <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+                                <div class="portfolio-item-caption-content text-center text-white"><i
+                                        class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                        </a>
+                        <img class="img-fluid"
+                             src="{% static 'img/food.png' %}"
+                             alt=""/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider-custom">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+        <div class="divider-custom-line"></div>
+    </div>
+    <div class="page-wrapper bg-gra-03 " data-aos="fade-up" data-aos-delay="300">
+        <div class="wrapper wrapper--w790">
+            <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
+                <div class="card-heading">
+                    <h2 class="title"><i class="fas fa-scroll"></i> Update Place Details <i
+                            class="fas fa-feather-alt"></i></h2>
+
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <h2 align="center">Open</h2>
+                        {{ form.is_open_now }}
+
+                        <div class="form-row">
+                            <div class="name">Name</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.business_name }}
+                                    {{ form.business_name.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">Category</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <div class="rs-select2 js-select-simple">
+                                        {{ form.category }}
+                                        {{ form.category.errors }}
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-row">
+                            <div class="name">Short description</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.short_description }}
+                                    {{ form.short_description.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">Email</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.email }}
+                                    {{ form.email.errors }}
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-row">
+                            <div class="name">Phone</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.phone_nr }}
+                                    {{ form.phone_nr.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-row">
+                            <div class="name">Country</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <div class="rs-select2 js-select-simple">
+                                        {{ form.country }}
+                                        {{ form.country.errors }}
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">Maps Address</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.maps_address }}
+                                    {{ form.maps_address.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">Display Address</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.displayed_address }}
+                                    {{ form.displayed_address.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">All tables</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.all_tables }}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="optional-div"><p id="optional-text">Date Created : {{ business.date_created }}</p>
+                        </div>
+                        <div class="button-div">
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Update
+                                Information
+                            </button>
+                            <a href="{% url 'owned:owned_list' %}">
+                                <button class="register-button btn btn--radius-2" type="submit">Cancel</button>
+                            </a>
+                        </div>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider-custom">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+        <div class="divider-custom-line"></div>
+    </div>
+
+
+{% endblock content %}
+
+
+{% block bottomscript %}
+    <!-- Jquery JS-->
+    <script src="{% static 'register/vendor/jquery/jquery.min.js' %}"></script>
+    <!-- Vendor JS-->
+    <script src="{% static 'register/vendor/select2/select2.min.js' %}"></script>
+    <script src="{% static 'register/vendor/datepicker/moment.min.js' %}"></script>
+    <script src="{% static 'register/vendor/datepicker/daterangepicker.js' %}"></script>
+
+    <script src="{% static 'register/js/global.js' %}"></script>
+
+{% endblock bottomscript %}

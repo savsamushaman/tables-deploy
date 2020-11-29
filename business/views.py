@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import CreateView, UpdateView, ListView
 
 from tray.models import OrderModel, OrderItem
-from .forms import CreateBusinessForm, CreateProductForm
+from .forms import CreateBusinessForm, CreateProductForm, UpdateBusinessForm
 from .models import BusinessModel, ProductModel, TableModel
 
 
@@ -16,7 +16,7 @@ from .models import BusinessModel, ProductModel, TableModel
 # List
 class BusinessListView(LoginRequiredMixin, ListView):
     context_object_name = 'owned'
-    template_name = 'business/your_places.html'
+    template_name = 'business/business_list.html'
     model = BusinessModel
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -40,12 +40,10 @@ class CreateBusinessView(LoginRequiredMixin, CreateView):
 # Edit
 class BusinessEditView(LoginRequiredMixin, UpdateView):
     model = BusinessModel
-    template_name = 'business/business/edit_business.html'
+    template_name = 'business/update_business.html'
     context_object_name = 'business'
-    fields = ['business_name', 'short_description', 'email', 'phone_nr', 'displayed_address', 'all_tables',
-              'available_tables',
-              'is_open_now']
     success_url = reverse_lazy('owned:owned_list')
+    form_class = UpdateBusinessForm
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
