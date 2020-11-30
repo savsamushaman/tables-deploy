@@ -10,8 +10,8 @@ from django.views import View
 from django.views.generic import CreateView, UpdateView, ListView
 
 from tray.models import OrderModel, OrderItem
-from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm
-from .models import BusinessModel, ProductModel, TableModel
+from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm, MenuPointForm
+from .models import BusinessModel, ProductModel, TableModel, ProductCategory
 
 
 # Business -----------------------------------------------------
@@ -309,6 +309,123 @@ class TableDeleteView(LoginRequiredMixin, View):
                                  message=f'Table {table.table_nr} was deleted successfully')
             table.delete()
             return redirect('owned:tables_list', slug=slug)
+        else:
+            return HttpResponseForbidden()
+
+
+# Menu point -----------------------------------------------------
+# Create
+
+class CreateMenuPoint(LoginRequiredMixin, CreateView):
+    model = ProductCategory
+    form_class = MenuPointForm
+    template_name = 'business/business/create_menupoint.html'
+
+    def get(self, request, *args, **kwargs):
+        slug = kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            return super(CreateMenuPoint, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def post(self, request, *args, **kwargs):
+        slug = kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            return super(CreateMenuPoint, self).post(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def form_valid(self, form):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        form.instance.business = business
+        form.instance.save()
+        messages.add_message(self.request, level=messages.INFO,
+                             message=f'Menu Point {form.instance.category_name} was created successfully')
+        return super(CreateMenuPoint, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateMenuPoint, self).get_context_data(**kwargs)
+        context['slug'] = self.kwargs['slug']
+        return context
+
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:create_menu_point', kwargs={'slug': slug})
+
+
+# List
+
+class MenuPointListView(LoginRequiredMixin, ListView):
+    model = ProductCategory
+    template_name = 'business/business/menupoint_list.html'
+    context_object_name = 'menupoints'
+
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            return super(MenuPointListView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def get_context_data(self, **kwargs):
+        context = super(MenuPointListView, self).get_context_data(**kwargs)
+        slug = self.kwargs['slug']
+        context['menupoints'] = ProductCategory.objects.filter(business__slug=slug).order_by('category_name')
+        context['slug'] = slug
+        return context
+
+
+# Edit
+
+class MenuPointEditView(LoginRequiredMixin, UpdateView):
+    model = ProductCategory
+    template_name = 'business/business/update_menupoint.html'
+    context_object_name = 'menupoint'
+    form_class = MenuPointForm
+
+    def get(self, request, *args, **kwargs):
+        slug = kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            return super(MenuPointEditView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def post(self, request, *args, **kwargs):
+        slug = kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            return super(MenuPointEditView, self).post(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def form_valid(self, form):
+        form.instance.save()
+        messages.add_message(self.request, level=messages.INFO,
+                             message=f'Menu Point {form.instance.category_name} was updated successfully')
+        return super(MenuPointEditView, self).form_valid(form)
+
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:menupoints_list', kwargs={'slug': slug})
+
+
+# Delete
+
+class MenuPointDelete(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager:
+            menupoint = ProductCategory.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            messages.add_message(request, level=messages.INFO,
+                                 message=f'Menupoint {menupoint.category_name} was deleted successfully')
+            menupoint.delete()
+            return redirect('owned:menupoints_list', slug=slug)
         else:
             return HttpResponseForbidden()
 

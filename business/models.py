@@ -85,7 +85,7 @@ class ProductCategory(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     category_name = models.CharField(max_length=25)
     slug = models.SlugField(blank=True, null=True)
-    icon = models.ImageField(default='beer.png', null=True, blank=True)
+    icon = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return str(self.category_name)

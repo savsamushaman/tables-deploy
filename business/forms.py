@@ -83,3 +83,13 @@ class UpdateTableForm(ModelForm):
 
     table_nr = forms.IntegerField(
         widget=forms.NumberInput(attrs={'class': 'input--style-5', 'placeholder': 'Table number'}))
+
+
+class MenuPointForm(ModelForm):
+    class Meta:
+        model = ProductCategory
+        fields = ['category_name']
+
+    category_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'input--style-5', 'placeholder': 'Menu Point name'}))
+

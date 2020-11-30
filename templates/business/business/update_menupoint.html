@@ -1,7 +1,7 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %}Your Products{% endblock title %}
+{% block title %}Update Menu Point - {{ menupoint.business.business_name }}{% endblock title %}
 
 {% block headspace %}
     {{ block.super }}
@@ -21,8 +21,8 @@
     <link href="{% static 'register/vendor/datepicker/daterangepicker.css' %}" rel="stylesheet" media="all">
 
     <!-- Main CSS-->
-    <link href="{% static 'business/articles/list/upper/styles.css' %}" rel="stylesheet"/>
-    <link href="{% static 'business/articles/list/table/style.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'business/update_page/business_items/css/styles.css' %}" rel="stylesheet"/>
+    <link href="{% static 'business/articles/update/style.css' %}" rel="stylesheet" media="all">
 
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
@@ -46,11 +46,12 @@
     <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
         <div class="container">
             <div class="cancel-button-div">
-                <a style="text-align: center" href="{% url 'owned:business_update' slug %}">
+                <a style="text-align: center" href="{% url 'owned:menupoints_list' menupoint.business.slug %}">
                     <button class="register-button btn btn--radius-2">Back</button>
                 </a>
             </div>
-            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Create a Product</h2>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Update Menu Point
+                Details</h2>
             <!-- Icon Divider-->
             <div class="divider-custom">
                 <div class="divider-custom-line"></div>
@@ -61,29 +62,19 @@
 
             <div class="row justify-content-center">
 
-                <!-- Food Tab -->
+                <!-- Menu Tab -->
                 <div class="col-md-6 col-lg-4">
-                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal6">
-                        <a href="{% url 'owned:create_product' slug %}">
-                            <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
-                                <div class="portfolio-item-caption-content text-center text-white"><i
-                                        class="fas fa-plus fa-3x"></i></div>
-                            </div>
-                        </a>
+                    <div class="portfolio-item mx-auto">
+                        <div class=" d-flex align-items-center justify-content-center h-100 w-100">
+                            <div class="text-center text-white"></div>
+                        </div>
                         <img class="img-fluid"
-                             src="{% static 'img/food.png' %}"
+                             src="{% static 'img/menu.png' %}"
                              alt=""/>
                     </div>
-                    {% if messages %}
-                        <div id='alert-div' class="alert alert-success" role="alert">
-                            {% for message in messages %}
-                                {{ message }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -91,46 +82,58 @@
         <div class="divider-custom-line"></div>
         <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
         <div class="divider-custom-line"></div>
+    </div>
+    <div class="page-wrapper bg-gra-03 " data-aos="fade-up" data-aos-delay="300">
+        <div class="wrapper wrapper--w790">
+            <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
+                <div class="card-heading">
+                    <h2 class="title"><i class="fas fa-scroll"></i> Menupoint details <i
+                            class="fas fa-feather-alt"></i></h2>
 
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form-row">
+                            <div class="name">Name</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.category_name }}
+                                    {{ form.category_name.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="button-div">
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Update Menu Point
+                            </button>
+                        </div>
+
+                    </form>
+                    <div class="cancel-button-div">
+                        <a style="text-align: center" href="{% url 'owned:menupoints_list' menupoint.business.slug %}">
+                            <button class="register-button btn btn--radius-2">Cancel</button>
+                        </a>
+                    </div>
+
+                    <div style="margin-top: 50px;" class="cancel-button-div">
+                        <a style="text-align: center"
+                           href="{% url 'owned:delete_menupoint' menupoint.business.slug menupoint.pk %}">
+                            <button class="register-button btn btn--radius-2">Delete Menu Point</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="page-wrapper bg-gra-03 " data-aos="fade-up" data-aos-delay="300">
-        <h4 style="font-size: 25px"
-            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if products %}Existing
-            products {% else %} No products created yet {% endif %}</h4>
-        {% if products %}
-            <div class="wrapper wrapper--w790">
-                <table id="article-table" class="table table-dark article-table">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Price</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for product in products %}
-                        <tr>
-                            <th scope="row">{{ product.id }}</th>
-                            <td>{% if product.category %}{{ product.category }} {% else %} - {% endif %}</td>
-                            <td>
-                                <a href="{% url 'owned:update_product' product.business.slug product.pk %}">{{ product.name }}</a>
-                            </td>
-                            <td>{{ product.price }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            </div>
-
-            <div class="divider-custom">
-                <div class="divider-custom-line"></div>
-                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-                <div class="divider-custom-line"></div>
-            </div>
-        {% endif %}
+    <div class="divider-custom">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+        <div class="divider-custom-line"></div>
+    </div>
 
 
 {% endblock content %}
