@@ -42,6 +42,13 @@
     <a href="{% url "owned:create_business" %}">
         <button class="create-business" type="button">Create a new business</button>
     </a>
+    {% if messages %}
+        <div id='alert-div' class="alert alert-success" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
     {% if owned %}
         {% for business in owned %}
             <li data-aos="fade-up" data-aos-delay="300">
@@ -50,7 +57,7 @@
                 <div>
                     <h2><a href="{% url 'owned:business_update' business.slug %}">{{ business.business_name }}</a></h2>
                     <a href="{% url 'owned:feed' business.slug %}">
-                        <button>Feed</button>
+                        <button id="feed-button">Feed</button>
                     </a>
                     <p>{% if business.is_open_now %}OPEN NOW {% else %}CLOSED{% endif %}</p>
                     <p>{{ business.email }}</p>

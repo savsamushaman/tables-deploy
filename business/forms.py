@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 
-from .models import BusinessModel, ProductModel, ProductCategory
+from .models import BusinessModel, ProductModel, ProductCategory, TableModel
 
 
 class CreateBusinessForm(ModelForm):
@@ -44,7 +44,7 @@ class UpdateBusinessForm(ModelForm):
     all_tables = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'input--style-5'}))
 
 
-class CreateProductForm(ModelForm):
+class ProductForm(ModelForm):
     class Meta:
         model = ProductModel
         fields = '__all__'
@@ -61,7 +61,25 @@ class CreateProductForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         slug = kwargs.pop('slug', None)
-        super(CreateProductForm, self).__init__(*args, **kwargs)
+        super(ProductForm, self).__init__(*args, **kwargs)
 
         if slug:
             self.fields['category'].queryset = ProductCategory.objects.filter(business__slug=slug)
+
+
+class TableForm(ModelForm):
+    class Meta:
+        model = TableModel
+        fields = ['table_nr']
+
+    table_nr = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'input--style-5', 'placeholder': 'Table number'}))
+
+
+class UpdateTableForm(ModelForm):
+    class Meta:
+        model = TableModel
+        fields = ['table_nr', 'qr_code']
+
+    table_nr = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'input--style-5', 'placeholder': 'Table number'}))

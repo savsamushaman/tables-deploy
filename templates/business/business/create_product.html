@@ -1,7 +1,7 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %}Create Table{% endblock title %}
+{% block title %}Create Product - {{ business.business_name }} {% endblock title %}
 
 {% block headspace %}
     {{ block.super }}
@@ -46,12 +46,12 @@
     <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
         <div class="container">
             <div class="cancel-button-div">
-                <a style="text-align: center" href="{% url 'owned:tables_list' slug %}">
+                <a style="text-align: center" href="{% url 'owned:products_list' slug %}">
                     <button class="register-button btn btn--radius-2">Back</button>
                 </a>
 
             </div>
-            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Create a Table</h2>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Create a Product</h2>
             <!-- Icon Divider-->
             <div class="divider-custom">
                 <div class="divider-custom-line"></div>
@@ -62,14 +62,14 @@
 
             <div class="row justify-content-center">
 
-                <!-- Table Tab -->
+                <!-- Food Tab -->
                 <div class="col-md-6 col-lg-4">
                     <div class="portfolio-item mx-auto">
                         <div class=" d-flex align-items-center justify-content-center h-100 w-100">
                             <div class="text-center text-white"></div>
                         </div>
                         <img class="img-fluid"
-                             src="{% static 'img/table.png' %}"
+                             src="{% static 'img/food.png' %}"
                              alt=""/>
                     </div>
                     {% if messages %}
@@ -93,7 +93,7 @@
         <div class="wrapper wrapper--w790">
             <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
                 <div class="card-heading">
-                    <h2 class="title"><i class="fas fa-scroll"></i> Table details <i
+                    <h2 class="title"><i class="fas fa-scroll"></i> Product details <i
                             class="fas fa-feather-alt"></i></h2>
 
                 </div>
@@ -102,17 +102,54 @@
                         {% csrf_token %}
 
                         <div class="form-row">
-                            <div class="name">Number</div>
+                            <div class="name">Name</div>
                             <div class="value">
                                 <div class="input-group">
-                                    {{ form.table_nr }}
-                                    {{ form.table_nr.errors }}
+                                    {{ form.name }}
+                                    {{ form.name.errors }}
                                 </div>
                             </div>
                         </div>
 
+
+                        <div class="form-row">
+                            <div class="name">Category</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <div class="rs-select2 js-select-simple">
+                                        {{ form.category }}
+                                        {{ form.category.errors }}
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-row">
+                            <div class="name">Short description</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.description }}
+                                    {{ form.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="name">Price</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    {{ form.price }}
+                                    {{ form.price.errors }}
+                                </div>
+                            </div>
+
+                        </div>
+
+
                         <div class="button-div">
-                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Create Table
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Create Product
                             </button>
                         </div>
 

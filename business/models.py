@@ -55,8 +55,12 @@ class TableModel(models.Model):
     table_nr = models.IntegerField()
     qr_code = models.ImageField(blank=True, null=True)
 
+    def __init__(self, *args, **kwargs):
+        super(TableModel, self).__init__(*args, **kwargs)
+        self.old_table_nr = self.table_nr
+
     def save(self, *args, **kwargs):
-        if not self.qr_code:
+        if not self.qr_code or self.old_table_nr != self.table_nr:
             url = f'https://api.qrserver.com/v1/create-qr-code/?data=http://127.0.0.1:8000/tray/generate_order/{self.business.slug}/{self.table_nr}&size=300x300&format=png'
             req = requests.get(url)
             path = f'..\\media\\qr\\{self.business.business_name}'
@@ -100,7 +104,7 @@ class ProductModel(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(price__gt=Decimal('0')), name='price_gt_0'),
+            models.CheckConstraint(check=models.Q(price__gte=Decimal('0')), name='price_gt_0'),
         ]
 
     def __str__(self):

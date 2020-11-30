@@ -1,7 +1,7 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %} Tables - Create Product {{ business.business_name }} {% endblock title %}
+{% block title %}Update Table {{ table.table_nr }}{% endblock title %}
 
 {% block headspace %}
     {{ block.super }}
@@ -22,7 +22,7 @@
 
     <!-- Main CSS-->
     <link href="{% static 'business/update_page/business_items/css/styles.css' %}" rel="stylesheet"/>
-    <link href="{% static 'business/articles/create/style.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'business/articles/update/style.css' %}" rel="stylesheet" media="all">
 
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
@@ -46,12 +46,11 @@
     <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
         <div class="container">
             <div class="cancel-button-div">
-                <a style="text-align: center" href="{% url 'owned:products_list' slug %}">
+                <a style="text-align: center" href="{% url 'owned:tables_list' table.business.slug %}">
                     <button class="register-button btn btn--radius-2">Back</button>
                 </a>
-
             </div>
-            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Create a Product</h2>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Update Table Details</h2>
             <!-- Icon Divider-->
             <div class="divider-custom">
                 <div class="divider-custom-line"></div>
@@ -69,16 +68,10 @@
                             <div class="text-center text-white"></div>
                         </div>
                         <img class="img-fluid"
-                             src="{% static 'img/food.png' %}"
+                             src="{% static 'img/table.png' %}"
                              alt=""/>
                     </div>
-                    {% if messages %}
-                        {% for message in messages %}
-                            <h4 style="font-size: 25px"
-                                class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5">
-                                <span class="font-weight-bold">{{ message }}</span></h4>
-                        {% endfor %}
-                    {% endif %}
+
                 </div>
             </div>
         </div>
@@ -93,7 +86,7 @@
         <div class="wrapper wrapper--w790">
             <div class="card card-5" data-aos-delay="300" data-aos="fade-up">
                 <div class="card-heading">
-                    <h2 class="title"><i class="fas fa-scroll"></i> Product details <i
+                    <h2 class="title"><i class="fas fa-scroll"></i> Table details <i
                             class="fas fa-feather-alt"></i></h2>
 
                 </div>
@@ -102,58 +95,53 @@
                         {% csrf_token %}
 
                         <div class="form-row">
-                            <div class="name">Name</div>
+                            <div class="name">Table Number</div>
                             <div class="value">
                                 <div class="input-group">
-                                    {{ form.name }}
-                                    {{ form.name.errors }}
+                                    {{ form.table_nr }}
+                                    {{ form.table_nr.errors }}
                                 </div>
                             </div>
                         </div>
 
 
                         <div class="form-row">
-                            <div class="name">Category</div>
+                            <div style="text-align: center" class="name">QR Code</div>
                             <div class="value">
                                 <div class="input-group">
-                                    <div class="rs-select2 js-select-simple">
-                                        {{ form.category }}
-                                        {{ form.category.errors }}
-                                        <div class="select-dropdown"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="form-row">
-                            <div class="name">Short description</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    {{ form.description }}
-                                    {{ form.errors }}
+                                    <a style="text-align: center" download href="{{ table.qr_code.url }}">Click to
+                                        download
+                                        the QR code</a>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-row">
-                            <div class="name">Price</div>
-                            <div class="value">
-                                <div class="input-group">
-                                    {{ form.price }}
-                                    {{ form.price.errors }}
-                                </div>
+                            <div class="input-group">
+                                <img id='qr-code' alt="qr-code"
+                                     src="{{ table.qr_code.url }}">
                             </div>
-
                         </div>
 
 
                         <div class="button-div">
-                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Create Product
+                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Update Table
                             </button>
                         </div>
 
                     </form>
+                    <div class="cancel-button-div">
+                        <a style="text-align: center" href="{% url 'owned:tables_list' table.business.slug %}">
+                            <button class="register-button btn btn--radius-2">Cancel</button>
+                        </a>
+                    </div>
+
+                    <div style="margin-top: 50px;" class="cancel-button-div">
+                        <a style="text-align: center"
+                           href="{% url 'owned:delete_table' table.business.slug table.pk %}">
+                            <button class="register-button btn btn--radius-2">Delete table</button>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

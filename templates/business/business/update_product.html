@@ -1,7 +1,7 @@
 {% extends 'page_parts/base.html' %}
 {% load static %}
 
-{% block title %} Tables - Update Product{{ business.business_name }} {% endblock title %}
+{% block title %}Update Product - {{ business.business_name }}{% endblock title %}
 
 {% block headspace %}
     {{ block.super }}
@@ -71,13 +71,7 @@
                              src="{% static 'img/food.png' %}"
                              alt=""/>
                     </div>
-                    {% if messages %}
-                        {% for message in messages %}
-                            <h4 style="font-size: 25px"
-                                class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5">
-                                <span class="font-weight-bold">{{ message }}</span></h4>
-                        {% endfor %}
-                    {% endif %}
+
                 </div>
             </div>
         </div>

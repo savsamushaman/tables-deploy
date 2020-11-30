@@ -2,14 +2,15 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, \
+    HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, UpdateView, ListView
 
 from tray.models import OrderModel, OrderItem
-from .forms import CreateBusinessForm, CreateProductForm, UpdateBusinessForm
+from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm
 from .models import BusinessModel, ProductModel, TableModel
 
 
@@ -35,6 +36,7 @@ class CreateBusinessView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.manager = self.request.user
+        messages.add_message(self.request, messages.INFO, f'{form.instance.business_name} was created successfully')
         return super().form_valid(form)
 
 
@@ -52,7 +54,7 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
         if request.user == business.manager:
             return super(BusinessEditView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def post(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
@@ -60,7 +62,7 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
         if request.user == business.manager:
             return super(BusinessEditView, self).post(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         context = super(BusinessEditView, self).get_context_data(**kwargs)
@@ -69,14 +71,15 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.save()
-        return HttpResponseRedirect('/owned/')
+        messages.add_message(self.request, messages.INFO, f'{form.instance.business_name} was updated successfully')
+        return super(BusinessEditView, self).form_valid(form)
 
 
 # Product -----------------------------------------------------
 # List
 class ProductListView(LoginRequiredMixin, ListView):
     model = ProductModel
-    template_name = 'business/product_list.html'
+    template_name = 'business/business/product_list.html'
     context_object_name = 'products'
 
     def get(self, request, *args, **kwargs):
@@ -85,7 +88,7 @@ class ProductListView(LoginRequiredMixin, ListView):
         if request.user == business.manager:
             return super(ProductListView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         context = super(ProductListView, self).get_context_data(**kwargs)
@@ -98,8 +101,8 @@ class ProductListView(LoginRequiredMixin, ListView):
 # Create
 class CreateProductView(LoginRequiredMixin, CreateView):
     model = ProductModel
-    template_name = 'business/create_product.html'
-    form_class = CreateProductForm
+    template_name = 'business/business/create_product.html'
+    form_class = ProductForm
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -107,7 +110,7 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         if request.user == business.manager:
             return super(CreateProductView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -115,14 +118,15 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         if request.user == business.manager:
             return super(CreateProductView, self).post(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def form_valid(self, form):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
         form.instance.save()
-        messages.add_message(self.request, level=messages.INFO, message=f'Product {form.instance.name} was created')
+        messages.add_message(self.request, level=messages.INFO,
+                             message=f'Product {form.instance.name} was created successfully')
         return super(CreateProductView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -143,9 +147,9 @@ class CreateProductView(LoginRequiredMixin, CreateView):
 # Edit
 class ProductEditView(LoginRequiredMixin, UpdateView):
     model = ProductModel
-    template_name = 'business/update_product.html'
+    template_name = 'business/business/update_product.html'
     context_object_name = 'product'
-    form_class = CreateProductForm
+    form_class = ProductForm
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -153,7 +157,7 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
         if request.user == business.manager:
             return super(ProductEditView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -161,11 +165,12 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
         if request.user == business.manager:
             return super(ProductEditView, self).post(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def form_valid(self, form):
         form.instance.save()
-        messages.add_message(self.request, level=messages.INFO, message=f'Product {form.instance.name} was updated')
+        messages.add_message(self.request, level=messages.INFO,
+                             message=f'Product {form.instance.name} was updated successfully')
         return super(ProductEditView, self).form_valid(form)
 
     def get_form_kwargs(self):
@@ -185,18 +190,19 @@ class ProductDeleteView(LoginRequiredMixin, View):
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager:
             product = ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
-            messages.add_message(request, level=messages.INFO, message=f'Product {product.name} was deleted')
+            messages.add_message(request, level=messages.INFO,
+                                 message=f'Product {product.name} was deleted successfully')
             product.delete()
             return redirect('owned:products_list', slug=slug)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
 
 # Table -----------------------------------------------------
 # List
 class TableListView(LoginRequiredMixin, ListView):
     model = TableModel
-    template_name = 'business/business/tables_list.html'
+    template_name = 'business/business/table_list.html'
     context_object_name = 'tables'
 
     def get(self, request, *args, **kwargs):
@@ -205,11 +211,11 @@ class TableListView(LoginRequiredMixin, ListView):
         if request.user == business.manager:
             return super(TableListView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         context = super(TableListView, self).get_context_data(**kwargs)
-        context['tables'] = TableModel.objects.filter(business__slug=self.kwargs['slug'])
+        context['tables'] = TableModel.objects.filter(business__slug=self.kwargs['slug']).order_by('table_nr')
         context['slug'] = self.kwargs['slug']
         return context
 
@@ -218,8 +224,7 @@ class TableListView(LoginRequiredMixin, ListView):
 class CreateTableView(LoginRequiredMixin, CreateView):
     model = TableModel
     template_name = 'business/business/create_table.html'
-    fields = ['table_nr']
-    success_url = reverse_lazy('user_details')
+    form_class = TableForm
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -227,7 +232,7 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         if request.user == business.manager:
             return super(CreateTableView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -235,28 +240,31 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         if request.user == business.manager:
             return super(CreateTableView, self).post(request, *args, **kwargs)
         else:
-            raise Http404
-
-    def form_valid(self, form):
-        slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        form.instance.business = business
-        form.instance.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         context = super(CreateTableView, self).get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
         return context
 
+    def form_valid(self, form):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        form.instance.business = business
+        form.instance.save()
+        messages.add_message(self.request, messages.INFO, f'Table {form.instance.table_nr} was created successfully')
+        return super(CreateTableView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('owned:tables_list', kwargs={'slug': self.kwargs['slug']})
+
 
 # Update
 class TableEditView(LoginRequiredMixin, UpdateView):
     model = TableModel
-    template_name = 'business/business/edit_table.html'
+    template_name = 'business/business/update_table.html'
     context_object_name = 'table'
-    fields = ['table_nr', 'qr_code']
-    success_url = reverse_lazy('user_details')
+    form_class = UpdateTableForm
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -264,7 +272,7 @@ class TableEditView(LoginRequiredMixin, UpdateView):
         if request.user == business.manager:
             return super(TableEditView, self).get(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
@@ -272,17 +280,22 @@ class TableEditView(LoginRequiredMixin, UpdateView):
         if request.user == business.manager:
             return super(TableEditView, self).post(request, *args, **kwargs)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
     def form_valid(self, form):
         form.instance.save()
-        return redirect('owned:tables_list', slug=self.kwargs['slug'])
+        messages.add_message(self.request, messages.INFO, f'Table {form.instance.table_nr} was updated successfully')
+        return super(TableEditView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super(TableEditView, self).get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
         context['table'] = TableModel.objects.get(pk=self.kwargs['pk'], business__slug=self.kwargs['slug'])
         return context
+
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:tables_list', kwargs={'slug': slug})
 
 
 # Delete
@@ -291,10 +304,13 @@ class TableDeleteView(LoginRequiredMixin, View):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager:
-            TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk']).delete()
+            table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            messages.add_message(request, level=messages.INFO,
+                                 message=f'Table {table.table_nr} was deleted successfully')
+            table.delete()
             return redirect('owned:tables_list', slug=slug)
         else:
-            raise Http404
+            return HttpResponseForbidden()
 
 
 # Feed -----------------------------------------------------
