@@ -53,6 +53,7 @@
                                     <div class="col-9">
                                         <div class="input-group-desc">
                                             {{ form.phone_number }}
+                                            {{ form.phone_number.errors }}
                                         </div>
                                     </div>
                                 </div>
@@ -64,20 +65,21 @@
                                 <div class="input-group">
                                     <div class="rs-select2 js-select-simple ">
                                         {{ form.country }}
+                                        {{ form.country.errors }}
                                         <div class="select-dropdown"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-
                         <div class="button-div">
                             <button class="register-button btn btn--radius-2 btn--red" type="submit">Update</button>
-                            <a href="{% url 'accounts:user_details' %}">
-                                <button class="register-button btn btn--radius-2" type="submit">Cancel</button>
-                            </a>
                         </div>
                     </form>
+                    <div class="cancel-button-div">
+                        <a href="{% url 'accounts:user_details' %}">
+                            <button class="register-button btn btn--radius-2" type="submit">Back</button>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

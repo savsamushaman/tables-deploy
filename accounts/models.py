@@ -1,6 +1,12 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.utils.text import slugify
+
+
+class CustomUserManager(UserManager):
+    def get_by_natural_key(self, username):
+        case_insensitive_username_field = '{}__iexact'.format(self.model.USERNAME_FIELD)
+        return self.get(**{case_insensitive_username_field: username})
 
 
 class CountryModel(models.Model):
@@ -12,14 +18,16 @@ class CountryModel(models.Model):
 
 
 class CustomUser(AbstractUser):
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    objects = CustomUserManager()
+
+    phone_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
     slug = models.SlugField(blank=True, null=True)
     email = models.EmailField(unique=True, blank=False, null=True)
-    country = models.ForeignKey(CountryModel, on_delete=models.DO_NOTHING, null=True, blank=True)
-    device = models.CharField(max_length=16, blank=True, null=True)
+    country = models.ForeignKey(CountryModel, on_delete=models.SET_NULL, null=True, blank=True)
+    device = models.CharField(max_length=16, blank=True, null=True, unique=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.username)
         if not self.username:
-            self.username = 'Anonymous-' + self.device
+            self.username = 'Anonymous-' + str(self.pk)
         super(CustomUser, self).save(*args, **kwargs)

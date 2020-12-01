@@ -74,6 +74,10 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
         messages.add_message(self.request, messages.INFO, f'{form.instance.business_name} was updated successfully')
         return super(BusinessEditView, self).form_valid(form)
 
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.ERROR, f'{form.instance.business_name} update failed')
+        return super(BusinessEditView, self).form_invalid(form)
+
 
 # Product -----------------------------------------------------
 # List
@@ -93,7 +97,7 @@ class ProductListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(ProductListView, self).get_context_data(**kwargs)
         slug = self.kwargs['slug']
-        context['products'] = ProductModel.objects.filter(business__slug=slug).order_by('category')
+        context['products'] = ProductModel.objects.filter(business__slug=slug, deleted=False).order_by('category')
         context['slug'] = slug
         return context
 
@@ -190,9 +194,10 @@ class ProductDeleteView(LoginRequiredMixin, View):
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager:
             product = ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            product.deleted = True
+            product.save()
             messages.add_message(request, level=messages.INFO,
                                  message=f'Product {product.name} was deleted successfully')
-            product.delete()
             return redirect('owned:products_list', slug=slug)
         else:
             return HttpResponseForbidden()
@@ -215,7 +220,8 @@ class TableListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(TableListView, self).get_context_data(**kwargs)
-        context['tables'] = TableModel.objects.filter(business__slug=self.kwargs['slug']).order_by('table_nr')
+        context['tables'] = TableModel.objects.filter(business__slug=self.kwargs['slug'], deleted=False).order_by(
+            'table_nr')
         context['slug'] = self.kwargs['slug']
         return context
 
@@ -305,9 +311,10 @@ class TableDeleteView(LoginRequiredMixin, View):
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager:
             table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            table.deleted = True
+            table.save()
             messages.add_message(request, level=messages.INFO,
                                  message=f'Table {table.table_nr} was deleted successfully')
-            table.delete()
             return redirect('owned:tables_list', slug=slug)
         else:
             return HttpResponseForbidden()
@@ -374,7 +381,8 @@ class MenuPointListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(MenuPointListView, self).get_context_data(**kwargs)
         slug = self.kwargs['slug']
-        context['menupoints'] = ProductCategory.objects.filter(business__slug=slug).order_by('category_name')
+        context['menupoints'] = ProductCategory.objects.filter(business__slug=slug, deleted=False).order_by(
+            'category_name')
         context['slug'] = slug
         return context
 
@@ -422,9 +430,21 @@ class MenuPointDelete(LoginRequiredMixin, View):
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager:
             menupoint = ProductCategory.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+
+            try:
+                products = ProductModel.objects.filter(category=menupoint)
+            except:
+                products = None
+
+            if products:
+                for product in products:
+                    product.category = None
+
+            menupoint.deleted = True
+            menupoint.save()
+
             messages.add_message(request, level=messages.INFO,
                                  message=f'Menupoint {menupoint.category_name} was deleted successfully')
-            menupoint.delete()
             return redirect('owned:menupoints_list', slug=slug)
         else:
             return HttpResponseForbidden()

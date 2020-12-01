@@ -41,6 +41,22 @@ class RegisterUserForm(UserCreationForm):
                                                                   'class': 'input--style-5',
                                                                   }))
 
+    def clean_phone(self):
+        return self.cleaned_data['phone'] or None
+
+    def clean_device(self):
+        return self.cleaned_data['device'] or None
+
+    def clean_email(self):
+        return self.cleaned_data['email'] or None
+
+    def clean(self):
+        cleaned_data = super(RegisterUserForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and CustomUser.objects.filter(username__iexact=username).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data
+
 
 class RegisterUserFormAdmin(UserCreationForm):
     class Meta:

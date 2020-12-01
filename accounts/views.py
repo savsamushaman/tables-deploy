@@ -1,4 +1,5 @@
 from django.contrib.auth import views as auth_views
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
 from django.http import HttpResponseForbidden
@@ -44,9 +45,10 @@ class UserDetailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         template_name = 'accounts/user_details.html'
         user_details = CustomUser.objects.get(pk=request.user.pk)
-        paid_orders = OrderModel.objects.filter(customer=self.request.user, status__in='PC')
+        finished_orders = OrderModel.objects.filter(customer=self.request.user, status__in='PC').order_by(
+            '-date_ordered')
         order_history = []
-        for order in paid_orders:
+        for order in finished_orders:
             order_items = OrderItem.objects.filter(order=order)
             order_history.append({
                 'customer': f'{order.customer}',
@@ -75,6 +77,17 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
             return super(UpdateUserView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user == CustomUser.objects.get(slug=self.kwargs['slug']):
+            return super(UpdateUserView, self).post(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.INFO, 'User was successfully updated')
+        form.save()
+        return super(UpdateUserView, self).form_valid(form)
 
 
 class CustomPasswordResetView(auth_views.PasswordResetView):

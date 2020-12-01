@@ -48,9 +48,9 @@ class PlaceDetailView(DetailView):
             on_the_tray = []
 
         context['on_the_tray'] = on_the_tray
-        context['tables'] = TableModel.objects.filter(business=kwargs['object'])
-        context['categories'] = ProductCategory.objects.filter(business=kwargs['object'])
-        context['products'] = ProductModel.objects.filter(business=kwargs['object'])
+        context['tables'] = TableModel.objects.filter(business=kwargs['object'], deleted=False)
+        context['categories'] = ProductCategory.objects.filter(business=kwargs['object'], deleted=False)
+        context['products'] = ProductModel.objects.filter(business=kwargs['object'], deleted=False)
         context['current_order'] = self.request.session.get('current_order', '')
 
         return context
@@ -62,9 +62,12 @@ def filter_places(request):
 
     data = json.loads(request.body)
     search_value = data['search_value']
-    results = BusinessModel.objects.filter(business_name__contains=search_value).values('business_name') | \
-              BusinessModel.objects.filter(displayed_address__contains=search_value).values('business_name') | \
-              BusinessModel.objects.filter(category__category_name__contains=search_value).values('business_name')
+    results = BusinessModel.objects.filter(business_name__contains=search_value, is_active=True).values(
+        'business_name') | \
+              BusinessModel.objects.filter(displayed_address__contains=search_value, is_active=True).values(
+                  'business_name') | \
+              BusinessModel.objects.filter(category__category_name__contains=search_value, is_active=True).values(
+                  'business_name')
 
     results = [result['business_name'] for result in results]
     payload = {'results': results}

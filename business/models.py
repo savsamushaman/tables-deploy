@@ -27,7 +27,7 @@ class BusinessCategory(models.Model):
 class BusinessModel(models.Model):
     manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     business_name = models.CharField(max_length=200, blank=False, unique=True)
-    category = models.ForeignKey(BusinessCategory, on_delete=models.DO_NOTHING)
+    category = models.ForeignKey(BusinessCategory, on_delete=models.DO_NOTHING, null=True)
     short_description = models.TextField()
     email = models.EmailField(unique=True)
     phone_nr = models.CharField(max_length=30, unique=True)
@@ -35,11 +35,11 @@ class BusinessModel(models.Model):
     maps_address = models.CharField(max_length=100)
     displayed_address = models.CharField(max_length=100)
     slug = models.SlugField(blank=True, unique=True, max_length=120)
-    is_active = models.BooleanField(default=False)
     date_created = models.DateTimeField(default=timezone.now)
     all_tables = models.IntegerField(default=0)
     available_tables = models.IntegerField(blank=True, null=True, default=0)
     is_open_now = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.business_name)
@@ -54,6 +54,7 @@ class TableModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     table_nr = models.IntegerField()
     qr_code = models.ImageField(blank=True, null=True)
+    deleted = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
         super(TableModel, self).__init__(*args, **kwargs)
@@ -80,12 +81,16 @@ class TableModel(models.Model):
     def str_table_nr(self):
         return str(self.table_nr)
 
+    class Meta:
+        unique_together = ('business', 'table_nr')
+
 
 class ProductCategory(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     category_name = models.CharField(max_length=25)
     slug = models.SlugField(blank=True, null=True)
     icon = models.ImageField(null=True, blank=True)
+    deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.category_name)
@@ -101,6 +106,7 @@ class ProductModel(models.Model):
     description = models.TextField(max_length=500, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, blank=True, null=True)
+    deleted = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

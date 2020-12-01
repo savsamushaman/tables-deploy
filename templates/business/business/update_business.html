@@ -97,6 +97,13 @@
                              alt=""/>
                     </div>
                 </div>
+                {% if messages %}
+                        <div id='alert-div' class="alert alert-danger" role="alert">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
             </div>
         </div>
     </section>

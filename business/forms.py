@@ -35,8 +35,9 @@ class UpdateBusinessForm(ModelForm):
         exclude = ['manager', 'slug', 'date_created', 'available_tables', 'is_active']
 
     business_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input--style-5', }))
-    short_description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 7, 'col': 10, 'class': 'input--style-5', }))
+    short_description = forms.CharField(required=False,
+                                        widget=forms.Textarea(
+                                            attrs={'rows': 7, 'col': 10, 'class': 'input--style-5', }))
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'input--style-5'}))
     phone_nr = forms.CharField(widget=forms.TextInput(attrs={'class': 'input--style-5', }))
     maps_address = forms.CharField(widget=forms.TextInput(attrs={'class': 'input--style-5', }))
@@ -92,4 +93,3 @@ class MenuPointForm(ModelForm):
 
     category_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'input--style-5', 'placeholder': 'Menu Point name'}))
-
