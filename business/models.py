@@ -55,6 +55,7 @@ class TableModel(models.Model):
     table_nr = models.IntegerField()
     qr_code = models.ImageField(blank=True, null=True)
     deleted = models.BooleanField(default=False)
+    locked = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
         super(TableModel, self).__init__(*args, **kwargs)

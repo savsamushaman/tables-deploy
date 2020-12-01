@@ -1,5 +1,6 @@
 import json
 
+from django.contrib import messages
 from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, HttpResponse, \
     HttpResponseForbidden
 from django.shortcuts import redirect
@@ -31,6 +32,11 @@ class GenerateOrder(View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs['place']
         table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
+        if table.locked:
+            messages.add_message(self.request, messages.INFO, f'Table {table.table_nr} is locked')
+            return redirect('pages:place_detail', slug=slug)
+        table.locked = True
+        table.save()
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['current_order'] = order
         self.request.session['tray'] = []
@@ -46,6 +52,7 @@ class CancelOrder(View):
 
         try:
             business_slug = self.request.session['current_order']['business']
+            table_nr = self.request.session['current_order']['table']
         except TypeError:
             return HttpResponseBadRequest()
 
@@ -53,10 +60,16 @@ class CancelOrder(View):
             business = BusinessModel.objects.get(slug=business_slug)
             active_orders = OrderModel.objects.filter(customer=customer, business=business,
                                                       status='PL')
+
             for order in active_orders:
                 order.status = 'C'
                 order.save()
             self.request.session['current_order'] = None
+
+            table = TableModel.objects.get(table_nr=table_nr)
+            table.locked = False
+            table.save()
+
             return redirect('pages:place_detail', slug=business_slug)
 
         self.request.session['tray'] = []

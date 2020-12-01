@@ -1,4 +1,5 @@
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.signals import user_logged_out
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
@@ -8,6 +9,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, UpdateView, TemplateView
 
+from business.models import TableModel
 from tray.models import OrderModel, OrderItem
 from .forms import RegisterUserForm, LoginForm, UpdateUserForm, ChangePasswordForm
 from .models import CustomUser
@@ -117,3 +119,17 @@ class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
 
 class ChangePasswordDoneView(TemplateView):
     template_name = 'accounts/change_password_done.html'
+
+
+# ---- signals
+
+def unlock_table(sender, user, request, **kwargs):
+    session = request.session.get('current_order', None)
+    if session:
+        table_nr = session['table']
+        table = TableModel.objects.get(table_nr=table_nr)
+        table.locked = False
+        table.save()
+
+
+user_logged_out.connect(unlock_table)

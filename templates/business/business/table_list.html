@@ -104,6 +104,7 @@
                     <thead>
                     <tr>
                         <th scope="col">Table Number</th>
+                        <th scope="col">Table Status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -112,6 +113,7 @@
                             <td>
                                 <a href="{% url 'owned:update_table' table.business.slug table.pk %}">{{ table.table_nr }}</a>
                             </td>
+                            <td>{% if table.locked %} Locked {% else %} Free {% endif %}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
