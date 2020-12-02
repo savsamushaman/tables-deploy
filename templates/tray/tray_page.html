@@ -37,7 +37,7 @@
 
 <!-- NAVBAR -->
 <div>
-{% include 'page_parts/navbar.html' %}
+    {% include 'page_parts/navbar.html' %}
 </div>
 
 <body class="skin-light">
@@ -46,17 +46,16 @@
     <div class="jumbotron color-grey-light mt-70">
         <div class="d-flex align-items-center h-100" style="background-color: #FFE4B5">
             <div class="container text-center py-5" style="margin-top: 100px;margin-bottom:150px;height: 50px">
+                {% if messages %}
+                    <div id='alert-div' class="alert alert-success" role="alert">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 {% if order %}
-                    {% if messages %}
-                            <div id='alert-div' class="alert alert-success" role="alert">
-                                {% for message in messages %}
-                                    {{ message }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-
                     <div style="margin-bottom: 50px" class="d-flex justify-content-center">
-
 
 
                         <a href="{% url 'pages:place_detail' order.business.slug %}">

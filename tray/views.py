@@ -30,12 +30,20 @@ def check_user(request):
 class GenerateOrder(View):
 
     def get(self, request, *args, **kwargs):
+
+        customer = check_user(request)
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
         slug = self.kwargs['place']
         table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
+
         if table.locked:
             messages.add_message(self.request, messages.INFO, f'Table {table.table_nr} is locked')
             return redirect('pages:place_detail', slug=slug)
-        table.locked = True
+
+        table.current_guests.add(customer)
+        if len(table.current_guests.all()) == 1:
+            table.locked = True
         table.save()
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['current_order'] = order
@@ -67,7 +75,9 @@ class CancelOrder(View):
             self.request.session['current_order'] = None
 
             table = TableModel.objects.get(table_nr=table_nr)
-            table.locked = False
+            table.current_guests.remove(customer)
+            if len(table.current_guests.all()) == 0:
+                table.locked = False
             table.save()
 
             return redirect('tray:my_tray')
@@ -283,13 +293,16 @@ class CancelActiveOrder(View):
 class UpdateTable(View):
     def get(self, request, *args, **kwargs):
         table_nr = self.kwargs['table_nr']
-        # unlock is a number, 0 is lock because it evaluates to false
+        # unlock is a number, lock is 0 because it evaluates to false
         unlock = self.kwargs['unlock']
         business_slug = self.kwargs['slug']
 
         table = TableModel.objects.get(business__slug=business_slug, table_nr=table_nr)
 
-        if table.locked and unlock:
+        if request.user not in table.current_guests.all():
+            messages.add_message(request, messages.INFO, 'Denied')
+            return redirect('tray:my_tray')
+        elif table.locked and unlock:
             table.locked = False
             table.save()
             messages.add_message(request, messages.INFO, 'You UNLOCKED the table')

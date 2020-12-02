@@ -128,7 +128,9 @@ def unlock_table(sender, user, request, **kwargs):
     if session:
         table_nr = session['table']
         table = TableModel.objects.get(table_nr=table_nr)
-        table.locked = False
+        table.current_guests.remove(request.user)
+        if len(table.current_guests.all()) == 0:
+            table.locked = False
         table.save()
 
 

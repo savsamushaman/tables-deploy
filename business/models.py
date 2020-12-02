@@ -56,6 +56,7 @@ class TableModel(models.Model):
     qr_code = models.ImageField(blank=True, null=True)
     deleted = models.BooleanField(default=False)
     locked = models.BooleanField(default=False)
+    current_guests = models.ManyToManyField(CustomUser, blank=True)
 
     def __init__(self, *args, **kwargs):
         super(TableModel, self).__init__(*args, **kwargs)
