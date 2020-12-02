@@ -36,6 +36,8 @@ class BusinessModel(models.Model):
     displayed_address = models.CharField(max_length=100)
     slug = models.SlugField(blank=True, unique=True, max_length=120)
     date_created = models.DateTimeField(default=timezone.now)
+    max_capacity = models.IntegerField(default=0)
+    current_guests = models.IntegerField(default=0)
     all_tables = models.IntegerField(default=0)
     available_tables = models.IntegerField(blank=True, null=True, default=0)
     is_open_now = models.BooleanField(default=False)
@@ -47,6 +49,14 @@ class BusinessModel(models.Model):
 
     def __str__(self):
         return str(self.business_name)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(all_tables__gte=Decimal('0')), name='all_tables_gt_0'),
+            models.CheckConstraint(check=models.Q(available_tables__gte=Decimal('0')), name='available_tables_gt_0'),
+            models.CheckConstraint(check=models.Q(max_capacity__gte=Decimal('0')), name='max_capacity_gt_0'),
+            models.CheckConstraint(check=models.Q(current_guests__gte=Decimal('0')), name='current_guests_gt_0'),
+        ]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ must change URL ON RELEASE
@@ -74,6 +84,10 @@ class TableModel(models.Model):
             image.close()
 
             self.qr_code = f'{path}\\{self.business.slug}_{self.table_nr}.png'
+
+        if len(self.current_guests.all()) == 0:
+            self.business.available_tables += 1
+            self.business.save()
 
         super(TableModel, self).save(*args, **kwargs)
 

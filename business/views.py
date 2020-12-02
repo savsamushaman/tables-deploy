@@ -483,6 +483,7 @@ class ProcessOrder(View):
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
+# needs redesigning - add many to many to order instead of order item
 class ReturnOrders(View):
     def get(self, request, *args, **kwargs):
         return HttpResponseNotAllowed('POST')
@@ -502,5 +503,7 @@ class ReturnOrders(View):
                     order['items'] = items[f'{order["orderid"]}']
 
                 return JsonResponse({'results': response})
+            else:
+                return HttpResponseForbidden()
         else:
             return HttpResponseBadRequest()
