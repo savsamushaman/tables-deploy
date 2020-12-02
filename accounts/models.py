@@ -29,5 +29,5 @@ class CustomUser(AbstractUser):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.username)
         if not self.username:
-            self.username = 'Anonymous-' + str(self.pk)
+            self.username = 'Anonymous-' + str(self.device)
         super(CustomUser, self).save(*args, **kwargs)

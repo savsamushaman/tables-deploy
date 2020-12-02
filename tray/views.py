@@ -70,7 +70,7 @@ class CancelOrder(View):
             table.locked = False
             table.save()
 
-            return redirect('pages:place_detail', slug=business_slug)
+            return redirect('tray:my_tray')
 
         self.request.session['tray'] = []
 
@@ -278,3 +278,26 @@ class CancelActiveOrder(View):
             return redirect('tray:my_tray')
         else:
             return HttpResponseForbidden()
+
+
+class UpdateTable(View):
+    def get(self, request, *args, **kwargs):
+        table_nr = self.kwargs['table_nr']
+        # unlock is a number, 0 is lock because it evaluates to false
+        unlock = self.kwargs['unlock']
+        business_slug = self.kwargs['slug']
+
+        table = TableModel.objects.get(business__slug=business_slug, table_nr=table_nr)
+
+        if table.locked and unlock:
+            table.locked = False
+            table.save()
+            messages.add_message(request, messages.INFO, 'You UNLOCKED the table')
+            return redirect('tray:my_tray')
+        elif not table.locked and not unlock:
+            table.locked = True
+            table.save()
+            messages.add_message(request, messages.INFO, 'You LOCKED the table')
+            return redirect('tray:my_tray')
+
+        return redirect('tray:my_tray')

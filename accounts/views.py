@@ -121,7 +121,7 @@ class ChangePasswordDoneView(TemplateView):
     template_name = 'accounts/change_password_done.html'
 
 
-# ---- signals
+# signals
 
 def unlock_table(sender, user, request, **kwargs):
     session = request.session.get('current_order', None)

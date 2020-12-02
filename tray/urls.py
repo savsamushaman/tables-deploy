@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import TrayListView, GenerateOrder, PlaceOrder, RemoveItemFromOrder, CancelOrder, update_tray, \
-    add_remove_from_tray, OrderDetailView, CancelActiveOrder
+    add_remove_from_tray, OrderDetailView, CancelActiveOrder, UpdateTable
 
 app_name = 'tray'
 
@@ -14,6 +14,6 @@ urlpatterns = [
     path('add_remove/', add_remove_from_tray, name='add_remove'),
     path('remove_item/<int:pk>', RemoveItemFromOrder.as_view(), name='remove_item'),
     path('update_tray/', update_tray, name='update_tray'),
-
+    path('update_table/<slug:slug>/<int:table_nr>/<int:unlock>', UpdateTable.as_view(), name='update_table')
 
 ]

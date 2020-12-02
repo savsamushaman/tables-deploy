@@ -63,7 +63,9 @@
                     <p>{{ business.email }}</p>
                     <p>{{ business.phone_nr }}</p>
                     <p>{{ business.short_description | slice:100 }}</p>
-                    <a href="{% url 'owned:business_update' business.slug %}" class="read-more">Details &rarr;</a>
+                    <a href="{% url 'owned:business_update' business.slug %}" class="read-more">
+                        <button id="feed-button">Details</button>
+                    </a>
                 </div>
             </li>
         {% endfor %}

@@ -36,27 +36,68 @@
 </head>
 
 <!-- NAVBAR -->
+<div>
 {% include 'page_parts/navbar.html' %}
+</div>
 
 <body class="skin-light">
 
-<div class="container" data-aos="fade-down" data-aos-delay="250">
+<div id="actions-div" class="container" data-aos="fade-down" data-aos-delay="250">
     <div class="jumbotron color-grey-light mt-70">
         <div class="d-flex align-items-center h-100" style="background-color: #FFE4B5">
             <div class="container text-center py-5" style="margin-top: 100px;margin-bottom:150px;height: 50px">
                 {% if order %}
+                    {% if messages %}
+                            <div id='alert-div' class="alert alert-success" role="alert">
+                                {% for message in messages %}
+                                    {{ message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
-                    <h3 style="color: black;font-family: 'Playfair Display',sans-serif; margin-bottom: 30px!important;"
-                        class="mb-0">Order Summary - {{ order.business.business_name }} <br>
-                        Table {{ order.table.table_nr }} </h3>
+                    <div style="margin-bottom: 50px" class="d-flex justify-content-center">
 
-                    <div class="d-flex justify-content-center">
+
+
                         <a href="{% url 'pages:place_detail' order.business.slug %}">
                             <button id="redirect_button"><i class="fas fa-wine-glass-alt"></i>
                                 Back to the menu
                                 <i class="fas fa-utensils"></i></button>
                         </a>
+
                     </div>
+
+                    <h3 id="title-h3"
+                        class="mb-0">Order Summary - {{ order.business.business_name }} <br>
+                        Table {{ order.table.table_nr }} </h3>
+
+
+
+                    {% if order.table.locked %}
+                        <a href="{% url 'tray:update_table' slug=order.business.slug table_nr=order.table.table_nr unlock=1 %}">
+                            <button id="redirect_button"><i class="fas fa-unlock"></i>
+                                Unlock Table
+                            </button>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'tray:update_table' slug=order.business.slug table_nr=order.table.table_nr unlock=0 %}">
+                            <button id="redirect_button"><i class="fas fa-lock"></i>
+                                Lock Table
+                            </button>
+                        </a>
+                    {% endif %}
+
+
+
+                    <a href="{% url 'tray:cancel_order' clear=0 %}">
+                        <button id="redirect_button"><i
+                                class="fas fa-power-off"></i>
+                            Leave Table
+                        </button>
+                    </a>
+
+
+
 
                 {% else %}
 
@@ -68,7 +109,7 @@
                         <a href="{% url 'pages:places' %}">
                             <button id="redirect_button"><i
                                     class="fab fa-periscope"></i>
-                                Back to places
+                                Find Places
                             </button>
                         </a>
                     </div>
@@ -249,7 +290,8 @@
                             <ul style="list-style-type: none">
                                 {% for order in active %}
                                     <a href="{% url 'tray:order_detail' order.id %}">
-                                        <li style="margin-top: 5px; color: orangered">ID : {{ order.id }} - Table : {{ order.table }}
+                                        <li style="margin-top: 5px; color: orangered">ID : {{ order.id }} - Table
+                                            : {{ order.table }}
                                             - Total : {{ order.total }} - Status : {% if order.status == 'PL' %}
                                                 Placed {% else %}
                                                 Serving{% endif %}</li>

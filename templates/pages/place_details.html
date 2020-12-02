@@ -24,8 +24,14 @@
                 <h2><a href="{% url 'pages:places' %}"></a>{{ place.business_name }}</h2>
                 <br>
                 {% if not current_order.business == place.slug %}
+                    {% if messages %}
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
 
                     <div class="simulation d-flex justify-content-center" data-aos='fade-up' data-aos-delay="200">
+
                         {% for table in tables %}
                             <a href="{% url 'tray:generate_order' place.slug table.table_nr %} ">
                                 <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
@@ -33,16 +39,6 @@
                                 </button>
                             </a>
                         {% endfor %}
-                    </div>
-
-                {% else %}
-                    <div class=" simulation d-flex justify-content-center">
-                        <a href="{% url 'tray:cancel_order' clear=0 %}">
-                            <button style="background: #FFE4B5;color: orangered" id="redirect_button"><i
-                                    class="fas fa-power-off"></i>
-                                Leave Table
-                            </button>
-                        </a>
                     </div>
                 {% endif %}
 
