@@ -7,24 +7,9 @@ from django.shortcuts import redirect
 from django.views.generic import View, TemplateView, DetailView
 
 from accounts.models import CustomUser
+from accounts.views import check_user, clear_session
 from business.models import BusinessModel, ProductModel, TableModel
 from .models import OrderItem, OrderModel
-
-
-def check_user(request):
-    if request.user.is_authenticated:
-        customer = request.user
-        return customer
-    else:
-        device = request.COOKIES.get('device', None)
-        if device:
-            try:
-                customer = CustomUser.objects.get(device=device)
-                return customer
-            except:
-                return None
-        else:
-            return HttpResponseBadRequest
 
 
 class GenerateOrder(View):
@@ -42,8 +27,14 @@ class GenerateOrder(View):
             return redirect('pages:place_detail', slug=slug)
 
         table.current_guests.add(customer)
+        table.business.current_guests += 1
+
         if len(table.current_guests.all()) == 1:
             table.locked = True
+            table.business.available_tables -= 1
+            table.business.save()
+
+        table.business.save()
         table.save()
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['current_order'] = order
@@ -54,37 +45,11 @@ class GenerateOrder(View):
 class CancelOrder(View):
     def get(self, request, *args, **kwargs):
 
-        customer = check_user(request)
-        if customer == HttpResponseBadRequest:
-            return HttpResponseBadRequest()
-
-        try:
-            business_slug = self.request.session['current_order']['business']
-            table_nr = self.request.session['current_order']['table']
-        except TypeError:
-            return HttpResponseBadRequest()
-
-        if not self.kwargs['clear'] and customer:
-            business = BusinessModel.objects.get(slug=business_slug)
-            active_orders = OrderModel.objects.filter(customer=customer, business=business,
-                                                      status='PL')
-
-            for order in active_orders:
-                order.status = 'C'
-                order.save()
-            self.request.session['current_order'] = None
-
-            table = TableModel.objects.get(table_nr=table_nr)
-            table.current_guests.remove(customer)
-            if len(table.current_guests.all()) == 0:
-                table.locked = False
-            table.save()
-
+        response = clear_session(request, clear_tray=kwargs['clear'])
+        if response == HttpResponseBadRequest:
+            return HttpResponseBadRequest
+        else:
             return redirect('tray:my_tray')
-
-        self.request.session['tray'] = []
-
-        return redirect('tray:my_tray')
 
 
 class PlaceOrder(View):
@@ -296,10 +261,14 @@ class UpdateTable(View):
         # unlock is a number, lock is 0 because it evaluates to false
         unlock = self.kwargs['unlock']
         business_slug = self.kwargs['slug']
+        customer = check_user(request)
+
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
 
         table = TableModel.objects.get(business__slug=business_slug, table_nr=table_nr)
 
-        if request.user not in table.current_guests.all():
+        if customer not in table.current_guests.all():
             messages.add_message(request, messages.INFO, 'Denied')
             return redirect('tray:my_tray')
         elif table.locked and unlock:

@@ -60,6 +60,7 @@ class BusinessModel(models.Model):
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ must change URL ON RELEASE
+
 class TableModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     table_nr = models.IntegerField()
@@ -84,10 +85,6 @@ class TableModel(models.Model):
             image.close()
 
             self.qr_code = f'{path}\\{self.business.slug}_{self.table_nr}.png'
-
-        if len(self.current_guests.all()) == 0:
-            self.business.available_tables += 1
-            self.business.save()
 
         super(TableModel, self).save(*args, **kwargs)
 

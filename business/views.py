@@ -1,5 +1,8 @@
 import json
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, \
@@ -258,6 +261,8 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
         form.instance.save()
+        business.all_tables += 1
+        business.save()
         messages.add_message(self.request, messages.INFO, f'Table {form.instance.table_nr} was created successfully')
         return super(CreateTableView, self).form_valid(form)
 
@@ -313,6 +318,8 @@ class TableDeleteView(LoginRequiredMixin, View):
             table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
             table.deleted = True
             table.save()
+            business.all_tables -= 1
+            business.save()
             messages.add_message(request, level=messages.INFO,
                                  message=f'Table {table.table_nr} was deleted successfully')
             return redirect('owned:tables_list', slug=slug)
@@ -507,3 +514,12 @@ class ReturnOrders(View):
                 return HttpResponseForbidden()
         else:
             return HttpResponseBadRequest()
+
+# signals
+
+# @receiver(post_save, sender=TableModel)
+# def update_available_table(sender, instance, created, **kwargs):
+#     if not instance.current_guests:
+#         instance.business.available_tables +=1
+#     else:
+#         instance

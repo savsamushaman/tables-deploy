@@ -3,7 +3,7 @@ from django.contrib.auth.signals import user_logged_out
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -13,6 +13,54 @@ from business.models import TableModel
 from tray.models import OrderModel, OrderItem
 from .forms import RegisterUserForm, LoginForm, UpdateUserForm, ChangePasswordForm
 from .models import CustomUser
+
+
+def check_user(request):
+    if request.user.is_authenticated:
+        customer = request.user
+        return customer
+    else:
+        device = request.COOKIES.get('device', None)
+        if device:
+            try:
+                customer = CustomUser.objects.get(device=device)
+                return customer
+            except:
+                return None
+        else:
+            return HttpResponseBadRequest
+
+
+def clear_session(request, **kwargs):
+    session = request.session.get('current_order', None)
+
+    if session:
+        customer = check_user(request)
+
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest
+
+        if customer and not kwargs['clear_tray']:
+            table_nr = session['table']
+            business_slug = session['business']
+            table = TableModel.objects.get(table_nr=table_nr, business__slug=business_slug)
+            table.current_guests.remove(customer)
+            table.business.current_guests -= 1
+            if len(table.current_guests.all()) == 0:
+                table.locked = False
+                table.business.available_tables += 1
+                table.business.save()
+            table.save()
+
+            request.session['current_order'] = None
+            request.session['tray'] = []
+
+            active_orders = OrderModel.objects.filter(customer=customer, status='PL')
+            for order in active_orders:
+                order.status = 'C'
+                order.save()
+        else:
+            request.session['tray'] = []
 
 
 class RegisterUserView(CreateView):
@@ -30,12 +78,11 @@ class RegisterUserView(CreateView):
 class MyLoginView(LoginView):
     template_name = "accounts/login.html"
     form_class = LoginForm
+    redirect_authenticated_user = True
 
-    def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect('accounts:user_details')
-        else:
-            return super(MyLoginView, self).get(request, *args, **kwargs)
+    def form_valid(self, form):
+        clear_session(self.request)
+        return super(MyLoginView, self).form_valid(form)
 
 
 class MyLogoutView(LogoutView):
@@ -123,15 +170,8 @@ class ChangePasswordDoneView(TemplateView):
 
 # signals
 
-def unlock_table(sender, user, request, **kwargs):
-    session = request.session.get('current_order', None)
-    if session:
-        table_nr = session['table']
-        table = TableModel.objects.get(table_nr=table_nr)
-        table.current_guests.remove(request.user)
-        if len(table.current_guests.all()) == 0:
-            table.locked = False
-        table.save()
+def cleanup_logout(sender, user, request, **kwargs):
+    clear_session(request)
 
 
-user_logged_out.connect(unlock_table)
+user_logged_out.connect(cleanup_logout)
