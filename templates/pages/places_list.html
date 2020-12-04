@@ -41,16 +41,7 @@
             {#  END OF SEARCHBAR  #}
 
             <div class="bigbox row" data-aos="fade-up" data-aos-delay="600">
-                <div class="col-lg-4">
-                    <ul class="nav nav-tabs flex-column">
-                        {% for business in businesses %}
-                            <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
-                                data-aos="fade-up">
-                            <a class="nav-link" data-toggle="tab"
-                               href="#{{ business.slug }}">{{ business.business_name }}</a>
-                        {% endfor %}
-                    </ul>
-                </div>
+
                 <div class="col-lg-8 mt-4 mt-lg-0">
                     <div class="tab-content">
                         <div class="tab-pane active show" id="">
@@ -71,7 +62,8 @@
                                     <div class="col-lg-8 details order-2 order-lg-1">
                                         <div class="bigbox">
                                             <h3>
-                                                <a href="{% url 'pages:place_detail' business.slug %}">{{ business.business_name }} <i class="fas fa-hand-point-left"></i></a>
+                                                <a href="{% url 'pages:place_detail' business.slug %}">{{ business.business_name }}
+                                                    <i class="fas fa-hand-point-left"></i></a>
                                             </h3>
                                             <p id="bootstrap-override" class="font-italic">tap for more</p>
                                             <p>
@@ -103,6 +95,17 @@
                         {% endfor %}
                     </div>
                 </div>
+                <div class="col-lg-4 mt-2">
+                    <ul class="nav nav-tabs flex-column">
+                        {% for business in businesses %}
+                            <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
+                                data-aos="fade-up">
+                            <a class="nav-link" data-toggle="tab"
+                               href="#{{ business.slug }}">{{ business.business_name }}</a>
+                        {% endfor %}
+                    </ul>
+                </div>
+
             </div>
         </div>
     </section>
