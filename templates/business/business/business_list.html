@@ -73,9 +73,6 @@
     {% else %}
         <img class="empty-list-img" src="{% static 'img/confuse.png' %}">
         <h2 class="empty-list">Looks like there are no business associated with your name</h2>
-        <a href="{% url "owned:create_business" %}">
-            <button class="create-business" type="button">Create a new business</button>
-        </a>
     {% endif %}
 <!-- Vendor JS Files -->
 <script src="{% static 'Ry/vendor/jquery/jquery.min.js' %}"></script>

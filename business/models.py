@@ -1,10 +1,12 @@
+from decimal import Decimal
+from pathlib import Path
+
+import requests
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+
 from accounts.models import CustomUser, CountryModel
-import requests
-from pathlib import Path
-from decimal import Decimal
 
 BUSINESS_CATEGORY_CHOICES = (
     ('Bar', 'Bar'),

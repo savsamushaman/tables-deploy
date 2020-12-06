@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import TrayListView, GenerateOrder, PlaceOrder, RemoveItemFromOrder, CancelOrder, update_tray, \
     add_remove_from_tray, OrderDetailView, CancelActiveOrder, UpdateTable
 

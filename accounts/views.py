@@ -1,10 +1,10 @@
-from django.core.mail import EmailMessage
-from django.contrib.auth import views as auth_views, login
-from django.contrib.auth.signals import user_logged_out
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.signals import user_logged_out
 from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMessage
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -113,7 +113,8 @@ class RegisterUserView(CreateView):
 
         email = EmailMessage(mail_subject, message, to=[to_email])
         email.send()
-        messages.add_message(self.request, messages.INFO, f'A confirmation mail was sent to your email address : {to_email}')
+        messages.add_message(self.request, messages.INFO,
+                             f'A confirmation mail was sent to your email address : {to_email}')
 
         return super(RegisterUserView, self).form_valid(form)
 

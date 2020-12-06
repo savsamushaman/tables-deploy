@@ -1,8 +1,5 @@
 import json
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, \

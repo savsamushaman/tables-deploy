@@ -1,6 +1,8 @@
-import django_filters
 from distutils.util import strtobool
+
+import django_filters
 from django import forms
+
 from business.models import BusinessCategory, CountryModel, BusinessModel
 
 BOOL_CHOICES = (('None', 'Open or Closed'), ('True', 'Open'), ('False', 'Closed'),)
