@@ -196,11 +196,11 @@ class TrayListView(TemplateView):
                     if customer not in table.current_guests.all():
                         self.request.session['current_order'] = None
                         self.request.session['tray'] = []
-                        messages.add_message(self.request, messages.INFO, "Wrong table or missing table XXX")
+                        messages.add_message(self.request, messages.INFO, "Wrong table or missing table")
                         return redirect('tray:my_tray')
 
                 except TableModel.DoesNotExist:
-                    messages.add_message(self.request, messages.INFO, "Wrong table or missing table YYY")
+                    messages.add_message(self.request, messages.INFO, "Wrong table or missing table")
                     self.request.session['current_order'] = None
                     self.request.session['tray'] = []
                     return redirect('tray:my_tray')
@@ -301,7 +301,13 @@ class UpdateTable(View):
         if customer == HttpResponseBadRequest:
             return HttpResponseBadRequest()
 
-        table = TableModel.objects.get(business__slug=business_slug, table_nr=table_nr)
+        try:
+            table = TableModel.objects.get(business=business_slug, table_nr=table_nr)
+        except TableModel.DoesNotExist:
+            messages.add_message(request, messages.INFO, "Wrong table or missing table")
+            self.request.session['current_order'] = None
+            self.request.session['tray'] = []
+            return redirect('tray:my_tray')
 
         if customer not in table.current_guests.all():
             messages.add_message(request, messages.INFO, 'Denied')
