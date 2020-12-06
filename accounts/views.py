@@ -1,11 +1,16 @@
-from django.contrib.auth import views as auth_views
+from django.core.mail import EmailMessage
+from django.contrib.auth import views as auth_views, login
 from django.contrib.auth.signals import user_logged_out
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
+from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
 from django.views.generic import CreateView, UpdateView, TemplateView
 
@@ -13,6 +18,7 @@ from business.models import TableModel
 from tray.models import OrderModel, OrderItem
 from .forms import RegisterUserForm, LoginForm, UpdateUserForm, ChangePasswordForm
 from .models import CustomUser
+from .tokens import account_activation_token
 
 
 def check_user(request):
@@ -63,6 +69,22 @@ def clear_session(request, **kwargs):
             request.session['tray'] = []
 
 
+def activate_user(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.add_message(request, messages.INFO, 'Your accounts has been activated.')
+        return redirect('accounts:login')
+    else:
+        messages.add_message(request, messages.INFO, 'Activation link is invalid!')
+        return redirect('accounts:login')
+
+
 class RegisterUserView(CreateView):
     form_class = RegisterUserForm
     success_url = reverse_lazy('accounts:login')
@@ -73,6 +95,27 @@ class RegisterUserView(CreateView):
             return redirect('accounts:user_details')
         else:
             return super(RegisterUserView, self).get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
+
+        current_site = get_current_site(self.request)
+        mail_subject = 'Activate your Tables account'
+        message = render_to_string('accounts/account_activation_mail.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user),
+        })
+        to_email = form.cleaned_data.get('email')
+
+        email = EmailMessage(mail_subject, message, to=[to_email])
+        email.send()
+        messages.add_message(self.request, messages.INFO, f'A confirmation mail was sent to your email address : {to_email}')
+
+        return super(RegisterUserView, self).form_valid(form)
 
 
 class MyLoginView(LoginView):
