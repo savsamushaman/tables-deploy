@@ -107,7 +107,6 @@ class BusinessDeleteView(LoginRequiredMixin, DeleteView):
             for table in tables:
                 business.current_guest -= len(table.current_guests.all())
                 table.current_guests.clear()
-                table.locked = True
                 table.delete()
 
             business.is_active = False

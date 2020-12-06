@@ -52,7 +52,7 @@ class CancelOrder(View):
         if response == HttpResponseBadRequest:
             return HttpResponseBadRequest
         elif response == ObjectDoesNotExist:
-            messages.add_message(request, messages.INFO, 'Unavailable table (deleted?)')
+            messages.add_message(request, messages.INFO, 'Table not available')
             return redirect('tray:my_tray')
         else:
             return redirect('tray:my_tray')
@@ -62,20 +62,23 @@ class PlaceOrder(View):
     def get(self, request, *args, **kwargs):
         slug = self.request.session['current_order']['business']
         table = self.request.session['current_order']['table']
-        if self.request.user.is_authenticated:
-            customer = self.request.user
-        else:
-            device = self.request.COOKIES.get('device', None)
-            if device:
-                customer, created = CustomUser.objects.get_or_create(device=device)
-            else:
-                return HttpResponseBadRequest()
+
+        customer = check_user(request)
+        if customer == HttpResponseBadRequest:
+            return HttpResponseBadRequest()
+
         business = BusinessModel.objects.get(slug=slug)
+
+        if not business.is_active:
+            messages.add_message(request, messages.INFO, 'Place unavailable')
+            request.session['current_order'] = None
+            request.session['tray'] = []
+            return redirect('tray:my_tray')
 
         try:
             table = TableModel.objects.get(business=business, table_nr=table)
         except TableModel.DoesNotExist:
-            messages.add_message(request, messages.INFO, "Wrong table or missing table")
+            messages.add_message(request, messages.INFO, "Non-existent or missing table")
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
             return redirect('tray:my_tray')
@@ -83,7 +86,7 @@ class PlaceOrder(View):
         if customer not in table.current_guests.all():
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
-            messages.add_message(request, messages.INFO, "Wrong table or missing table")
+            messages.add_message(request, messages.INFO, "You are not sitting at the table currently")
             return redirect('tray:my_tray')
 
         order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
@@ -186,33 +189,38 @@ class TrayListView(TemplateView):
         customer = check_user(request)
         if customer == HttpResponseBadRequest:
             return HttpResponseBadRequest()
-        else:
-            try:
-                slug = self.request.session['current_order']['business']
-                table = self.request.session['current_order']['table']
-                business = BusinessModel.objects.get(slug=slug)
-                try:
-                    table = TableModel.objects.get(business=business, table_nr=table)
-                    if customer not in table.current_guests.all():
-                        self.request.session['current_order'] = None
-                        self.request.session['tray'] = []
-                        messages.add_message(self.request, messages.INFO, "Wrong table or missing table")
-                        return redirect('tray:my_tray')
 
-                except TableModel.DoesNotExist:
-                    messages.add_message(self.request, messages.INFO, "Wrong table or missing table")
-                    self.request.session['current_order'] = None
-                    self.request.session['tray'] = []
-                    return redirect('tray:my_tray')
-            except (KeyError, TypeError):
-                HttpResponseBadRequest()
+        session = self.request.session.get('current_order', None)
+
+        if session:
+            slug = session['business']
+            table = session['table']
+            business = BusinessModel.objects.get(slug=slug)
+            try:
+                table = TableModel.objects.get(business=business, table_nr=table)
+            except TableModel.DoesNotExist:
+                messages.add_message(self.request, messages.INFO, "Wrong or missing table")
+                self.request.session['current_order'] = None
+                self.request.session['tray'] = []
+                return redirect('tray:my_tray')
+
+            if customer not in table.current_guests.all():
+                self.request.session['current_order'] = None
+                self.request.session['tray'] = []
+                messages.add_message(self.request, messages.INFO, "You are not sitting at the table currently")
+                return redirect('tray:my_tray')
 
             return super(TrayListView, self).get(request, *args, **kwargs)
 
+        return super(TrayListView, self).get(request, *args, **kwargs)
+
     def get_context_data(self, *, object_list=None, **kwargs):
-        try:
-            slug = self.request.session['current_order']['business']
-            table = self.request.session['current_order']['table']
+
+        session = self.request.session.get('current_order', None)
+
+        if session:
+            slug = session['business']
+            table = session['table']
 
             business = BusinessModel.objects.get(slug=slug)
             table = TableModel.objects.get(business=business, table_nr=table)
@@ -241,8 +249,7 @@ class TrayListView(TemplateView):
             context['active'] = OrderModel.objects.filter(business=business, customer=customer,
                                                           status__regex='PL|S').order_by('date_ordered')
             return context
-
-        except (TypeError, KeyError):
+        else:
             return super(TrayListView, self).get_context_data(**kwargs)
 
 
@@ -257,13 +264,10 @@ class OrderDetailView(DetailView):
         if customer == HttpResponseBadRequest:
             return HttpResponseBadRequest()
 
-        if customer:
-            if customer == OrderModel.objects.get(id=self.kwargs['pk']).customer:
-                return super(OrderDetailView, self).get(request, *args, **kwargs)
-            else:
-                return HttpResponseForbidden()
+        if customer == OrderModel.objects.get(id=self.kwargs['pk']).customer:
+            return super(OrderDetailView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseBadRequest()
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         order_id = self.kwargs['pk']
@@ -302,15 +306,17 @@ class UpdateTable(View):
             return HttpResponseBadRequest()
 
         try:
-            table = TableModel.objects.get(business=business_slug, table_nr=table_nr)
+            table = TableModel.objects.get(business__slug=business_slug, table_nr=table_nr)
         except TableModel.DoesNotExist:
-            messages.add_message(request, messages.INFO, "Wrong table or missing table")
+            messages.add_message(request, messages.INFO, "Wrong or missing table")
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
             return redirect('tray:my_tray')
 
         if customer not in table.current_guests.all():
-            messages.add_message(request, messages.INFO, 'Denied')
+            messages.add_message(request, messages.INFO, 'You are not sitting at the table currently')
+            self.request.session['current_order'] = None
+            self.request.session['tray'] = []
             return redirect('tray:my_tray')
         elif table.locked and unlock:
             table.locked = False

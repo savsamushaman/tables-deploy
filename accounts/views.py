@@ -29,13 +29,10 @@ def check_user(request):
     else:
         device = request.COOKIES.get('device', None)
         if device:
-            try:
-                customer = CustomUser.objects.get(device=device)
-                return customer
-            except CustomUser.DoesNotExist:
-                customer, created = CustomUser.objects.get_or_create(device=device)
-                return customer
+            customer, created = CustomUser.objects.get_or_create(device=device)
+            return customer
         else:
+            print('here')
             return HttpResponseBadRequest
 
 
@@ -48,13 +45,14 @@ def clear_session(request, **kwargs):
         if customer == HttpResponseBadRequest:
             return HttpResponseBadRequest
 
-        if customer and not kwargs['clear_tray']:
+        if not kwargs['clear_tray']:
             table_nr = session['table']
             business_slug = session['business']
             try:
                 table = TableModel.objects.get(table_nr=table_nr, business__slug=business_slug)
-                table.current_guests.remove(customer)
-                table.business.current_guests -= 1
+                if customer in table.current_guests.all():
+                    table.current_guests.remove(customer)
+                    table.business.current_guests -= 1
                 if len(table.current_guests.all()) == 0:
                     table.locked = False
                     table.business.available_tables += 1

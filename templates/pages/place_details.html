@@ -57,7 +57,7 @@
                 </div>
 
             </div>
-            {% if current_order %}
+            {% if current_order.business == place.slug %}
                 <div class="d-flex justify-content-center">
                     <a id='next-link' href="{% url 'tray:my_tray' %}">
                         <button id='redirect_button'>Order Summary<i class="fas fa-forward"></i></button>
