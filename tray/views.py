@@ -1,6 +1,7 @@
 import json
 
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, HttpResponse, \
     HttpResponseForbidden
 from django.shortcuts import redirect
@@ -19,6 +20,7 @@ class GenerateOrder(View):
         customer = check_user(request)
         if customer == HttpResponseBadRequest:
             return HttpResponseBadRequest()
+
         slug = self.kwargs['place']
         table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
 
@@ -39,6 +41,7 @@ class GenerateOrder(View):
         order = {'customer': str(self.request.user), 'business': slug, 'table': table.table_nr}
         self.request.session['current_order'] = order
         self.request.session['tray'] = []
+
         return redirect('pages:place_detail', slug=slug)
 
 
@@ -48,6 +51,9 @@ class CancelOrder(View):
         response = clear_session(request, clear_tray=kwargs['clear'])
         if response == HttpResponseBadRequest:
             return HttpResponseBadRequest
+        elif response == ObjectDoesNotExist:
+            messages.add_message(request, messages.INFO, 'Unavailable table (deleted?)')
+            return redirect('tray:my_tray')
         else:
             return redirect('tray:my_tray')
 
@@ -65,7 +71,21 @@ class PlaceOrder(View):
             else:
                 return HttpResponseBadRequest()
         business = BusinessModel.objects.get(slug=slug)
-        table = TableModel.objects.get(business=business, table_nr=table)
+
+        try:
+            table = TableModel.objects.get(business=business, table_nr=table)
+        except TableModel.DoesNotExist:
+            messages.add_message(request, messages.INFO, "Wrong table or missing table")
+            self.request.session['current_order'] = None
+            self.request.session['tray'] = []
+            return redirect('tray:my_tray')
+
+        if customer not in table.current_guests.all():
+            self.request.session['current_order'] = None
+            self.request.session['tray'] = []
+            messages.add_message(request, messages.INFO, "Wrong table or missing table")
+            return redirect('tray:my_tray')
+
         order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
 
         total = 0
@@ -167,6 +187,26 @@ class TrayListView(TemplateView):
         if customer == HttpResponseBadRequest:
             return HttpResponseBadRequest()
         else:
+            try:
+                slug = self.request.session['current_order']['business']
+                table = self.request.session['current_order']['table']
+                business = BusinessModel.objects.get(slug=slug)
+                try:
+                    table = TableModel.objects.get(business=business, table_nr=table)
+                    if customer not in table.current_guests.all():
+                        self.request.session['current_order'] = None
+                        self.request.session['tray'] = []
+                        messages.add_message(self.request, messages.INFO, "Wrong table or missing table XXX")
+                        return redirect('tray:my_tray')
+
+                except TableModel.DoesNotExist:
+                    messages.add_message(self.request, messages.INFO, "Wrong table or missing table YYY")
+                    self.request.session['current_order'] = None
+                    self.request.session['tray'] = []
+                    return redirect('tray:my_tray')
+            except (KeyError, TypeError):
+                HttpResponseBadRequest()
+
             return super(TrayListView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -180,11 +220,8 @@ class TrayListView(TemplateView):
             if self.request.user.is_authenticated:
                 customer = self.request.user
             else:
-                device = self.request.COOKIES.get('device', None)
-                if device:
-                    customer, created = CustomUser.objects.get_or_create(device=device)
-                else:
-                    customer = None
+                device = self.request.COOKIES.get('device')
+                customer, created = CustomUser.objects.get_or_create(device=device)
 
             order = OrderModel(business=business, customer=customer, table=table)
 
@@ -205,9 +242,7 @@ class TrayListView(TemplateView):
                                                           status__regex='PL|S').order_by('date_ordered')
             return context
 
-        except TypeError:
-            return super(TrayListView, self).get_context_data(**kwargs)
-        except KeyError:
+        except (TypeError, KeyError):
             return super(TrayListView, self).get_context_data(**kwargs)
 
 

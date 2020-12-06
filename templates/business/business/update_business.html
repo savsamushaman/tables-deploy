@@ -102,7 +102,7 @@
                         {% for message in messages %}
                             {{ message }}
                         {% endfor %}
-                    {{ form.errors }}
+                        {{ form.errors }}
                     </div>
                 {% endif %}
             </div>
@@ -241,6 +241,13 @@
                             <button class="register-button btn btn--radius-2">Cancel</button>
                         </a>
                     </div>
+                </div>
+                <div class="delete-button-div">
+                    <a style="text-align: center;" href="{% url 'owned:delete_business' slug %}">
+                        <button id="delete-button" class="register-button btn btn--radius-2"><i
+                                class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonRespon
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, UpdateView, ListView
+from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 
 from tray.models import OrderModel, OrderItem
 from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm, MenuPointForm
@@ -23,7 +23,7 @@ class BusinessListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(BusinessListView, self).get_context_data(**kwargs)
-        context['owned'] = BusinessModel.objects.filter(manager=self.request.user)
+        context['owned'] = BusinessModel.objects.filter(manager=self.request.user, is_active=True)
         return context
 
 
@@ -51,7 +51,7 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(BusinessEditView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -59,7 +59,7 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(BusinessEditView, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -79,6 +79,45 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
         return super(BusinessEditView, self).form_invalid(form)
 
 
+class BusinessDeleteView(LoginRequiredMixin, DeleteView):
+    model = BusinessModel
+    template_name = 'business/business/delete_business.html'
+    context_object_name = 'business'
+
+    def get_success_url(self):
+        return reverse_lazy('owned:owned_list')
+
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager and business.is_active:
+            return super(BusinessDeleteView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def post(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if request.user == business.manager and business.is_active:
+            orders = OrderModel.objects.filter(business=business, status__regex='PL|S')
+            tables = TableModel.objects.filter(business=business)
+            for order in orders:
+                order.status = 'C'
+                order.save()
+            for table in tables:
+                business.current_guest -= len(table.current_guests.all())
+                table.current_guests.clear()
+                table.locked = True
+                table.delete()
+
+            business.is_active = False
+            business.save()
+            messages.add_message(request, messages.INFO, f'{business.business_name} was deleted successfully')
+            return redirect('owned:owned_list')
+        else:
+            return HttpResponseForbidden()
+
+
 # Product -----------------------------------------------------
 # List
 class ProductListView(LoginRequiredMixin, ListView):
@@ -89,7 +128,7 @@ class ProductListView(LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(ProductListView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -111,7 +150,7 @@ class CreateProductView(LoginRequiredMixin, CreateView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(CreateProductView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -119,7 +158,7 @@ class CreateProductView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(CreateProductView, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -158,7 +197,7 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(ProductEditView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -166,7 +205,7 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(ProductEditView, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -192,7 +231,7 @@ class ProductDeleteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             product = ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
             product.deleted = True
             product.save()
@@ -213,7 +252,7 @@ class TableListView(LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(TableListView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -235,7 +274,7 @@ class CreateTableView(LoginRequiredMixin, CreateView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(CreateTableView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -243,7 +282,7 @@ class CreateTableView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(CreateTableView, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -259,6 +298,7 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         form.instance.business = business
         form.instance.save()
         business.all_tables += 1
+        business.available_tables += 1
         business.save()
         messages.add_message(self.request, messages.INFO, f'Table {form.instance.table_nr} was created successfully')
         return super(CreateTableView, self).form_valid(form)
@@ -277,7 +317,7 @@ class TableEditView(LoginRequiredMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(TableEditView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -285,7 +325,7 @@ class TableEditView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(TableEditView, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -311,12 +351,16 @@ class TableDeleteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
-            table.deleted = True
-            table.save()
+            if len(table.current_guests.all()) == 0:
+                business.available_tables -= 1
+            business.current_guests -= len(table.current_guests.all())
+            table.current_guests.clear()
             business.all_tables -= 1
+
             business.save()
+            table.delete()
             messages.add_message(request, level=messages.INFO,
                                  message=f'Table {table.table_nr} was deleted successfully')
             return redirect('owned:tables_list', slug=slug)
@@ -335,7 +379,7 @@ class CreateMenuPoint(LoginRequiredMixin, CreateView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(CreateMenuPoint, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -343,7 +387,7 @@ class CreateMenuPoint(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(CreateMenuPoint, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -377,7 +421,7 @@ class MenuPointListView(LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(MenuPointListView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -402,7 +446,7 @@ class MenuPointEditView(LoginRequiredMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(MenuPointEditView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -410,7 +454,7 @@ class MenuPointEditView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         slug = kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             return super(MenuPointEditView, self).post(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -432,7 +476,7 @@ class MenuPointDelete(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager:
+        if request.user == business.manager and business.is_active:
             menupoint = ProductCategory.objects.get(business__slug=slug, pk=self.kwargs['pk'])
 
             try:

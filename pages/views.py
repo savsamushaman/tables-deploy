@@ -1,6 +1,6 @@
 import json
 
-from django.http import HttpResponseNotAllowed, JsonResponse
+from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseNotFound
 from django.views.generic import ListView, DetailView, TemplateView
 
 from business.models import BusinessModel, ProductModel, ProductCategory, TableModel
@@ -13,6 +13,8 @@ class AboutView(TemplateView):
     def get(self, request, *args, **kwargs):
         a = request.session.get('tray', [])
         b = request.session.get('current_order', None)
+        request.session['tray'] = []
+        request.session['current_order'] = None
         print(a)
         print(b)
         return super(AboutView, self).get(request, *args, **kwargs)
@@ -23,6 +25,7 @@ class PlaceListView(ListView):
     template_name = 'pages/places_list.html'
     context_object_name = 'businesses'
     my_filter = BusinessFilter
+    queryset = BusinessModel.objects.filter(is_active=True)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PlaceListView, self).get_context_data(**kwargs)
@@ -34,7 +37,7 @@ class PlaceListView(ListView):
             context['filter'] = result_filter
             context['businesses'] = result_filter.qs
         else:
-            if hasattr(self.request.user, 'country'):
+            if hasattr(self.request.user, 'country') and self.request.user.country is not None:
                 data = self.request.GET.copy()
                 data['country'] = self.request.user.country
 
@@ -53,6 +56,14 @@ class PlaceDetailView(DetailView):
     model = BusinessModel
     template_name = 'pages/place_details.html'
     context_object_name = 'place'
+
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        business = BusinessModel.objects.get(slug=slug)
+        if business.is_active:
+            return super(PlaceDetailView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseNotFound()
 
     def get_context_data(self, **kwargs):
         context = super(PlaceDetailView, self).get_context_data(**kwargs)

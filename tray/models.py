@@ -15,7 +15,7 @@ ORDER_STATUS_CHOICES = (
 class OrderModel(models.Model):
     customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
-    table = models.ForeignKey(TableModel, on_delete=models.CASCADE)
+    table = models.ForeignKey(TableModel, on_delete=models.SET_NULL, null=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     status = models.CharField(choices=ORDER_STATUS_CHOICES, default='Unplaced', max_length=2)
     total = models.DecimalField(max_digits=20, decimal_places=2, default=0)

@@ -13,6 +13,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
 from django.views.generic import CreateView, UpdateView, TemplateView
+from django.core.exceptions import ObjectDoesNotExist
 
 from business.models import TableModel
 from tray.models import OrderModel, OrderItem
@@ -31,8 +32,9 @@ def check_user(request):
             try:
                 customer = CustomUser.objects.get(device=device)
                 return customer
-            except:
-                return None
+            except CustomUser.DoesNotExist:
+                customer, created = CustomUser.objects.get_or_create(device=device)
+                return customer
         else:
             return HttpResponseBadRequest
 
@@ -49,14 +51,19 @@ def clear_session(request, **kwargs):
         if customer and not kwargs['clear_tray']:
             table_nr = session['table']
             business_slug = session['business']
-            table = TableModel.objects.get(table_nr=table_nr, business__slug=business_slug)
-            table.current_guests.remove(customer)
-            table.business.current_guests -= 1
-            if len(table.current_guests.all()) == 0:
-                table.locked = False
-                table.business.available_tables += 1
-                table.business.save()
-            table.save()
+            try:
+                table = TableModel.objects.get(table_nr=table_nr, business__slug=business_slug)
+                table.current_guests.remove(customer)
+                table.business.current_guests -= 1
+                if len(table.current_guests.all()) == 0:
+                    table.locked = False
+                    table.business.available_tables += 1
+                    table.business.save()
+                table.save()
+            except TableModel.DoesNotExist:
+                request.session['current_order'] = None
+                request.session['tray'] = []
+                return ObjectDoesNotExist
 
             request.session['current_order'] = None
             request.session['tray'] = []
@@ -125,7 +132,7 @@ class MyLoginView(LoginView):
     redirect_authenticated_user = True
 
     def form_valid(self, form):
-        clear_session(self.request)
+        clear_session(self.request, clear_tray=False)
         return super(MyLoginView, self).form_valid(form)
 
 
@@ -215,7 +222,7 @@ class ChangePasswordDoneView(TemplateView):
 # signals
 
 def cleanup_logout(sender, user, request, **kwargs):
-    clear_session(request)
+    clear_session(request, clear_tray=False)
 
 
 user_logged_out.connect(cleanup_logout)
