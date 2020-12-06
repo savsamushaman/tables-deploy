@@ -1,37 +1,52 @@
 import json
 
 from django.http import HttpResponseNotAllowed, JsonResponse
-from django.shortcuts import render
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 
 from business.models import BusinessModel, ProductModel, ProductCategory, TableModel
+from .filters import BusinessFilter
 
 
-def test_view(request):
+class AboutView(TemplateView):
     template_name = 'pages/index.html'
-    a = request.session.get('tray', [])
-    b = request.session.get('current_order', None)
-    print(a)
-    print(b)
-    return render(request, template_name, {})
+
+    def get(self, request, *args, **kwargs):
+        a = request.session.get('tray', [])
+        b = request.session.get('current_order', None)
+        print(a)
+        print(b)
+        return super(AboutView, self).get(request, *args, **kwargs)
 
 
 class PlaceListView(ListView):
     model = BusinessModel
     template_name = 'pages/places_list.html'
     context_object_name = 'businesses'
+    my_filter = BusinessFilter
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PlaceListView, self).get_context_data(**kwargs)
+
         context['current_order'] = self.request.session.get('current_order', '')
-        try:
-            if self.request.user.country:
-                context['businesses'] = BusinessModel.objects.filter(country=self.request.user.country)
+
+        if self.request.GET:
+            result_filter = self.my_filter(self.request.GET, queryset=context['businesses'])
+            context['filter'] = result_filter
+            context['businesses'] = result_filter.qs
+        else:
+            if hasattr(self.request.user, 'country'):
+                data = self.request.GET.copy()
+                data['country'] = self.request.user.country
+
+                result_filter = self.my_filter(data, queryset=context['businesses'])
+                context['filter'] = result_filter
+                context['businesses'] = result_filter.qs.filter(country=self.request.user.country)
             else:
-                context['businesses'] = BusinessModel.objects.all()
-            return context
-        except AttributeError:
-            return context
+                result_filter = self.my_filter(request=self.request.GET, queryset=context['businesses'])
+                context['filter'] = result_filter
+                context['businesses'] = result_filter.qs
+
+        return context
 
 
 class PlaceDetailView(DetailView):

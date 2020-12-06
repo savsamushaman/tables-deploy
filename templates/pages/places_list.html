@@ -19,9 +19,50 @@
 {% block content %}
 
     <section id="places" class="places">
-
-        <div class="container" data-aos="fade-up">
-
+        <div style="text-align: center" class="container" data-aos="fade-up">
+            <button id='redirect_button' type="button" data-toggle="collapse" data-target="#collapseExample"
+                    aria-expanded="false" aria-controls="collapseExample">
+                SHOW FILTERS
+            </button>
+            {#  FILTERS    #}
+            <div class="collapse" id="collapseExample">
+                <form class="bigbox filter-form text-center">
+                    <div class="form-row">
+                        <div class="form-group col-md-6 filter-div">
+                            <label for="inputCurrGuests"><i class="fas fa-user"></i> Current Guests</label>
+                            {{ filter.form.current_guests }}
+                        </div>
+                        <div class="form-group col-md-6 filter-div">
+                            <label for="inputMaxCap"><i class="fas fa-users"></i> Max Capacity</label>
+                            {{ filter.form.max_capacity }}
+                        </div>
+                    </div>
+                    <div class="form-group filter-div">
+                        <label for="inputAvailableTables"><i class="fas fa-chair"></i> Available Tables</label>
+                        {{ filter.form.available_tables }}
+                    </div>
+                    <div class="form-group filter-div">
+                        <label for="inputAddress"><i class="fas fa-map-marker-alt"></i> Address</label>
+                        {{ filter.form.displayed_address }}
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6 filter-div">
+                            <label for="inputCountry"><i class="fas fa-globe-europe"></i> Country</label>
+                            {{ filter.form.country }}
+                        </div>
+                        <div class="form-group col-md-6 filter-div">
+                            <label for="inputCategory"><i class="fas fa-question"></i> Category</label>
+                            {{ filter.form.category }}
+                        </div>
+                    </div>
+                    <div class="form-group filter-div">
+                        <label for="is_open"><i class="fas fa-glass-cheers"></i> Status</label>
+                        {{ filter.form.is_open_now }}
+                    </div>
+                    <button id="redirect_button" type="submit" class="btn btn-primary">FILTER RESULTS</button>
+                </form>
+            </div>
+            {#  End of FILTERS   #}
 
             {#SEARCH BAR#}
             <div class="s130" data-aos="fade-down" data-aos-delay="600">
@@ -38,6 +79,7 @@
                     </div>
                 </form>
             </div>
+
             {#  END OF SEARCHBAR  #}
 
             <div class="bigbox row" data-aos="fade-up" data-aos-delay="600">
@@ -47,8 +89,15 @@
                         <div class="tab-pane active show" id="">
                             <div class="row">
                                 <div class="col-lg-8 details order-2 order-lg-1">
-                                    <h3>Tap a name</h3>
-                                    <p>for additional information</p>
+                                    {% if  businesses %}
+                                        <h3>Tap a name</h3>
+                                        <p>for additional information</p>
+                                    {% else %}
+                                        <h3>Sorry</h3>
+                                        <p>...we found nothing</p>
+
+                                    {% endif %}
+
                                 </div>
                                 <div class="col-lg-4 text-center order-1 order-lg-2">
                                     <img src="{% static 'img/info.png' %}" alt="" class="img-fluid">
@@ -67,6 +116,14 @@
                                             </h3>
                                             <p id="bootstrap-override" class="font-italic">tap for more</p>
                                             <p>
+                                                <i class="fas fa-glass-cheers"></i>
+                                                Status : {% if business.is_open_now %} Open {% else %}
+                                                Closed {% endif %}
+                                            </p>
+
+                                            <p><i class="fas fa-map-marker-alt"></i>
+                                                Address: {{ business.displayed_address }}</p>
+                                            <p>
                                                 <i class="fas fa-users"></i>
                                                 Guests: {{ business.current_guests }}/{{ business.max_capacity }}
                                             </p>
@@ -74,8 +131,7 @@
                                                 <i class="fas fa-chair"></i> Free
                                                 tables: {{ business.available_tables }}/{{ business.all_tables }}
                                             </p>
-                                            <p><i class="fas fa-map-marker-alt"></i>
-                                                Address: {{ business.displayed_address }}</p>
+
                                             <p><i class="fas fa-book"></i> Book a table</p>
                                         </div>
                                     </div>
@@ -95,16 +151,26 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="col-lg-4 mt-2">
-                    <ul class="nav nav-tabs flex-column">
-                        {% for business in businesses %}
-                            <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
+                {% if businesses %}
+                    <div class="col-lg-4 mt-2">
+                        <ul class="nav nav-tabs flex-column">
+                            {% for business in businesses %}
+                                <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
+                                    data-aos="fade-up">
+                                <a class="nav-link" data-toggle="tab"
+                                   href="#{{ business.slug }}">{{ business.business_name }}</a>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="col-lg-4 mt-2">
+                        <ul class="nav nav-tabs flex-column">
+                            <li data-type='entry' class="nav-item"
                                 data-aos="fade-up">
-                            <a class="nav-link" data-toggle="tab"
-                               href="#{{ business.slug }}">{{ business.business_name }}</a>
-                        {% endfor %}
-                    </ul>
-                </div>
+                                <a class="nav-link">No Results</a>
+                        </ul>
+                    </div>
+                {% endif %}
 
             </div>
         </div>
