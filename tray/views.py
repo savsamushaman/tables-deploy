@@ -22,7 +22,13 @@ class GenerateOrder(View):
             return HttpResponseBadRequest()
 
         slug = self.kwargs['place']
-        table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
+        try:
+            table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
+        except TableModel.DoesNotExist:
+            messages.add_message(request, messages.INFO, "Non-existent or missing table")
+            self.request.session['current_order'] = None
+            self.request.session['tray'] = []
+            return redirect('tray:my_tray')
 
         if table.locked:
             messages.add_message(self.request, messages.INFO, f'Table {table.table_nr} is locked')
@@ -109,12 +115,13 @@ class PlaceOrder(View):
 class RemoveItemFromOrder(View):
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
-        order_items = self.request.session['tray']
-        for item in order_items:
-            if item['item_id'] == pk:
-                order_items.remove(item)
-                break
-        self.request.session['tray'] = order_items
+        order_items = self.request.session.get('tray', None)
+        if order_items:
+            for item in order_items:
+                if item['item_id'] == pk:
+                    order_items.remove(item)
+                    break
+            self.request.session['tray'] = order_items
         return redirect('tray:my_tray')
 
 
@@ -126,23 +133,24 @@ def update_tray(request):
         product_id = int(data['id'])
         action = data['action']
 
-        all_items = request.session['tray']
+        all_items = request.session.get('tray', None)
         new_value = 0
 
-        for item in all_items:
-            if item['item_id'] == product_id:
-                if action == 'add':
-                    item['quantity'] += 1
-                    new_value = item['quantity']
-                    break
-                elif action == 'remove':
-                    item['quantity'] -= 1
-                    if item['quantity'] <= 0:
+        if all_items:
+            for item in all_items:
+                if item['item_id'] == product_id:
+                    if action == 'add':
+                        item['quantity'] += 1
                         new_value = item['quantity']
-                        all_items.remove(item)
                         break
-                    new_value = item['quantity']
-                    break
+                    elif action == 'remove':
+                        item['quantity'] -= 1
+                        if item['quantity'] <= 0:
+                            new_value = item['quantity']
+                            all_items.remove(item)
+                            break
+                        new_value = item['quantity']
+                        break
 
         request.session['tray'] = all_items
         payload = {'new_value': new_value}
