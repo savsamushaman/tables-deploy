@@ -36,8 +36,8 @@ class BusinessFilter(django_filters.FilterSet):
 
     current_guests = django_filters.NumberFilter(min_value=0, lookup_expr='lte', widget=forms.NumberInput(
         attrs={'class': 'form-control filter-field', 'id': 'inputCurrGuests', 'placeholder': 'X or less'}))
-    available_tables = django_filters.NumberFilter(min_value=0, lookup_expr='lte', widget=forms.NumberInput(
-        attrs={'class': 'form-control filter-field', 'id': 'inputAvailTables', 'placeholder': 'X or less'}))
+    available_tables = django_filters.NumberFilter(min_value=0, lookup_expr='gte', widget=forms.NumberInput(
+        attrs={'class': 'form-control filter-field', 'id': 'inputAvailTables', 'placeholder': 'X or more'}))
 
     is_open_now = django_filters.TypedChoiceFilter(choices=BOOL_CHOICES, coerce=strtobool,
                                                    widget=forms.Select(attrs={

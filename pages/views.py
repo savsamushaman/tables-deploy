@@ -74,7 +74,7 @@ class PlaceDetailView(DetailView):
             on_the_tray = []
 
         context['on_the_tray'] = on_the_tray
-        context['tables'] = TableModel.objects.filter(business=kwargs['object'], deleted=False)
+        context['tables'] = TableModel.objects.filter(business=kwargs['object'])
         context['categories'] = ProductCategory.objects.filter(business=kwargs['object'], deleted=False)
         context['products'] = ProductModel.objects.filter(business=kwargs['object'], deleted=False)
         context['current_order'] = self.request.session.get('current_order', '')

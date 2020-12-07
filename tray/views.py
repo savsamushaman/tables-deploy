@@ -25,13 +25,13 @@ class GenerateOrder(View):
         try:
             table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
         except TableModel.DoesNotExist:
-            messages.add_message(request, messages.INFO, "Non-existent or missing table")
+            messages.add_message(request, messages.ERROR, "Non-existent or missing table")
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
             return redirect('tray:my_tray')
 
         if table.locked:
-            messages.add_message(self.request, messages.INFO, f'Table {table.table_nr} is locked')
+            messages.add_message(self.request, messages.ERROR, f'Table {table.table_nr} is locked')
             return redirect('pages:place_detail', slug=slug)
 
         table.current_guests.add(customer)
@@ -58,7 +58,7 @@ class CancelOrder(View):
         if response == HttpResponseBadRequest:
             return HttpResponseBadRequest
         elif response == ObjectDoesNotExist:
-            messages.add_message(request, messages.INFO, 'Table not available')
+            messages.add_message(request, messages.ERROR, 'Table not available')
             return redirect('tray:my_tray')
         else:
             return redirect('tray:my_tray')
@@ -76,7 +76,7 @@ class PlaceOrder(View):
         business = BusinessModel.objects.get(slug=slug)
 
         if not business.is_active:
-            messages.add_message(request, messages.INFO, 'Place unavailable')
+            messages.add_message(request, messages.ERROR, 'Place unavailable')
             request.session['current_order'] = None
             request.session['tray'] = []
             return redirect('tray:my_tray')
@@ -84,7 +84,7 @@ class PlaceOrder(View):
         try:
             table = TableModel.objects.get(business=business, table_nr=table)
         except TableModel.DoesNotExist:
-            messages.add_message(request, messages.INFO, "Non-existent or missing table")
+            messages.add_message(request, messages.ERROR, "Non-existent or missing table")
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
             return redirect('tray:my_tray')
@@ -92,7 +92,7 @@ class PlaceOrder(View):
         if customer not in table.current_guests.all():
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
-            messages.add_message(request, messages.INFO, "You are not sitting at the table currently")
+            messages.add_message(request, messages.ERROR, "You are not sitting at the table currently")
             return redirect('tray:my_tray')
 
         order = OrderModel.objects.create(business=business, customer=customer, table=table, status='PL')
@@ -207,7 +207,7 @@ class TrayListView(TemplateView):
             try:
                 table = TableModel.objects.get(business=business, table_nr=table)
             except TableModel.DoesNotExist:
-                messages.add_message(self.request, messages.INFO, "Wrong or missing table")
+                messages.add_message(self.request, messages.ERROR, "Wrong or missing table")
                 self.request.session['current_order'] = None
                 self.request.session['tray'] = []
                 return redirect('tray:my_tray')
@@ -215,7 +215,7 @@ class TrayListView(TemplateView):
             if customer not in table.current_guests.all():
                 self.request.session['current_order'] = None
                 self.request.session['tray'] = []
-                messages.add_message(self.request, messages.INFO, "You are not sitting at the table currently")
+                messages.add_message(self.request, messages.ERROR, "You are not sitting at the table currently")
                 return redirect('tray:my_tray')
 
             return super(TrayListView, self).get(request, *args, **kwargs)
@@ -316,13 +316,13 @@ class UpdateTable(View):
         try:
             table = TableModel.objects.get(business__slug=business_slug, table_nr=table_nr)
         except TableModel.DoesNotExist:
-            messages.add_message(request, messages.INFO, "Wrong or missing table")
+            messages.add_message(request, messages.ERROR, "Wrong or missing table")
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
             return redirect('tray:my_tray')
 
         if customer not in table.current_guests.all():
-            messages.add_message(request, messages.INFO, 'You are not sitting at the table currently')
+            messages.add_message(request, messages.ERROR, 'You are not sitting at the table currently')
             self.request.session['current_order'] = None
             self.request.session['tray'] = []
             return redirect('tray:my_tray')

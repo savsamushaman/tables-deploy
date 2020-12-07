@@ -71,6 +71,19 @@
                              src="{% static 'img/table.png' %}"
                              alt=""/>
                     </div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% else %}
+                                <div id='alert-div' class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
 
                 </div>
             </div>

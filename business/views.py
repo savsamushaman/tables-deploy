@@ -1,5 +1,6 @@
 import json
 
+from django.db import IntegrityError
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, \
@@ -171,6 +172,10 @@ class CreateProductView(LoginRequiredMixin, CreateView):
                              message=f'Product {form.instance.name} was created successfully')
         return super(CreateProductView, self).form_valid(form)
 
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.ERROR, 'Product Creation Failed')
+        return super(CreateProductView, self).form_invalid(form)
+
     def get_context_data(self, **kwargs):
         context = super(CreateProductView, self).get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
@@ -258,7 +263,7 @@ class TableListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(TableListView, self).get_context_data(**kwargs)
-        context['tables'] = TableModel.objects.filter(business__slug=self.kwargs['slug'], deleted=False).order_by(
+        context['tables'] = TableModel.objects.filter(business__slug=self.kwargs['slug']).order_by(
             'table_nr')
         context['slug'] = self.kwargs['slug']
         return context
@@ -295,7 +300,13 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
-        form.instance.save()
+        try:
+            form.instance.save()
+        except IntegrityError:
+            form.add_error('table_nr', 'Table already exists')
+            messages.add_message(self.request, messages.ERROR,
+                                 f'Table with number {form.instance.table_nr} already exists ')
+            return super(CreateTableView, self).get(self.request, self.args, self.kwargs)
         business.all_tables += 1
         business.available_tables += 1
         business.save()
@@ -303,7 +314,7 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         return super(CreateTableView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('owned:tables_list', kwargs={'slug': self.kwargs['slug']})
+        return reverse_lazy('owned:create_table', kwargs={'slug': self.kwargs['slug']})
 
 
 # Update
@@ -330,7 +341,14 @@ class TableEditView(LoginRequiredMixin, UpdateView):
             return HttpResponseForbidden()
 
     def form_valid(self, form):
-        form.instance.save()
+        try:
+            form.instance.save()
+        except IntegrityError:
+            form.add_error('table_nr', 'Table already exists')
+            messages.add_message(self.request, messages.ERROR,
+                                 f'Table with number {form.instance.table_nr} already exists ')
+            return super(TableEditView, self).get(self.request, self.args, self.kwargs)
+
         messages.add_message(self.request, messages.INFO, f'Table {form.instance.table_nr} was updated successfully')
         return super(TableEditView, self).form_valid(form)
 
@@ -395,7 +413,13 @@ class CreateMenuPoint(LoginRequiredMixin, CreateView):
         slug = self.kwargs.get('slug')
         business = BusinessModel.objects.get(slug=slug)
         form.instance.business = business
-        form.instance.save()
+        try:
+            form.instance.save()
+        except IntegrityError:
+            form.add_error('category_name', 'Table already exists')
+            messages.add_message(self.request, messages.ERROR,
+                                 f'Menupoint {form.instance.category_name} already exists ')
+            return super(CreateMenuPoint, self).get(self.request, self.args, self.kwargs)
         messages.add_message(self.request, level=messages.INFO,
                              message=f'Menu Point {form.instance.category_name} was created successfully')
         return super(CreateMenuPoint, self).form_valid(form)
@@ -459,7 +483,13 @@ class MenuPointEditView(LoginRequiredMixin, UpdateView):
             return HttpResponseForbidden()
 
     def form_valid(self, form):
-        form.instance.save()
+        try:
+            form.instance.save()
+        except IntegrityError:
+            form.add_error('category_name', 'Table already exists')
+            messages.add_message(self.request, messages.ERROR,
+                                 f'Menupoint {form.instance.category_name} already exists ')
+            return super(MenuPointEditView, self).get(self.request, self.args, self.kwargs)
         messages.add_message(self.request, level=messages.INFO,
                              message=f'Menu Point {form.instance.category_name} was updated successfully')
         return super(MenuPointEditView, self).form_valid(form)
@@ -477,21 +507,19 @@ class MenuPointDelete(LoginRequiredMixin, View):
         business = BusinessModel.objects.get(slug=slug)
         if request.user == business.manager and business.is_active:
             menupoint = ProductCategory.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            products = ProductModel.objects.filter(category=menupoint)
 
-            try:
-                products = ProductModel.objects.filter(category=menupoint)
-            except:
-                products = None
-
-            if products:
-                for product in products:
-                    product.category = None
+            for product in products:
+                product.category = None
+                product.save()
 
             menupoint.deleted = True
-            menupoint.save()
-
             messages.add_message(request, level=messages.INFO,
                                  message=f'Menupoint {menupoint.category_name} was deleted successfully')
+
+            menupoint.category_name = f'deleted-menupoint-{menupoint.pk}-{menupoint.business.business_name}'
+            menupoint.save()
+
             return redirect('owned:menupoints_list', slug=slug)
         else:
             return HttpResponseForbidden()

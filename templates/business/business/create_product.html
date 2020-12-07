@@ -73,11 +73,17 @@
                              alt=""/>
                     </div>
                     {% if messages %}
-                        <div id='alert-div' class="alert alert-success" role="alert">
-                            {% for message in messages %}
-                                {{ message }}
-                            {% endfor %}
-                        </div>
+                        {% for message in messages %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% else %}
+                                <div id='alert-div' class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
                 </div>
             </div>
@@ -131,7 +137,7 @@
                             <div class="value">
                                 <div class="input-group">
                                     {{ form.description }}
-                                    {{ form.errors }}
+                                    {{ form.description.errors }}
                                 </div>
                             </div>
                         </div>

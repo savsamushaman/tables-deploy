@@ -29,6 +29,15 @@ class CreateBusinessForm(ModelForm):
                                       widget=forms.NumberInput(
                                           attrs={'class': 'input--style-5', 'placeholder': 'Max Capacity'}))
 
+    def clean(self):
+        super(CreateBusinessForm, self).clean()
+
+        max_capacity = self.cleaned_data.get('max_capacity')
+        if isinstance(max_capacity, type(None)):
+            self._errors['max_capacity'] = self.error_class(['Max capacity cannot be less than 0'])
+
+        return self.cleaned_data
+
 
 class UpdateBusinessForm(ModelForm):
     class Meta:
@@ -46,6 +55,15 @@ class UpdateBusinessForm(ModelForm):
     displayed_address = forms.CharField(widget=forms.TextInput(attrs={'class': 'input--style-5', }))
     max_capacity = forms.IntegerField(min_value=0, widget=forms.NumberInput(attrs={'class': 'input--style-5'}))
 
+    def clean(self):
+        super(UpdateBusinessForm, self).clean()
+
+        max_capacity = self.cleaned_data.get('max_capacity')
+        if isinstance(max_capacity, type(None)):
+            self._errors['max_capacity'] = self.error_class(['Max capacity cannot be less than 0'])
+
+        return self.cleaned_data
+
 
 class ProductForm(ModelForm):
     class Meta:
@@ -58,16 +76,24 @@ class ProductForm(ModelForm):
     description = forms.CharField(required=False,
                                   widget=forms.Textarea(
                                       attrs={'class': 'input--style-5', 'placeholder': 'Ingredients or other details'}))
-
     price = forms.DecimalField(min_value=0, max_digits=10, decimal_places=2,
                                widget=forms.NumberInput(attrs={'class': 'input--style-5', }))
+
+    def clean(self):
+        super(ProductForm, self).clean()
+
+        price = self.cleaned_data.get('price')
+        if isinstance(price, type(None)):
+            self._errors['price'] = self.error_class(['Price cannot be less than 0'])
+
+        return self.cleaned_data
 
     def __init__(self, *args, **kwargs):
         slug = kwargs.pop('slug', None)
         super(ProductForm, self).__init__(*args, **kwargs)
 
         if slug:
-            self.fields['category'].queryset = ProductCategory.objects.filter(business__slug=slug)
+            self.fields['category'].queryset = ProductCategory.objects.filter(business__slug=slug, deleted=False)
 
 
 class TableForm(ModelForm):

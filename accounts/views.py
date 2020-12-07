@@ -86,7 +86,7 @@ def activate_user(request, uidb64, token):
         messages.add_message(request, messages.INFO, 'Your accounts has been activated.')
         return redirect('accounts:login')
     else:
-        messages.add_message(request, messages.INFO, 'Activation link is invalid!')
+        messages.add_message(request, messages.ERROR, 'Activation link is invalid!')
         return redirect('accounts:login')
 
 

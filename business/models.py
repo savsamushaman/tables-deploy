@@ -67,7 +67,6 @@ class TableModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     table_nr = models.IntegerField()
     qr_code = models.ImageField(blank=True, null=True)
-    deleted = models.BooleanField(default=False)
     locked = models.BooleanField(default=False)
     current_guests = models.ManyToManyField(CustomUser, blank=True)
 
@@ -113,6 +112,9 @@ class ProductCategory(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.category_name)
         super(ProductCategory, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('business', 'category_name')
 
 
 class ProductModel(models.Model):

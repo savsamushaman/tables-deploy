@@ -55,12 +55,18 @@
                     <p id='form-error' class="alert alert-info alert-danger">Whoops. Username or password incorrect</p>
                 {% endif %}
                 {% if messages %}
-                    <div id='alert-div' class="alert alert-success" role="alert">
                         {% for message in messages %}
-                            {{ message }}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% else %}
+                                <div id='alert-div' class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
                         {% endfor %}
-                    </div>
-                {% endif %}
+                    {% endif %}
                 <div class="wrap-input100 validate-input m-t-85 m-b-35" data-validate="Enter username">
                     {{ form.username }}
                     <span class="focus-input100" data-placeholder="Username"></span>
