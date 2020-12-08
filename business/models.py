@@ -17,6 +17,13 @@ BUSINESS_CATEGORY_CHOICES = (
 
 )
 
+INVITATION_CHOICES = (
+    ('S', 'Sent'),
+    ('A', 'Accepted'),
+    ('D', 'Declined'),
+    ('C', 'Canceled')
+)
+
 
 class BusinessCategory(models.Model):
     category_name = models.CharField(choices=BUSINESS_CATEGORY_CHOICES, default='Other', max_length=20)
@@ -138,6 +145,16 @@ class ProductModel(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class Invitation(models.Model):
+    from_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='from_user')
+    to_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='to_user')
+    business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
+    status = models.CharField(choices=INVITATION_CHOICES, default='Sent', max_length=15)
+
+    def __str__(self):
+        return f'from : {str(self.from_user)} - to : {str(self.to_user)} / {self.business.business_name}'
 
 # class GenericValueModel(models.Model):
 #     assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)

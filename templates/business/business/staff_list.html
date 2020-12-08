@@ -115,29 +115,46 @@
     </div>
 
     <div class="page-wrapper bg-gra-03 " data-aos="fade-up" data-aos-delay="300">
-
+        <!-- Admins -->
         <h4 style="font-size: 25px"
-            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if admins %}Current
-            admins {% else %} No admins {% endif %}</h4>
+            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if admins %}
+            <i class="fas fa-chess-queen"></i> Current
+            admins {% else %}<i class="fas fa-chess-queen"></i> No admins {% endif %}</h4>
         {% if admins %}
             <div class="wrapper wrapper--w790">
                 <table id="article-table" style="background: orangered" class="table article-table">
                     <thead>
                     <tr>
+                        <th scope="col">Add to staff</th>
                         <th scope="col">First Name</th>
                         <th scope="col">Last Name</th>
                         <th scope="col">Username</th>
                         <th scope="col">Phone Number</th>
+                        <th scope="col">Remove admin status</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for admin in admins %}
                         <tr>
-                            <th scope="row">{% if admin.first_name %} {{ admin.first_name }} {% else %}
-                                - {% endif %}</th>
+
+                            <th scope="row">{% if admin in staff %} Staff member {% else %}<a style="color:#FFE4B5;"
+                                                                                              href="{% url 'owned:staff_list_update' slug=slug user_pk=admin.pk group=0 action=0 %}">
+                                <p> Add to staff</p></a>
+                            {% endif %}</th>
+
+                            <td>{% if admin.first_name %} {{ admin.first_name }} {% else %}
+                                - {% endif %}</td>
+
                             <td>{% if admin.last_name %}{{ admin.last_name }} {% else %} - {% endif %}</td>
+
                             <td>{{ admin.username }}</td>
+
                             <td>{% if admin.phone_number %}{{ admin.phone_number }} {% else %} - {% endif %}</td>
+
+                            <td><a style="color:#FFE4B5;"
+                                   href="{% url 'owned:staff_list_update' slug=slug user_pk=admin.pk group=1 action=1 %}">
+                                <p><i
+                                        class="fas fa-user-times"></i> Remove admin status</p></a></td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -145,28 +162,80 @@
             </div>
         {% endif %}
 
+        <!-- Invitations -->
         <h4 style="font-size: 25px"
-            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if staff %}Current
-            staff {% else %} No staff is working at your place {% endif %}</h4>
+            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5">
+            {% if pending_invitations %}
+                <i class="fas fa-paper-plane"></i> Pending Invitations {% else %}<i class="fas fa-paper-plane"></i> No pending invitations {% endif %}
+        </h4>
+        {% if pending_invitations %}
+            <div class="wrapper wrapper--w790">
+                <table id="article-table" style="background: green" class="table article-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Invited by</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Phone Number</th>
+                        <th scope='col'>Cancel</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for inv in pending_invitations %}
+                        <tr>
+                            <th scope="row">{{ inv.from_user.username }}</th>
+                            <th scope="row">{% if inv.to_user.first_name %} {{ inv.to_user.first_name }} {% else %}
+                                - {% endif %}</th>
+                            <td>{% if inv.to_user.last_name %}{{ inv.to_user.last_name }} {% else %} - {% endif %}</td>
+                            <td>{{ inv.to_user.username }}</td>
+                            <td>{% if inv.to_user.phone_number %}{{ inv.to_user.phone_number }} {% else %}
+                                - {% endif %}</td>
+                            <td><a href="{% url 'owned:cancel_invitation' slug=slug pk=inv.pk %}"><p
+                                    style="color: black"><i class="fas fa-ban"></i> Cancel invitation</p></a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <!-- Staff -->
+        <h4 style="font-size: 25px"
+            class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if staff %}
+            <i class="fas fa-users"></i> Current
+            staff {% else %}<i class="fas fa-users"></i> No staff is working at your place {% endif %}</h4>
         {% if staff %}
             <div class="wrapper wrapper--w790">
                 <table id="article-table" class="table table-dark article-table">
                     <thead>
                     <tr>
+                        <th scope="col">Add to admin</th>
                         <th scope="col">First Name</th>
                         <th scope="col">Last Name</th>
                         <th scope="col">Username</th>
                         <th scope="col">Phone Number</th>
+                        <th scope="col">Remove from staff</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for member in staff %}
                         <tr>
-                            <th scope="row">{% if member.first_name %} {{ member.first_name }} {% else %}
-                                - {% endif %}</th>
+                            <th scope="row">{% if member not in admins %}
+                                <a style="color: #FFE4B5;"
+                                   href="{% url 'owned:staff_list_update' slug=slug user_pk=member.pk group=1 action=0 %}">
+                                    <p>Promote to admin</p></a> {% else %}
+                                <i class="fas fa-chess-queen"></i> Is Admin {% endif %}</th>
+                            <td>{% if member.first_name %} {{ member.first_name }} {% else %}
+                                - {% endif %}</td>
                             <td>{% if member.last_name %}{{ member.last_name }} {% else %} - {% endif %}</td>
                             <td>{{ member.username }}</td>
                             <td>{% if member.phone_number %}{{ member.phone_number }} {% else %} - {% endif %}</td>
+                            <td>
+                                <a href="{% url 'owned:staff_list_update' slug=slug user_pk=member.pk group=0 action=1 %}">
+                                    <p
+                                            style="color: red"><i
+                                            class="fas fa-user-times"></i> Remove from staff</p></a></td>
                         </tr>
                     {% endfor %}
                     </tbody>

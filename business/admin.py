@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BusinessModel, ProductModel, ProductCategory, TableModel, BusinessCategory
+from .models import BusinessModel, ProductModel, ProductCategory, TableModel, BusinessCategory,Invitation
 
 
 class BusinessAdmin(admin.ModelAdmin):
@@ -19,3 +19,4 @@ admin.site.register(ProductModel)
 admin.site.register(TableModel, TableAdmin)
 admin.site.register(BusinessCategory)
 admin.site.register(ProductCategory)
+admin.site.register(Invitation)

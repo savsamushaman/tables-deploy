@@ -1,9 +1,6 @@
 from django.urls import path
 
-from .views import CreateBusinessView, BusinessEditView, ProductEditView, CreateProductView, ProductListView, \
-    TableListView, CreateTableView, TableEditView, ProductDeleteView, TableDeleteView, FeedView, ProcessOrder, \
-    BusinessListView, ReturnOrders, CreateMenuPoint, MenuPointListView, MenuPointEditView, MenuPointDelete, \
-    BusinessDeleteView, StaffListView
+from .views import *
 
 app_name = 'owned'
 
@@ -26,6 +23,9 @@ urlpatterns = [
     path('<slug:slug>/update/menupoints/<int:pk>', MenuPointEditView.as_view(), name='update_menupoint'),
     path('<slug:slug>/update/menupoints/delete/<int:pk>', MenuPointDelete.as_view(), name='delete_menupoint'),
     path('<slug:slug>/update/staff/', StaffListView.as_view(), name='staff_list'),
+    path('<slug:slug>/update/staff/remove/<int:user_pk>/<int:group>/<int:action>', StaffListUpdate.as_view(),
+         name='staff_list_update'),
+    path('<slug:slug>/udpate/staff/cancelinv/<int:pk>', CancelInvitation.as_view(), name='cancel_invitation'),
     path('<slug:slug>/feed/', FeedView.as_view(), name='feed'),
     path('<slug:slug>/feed/<int:pk>', ProcessOrder.as_view(), name='process_order'),
 ]

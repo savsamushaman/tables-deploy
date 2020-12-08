@@ -14,7 +14,7 @@ from accounts.models import CustomUser
 from tray.models import OrderModel, OrderItem
 from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm, MenuPointForm, \
     InviteForm
-from .models import BusinessModel, ProductModel, TableModel, ProductCategory
+from .models import BusinessModel, ProductModel, TableModel, ProductCategory, Invitation
 
 
 # Business -----------------------------------------------------
@@ -537,30 +537,127 @@ class StaffListView(LoginRequiredMixin, FormView):
     template_name = 'business/business/staff_list.html'
     form_class = InviteForm
 
+    def get(self, request, *args, **kwargs):
+        business = BusinessModel.objects.get(slug=kwargs['slug'])
+        if self.request.user in business.admins.all() and business.is_active:
+            return super(StaffListView, self).get(request, *args, **kwargs)
+        else:
+            HttpResponseForbidden()
+
+    def post(self, request, *args, **kwargs):
+        business = BusinessModel.objects.get(slug=kwargs['slug'])
+        if self.request.user in business.admins.all() and business.is_active:
+            return super(StaffListView, self).post(request, *args, **kwargs)
+        else:
+            HttpResponseForbidden()
+
     def get_context_data(self, **kwargs):
         context = super(StaffListView, self).get_context_data(**kwargs)
         slug = self.kwargs['slug']
         context['staff'] = BusinessModel.objects.get(slug=slug).staff.all()
         context['admins'] = BusinessModel.objects.get(slug=slug).admins.all()
+        context['pending_invitations'] = Invitation.objects.filter(business__slug=slug, status='S')
         context['slug'] = slug
+
         return context
 
     def form_valid(self, form):
         business = BusinessModel.objects.get(slug=self.kwargs['slug'])
         username = form.cleaned_data['username']
-        if self.request.user in business.admins.all():
+        current_user = self.request.user
+        if current_user in business.admins.all() and business.is_active:
             try:
                 invited_user = CustomUser.objects.get(username=username)
-                messages.add_message(self.request, messages.INFO,
-                                     f'You invited {username} to {business.business_name} staff')
+                if invited_user in business.staff.all() or invited_user in business.admins.all():
+                    messages.add_message(self.request, messages.INFO,
+                                         f'User {username} is already a staff member/ admin')
+                    return super(StaffListView, self).get(self.request, self.args, self.kwargs)
+
+                is_invited = len(Invitation.objects.filter(to_user=invited_user, business=business, status='S'))
+
+                if not is_invited:
+                    Invitation.objects.create(from_user=current_user, to_user=invited_user, business=business,
+                                              status='S')
+                    messages.add_message(self.request, messages.INFO,
+                                         f'You invited {username} to {business.business_name} staff')
+                else:
+                    messages.add_message(self.request, messages.INFO, f'User {username} is already invited')
                 return super(StaffListView, self).form_valid(form)
             except CustomUser.DoesNotExist:
                 messages.add_message(self.request, messages.ERROR, f'User {username} not found')
                 return super(StaffListView, self).get(self.request, self.args, self.kwargs)
+        else:
+            return HttpResponseForbidden()
 
     def get_success_url(self):
         slug = self.kwargs['slug']
         return reverse_lazy('owned:staff_list', kwargs={'slug': slug})
+
+
+class StaffListUpdate(View):
+    def get(self, request, *args, **kwargs):
+        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
+        user = CustomUser.objects.get(id=self.kwargs['user_pk'])
+        # from_admin evaluates to True if a 0 integer is passed in the url, same with add
+        admin_group = self.kwargs['group']
+        remove = self.kwargs['action']
+        admins = business.admins.all()
+        staff = business.staff.all()
+        if self.request.user in admins and business.is_active:
+            if remove:
+                if admin_group:
+                    if user in admins:
+                        if len(admins) - 1 <= 0:
+                            messages.add_message(request, messages.ERROR,
+                                                 'Action not possible, at least 1 admin is required')
+                        else:
+                            business.admins.remove(user)
+                            messages.add_message(request, messages.INFO, f'{user.username} was removed from admins')
+                    else:
+                        messages.add_message(request, messages.ERROR, f'{user.username} is not an admin')
+                else:
+                    if user in staff:
+                        business.staff.remove(user)
+                        messages.add_message(request, messages.INFO, f'{user.username} was removed from staff')
+                    else:
+                        messages.add_message(request, messages.ERROR, f'{user.username} is not a staff member')
+                return redirect('owned:staff_list', slug=business.slug)
+            else:
+                if admin_group:
+                    if user not in admins:
+                        business.admins.add(user)
+                        messages.add_message(request, messages.INFO, f'{user.username} was added to admins')
+                    else:
+                        messages.add_message(request, messages.ERROR,
+                                             f'{user.username} is already an admin')
+                else:
+                    if user not in staff:
+                        business.staff.add(user)
+                        messages.add_message(request, messages.INFO, f'{user.username} was added to staff')
+                    else:
+                        messages.add_message(request, messages.INFO, f'{user.username} is already a staff member')
+
+                return redirect('owned:staff_list', slug=business.slug)
+
+        else:
+            return HttpResponseForbidden()
+
+
+class CancelInvitation(View):
+    def get(self, request, *args, **kwargs):
+        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
+        if self.request.user in business.admins.all() and business.is_active:
+            invitation = Invitation.objects.get(pk=self.kwargs['pk'], business=business)
+            if invitation.status != 'C':
+                invitation.status = 'C'
+                invitation.save()
+                messages.add_message(request, messages.INFO, 'Invitation was cancelled')
+                return redirect('owned:staff_list', slug=business.slug)
+            else:
+                messages.add_message(request, messages.ERROR, 'Invitation was already accepted or declined')
+                return redirect('owned:staff_list', slug=business.slug)
+        else:
+            return HttpResponseForbidden()
 
 
 # Feed -----------------------------------------------------
