@@ -22,6 +22,9 @@ class BusinessCategory(models.Model):
     category_name = models.CharField(choices=BUSINESS_CATEGORY_CHOICES, default='Other', max_length=20)
     icon = models.ImageField(null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = 'Business Category models'
+
     def __str__(self):
         return str(self.category_name)
 
@@ -44,6 +47,8 @@ class BusinessModel(models.Model):
     available_tables = models.IntegerField(blank=True, null=True, default=0)
     is_open_now = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    staff = models.ManyToManyField(CustomUser, blank=True, related_name='staff', )
+    admins = models.ManyToManyField(CustomUser, blank=True, related_name='admins', )
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.business_name)
@@ -115,6 +120,7 @@ class ProductCategory(models.Model):
 
     class Meta:
         unique_together = ('business', 'category_name')
+        verbose_name_plural = 'Product Category models'
 
 
 class ProductModel(models.Model):

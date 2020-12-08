@@ -121,3 +121,8 @@ class MenuPointForm(ModelForm):
 
     category_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'input--style-5', 'placeholder': 'Menu Point name'}))
+
+
+class InviteForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control invite-field', 'placeholder': 'Username'}))

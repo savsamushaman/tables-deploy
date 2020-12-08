@@ -8,10 +8,12 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonRespon
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, UpdateView, ListView, DeleteView
+from django.views.generic import CreateView, UpdateView, ListView, DeleteView, FormView
 
+from accounts.models import CustomUser
 from tray.models import OrderModel, OrderItem
-from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm, MenuPointForm
+from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm, MenuPointForm, \
+    InviteForm
 from .models import BusinessModel, ProductModel, TableModel, ProductCategory
 
 
@@ -39,6 +41,11 @@ class CreateBusinessView(LoginRequiredMixin, CreateView):
         form.instance.manager = self.request.user
         messages.add_message(self.request, messages.INFO, f'{form.instance.business_name} was created successfully')
         return super().form_valid(form)
+
+    def get_success_url(self):
+        self.object.admins.add(self.object.manager)
+        self.object.save()
+        return super(CreateBusinessView, self).get_success_url()
 
 
 # Edit
@@ -523,6 +530,37 @@ class MenuPointDelete(LoginRequiredMixin, View):
             return redirect('owned:menupoints_list', slug=slug)
         else:
             return HttpResponseForbidden()
+
+
+class StaffListView(LoginRequiredMixin, FormView):
+    model = CustomUser
+    template_name = 'business/business/staff_list.html'
+    form_class = InviteForm
+
+    def get_context_data(self, **kwargs):
+        context = super(StaffListView, self).get_context_data(**kwargs)
+        slug = self.kwargs['slug']
+        context['staff'] = BusinessModel.objects.get(slug=slug).staff.all()
+        context['admins'] = BusinessModel.objects.get(slug=slug).admins.all()
+        context['slug'] = slug
+        return context
+
+    def form_valid(self, form):
+        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
+        username = form.cleaned_data['username']
+        if self.request.user in business.admins.all():
+            try:
+                invited_user = CustomUser.objects.get(username=username)
+                messages.add_message(self.request, messages.INFO,
+                                     f'You invited {username} to {business.business_name} staff')
+                return super(StaffListView, self).form_valid(form)
+            except CustomUser.DoesNotExist:
+                messages.add_message(self.request, messages.ERROR, f'User {username} not found')
+                return super(StaffListView, self).get(self.request, self.args, self.kwargs)
+
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:staff_list', kwargs={'slug': slug})
 
 
 # Feed -----------------------------------------------------

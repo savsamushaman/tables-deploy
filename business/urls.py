@@ -3,7 +3,7 @@ from django.urls import path
 from .views import CreateBusinessView, BusinessEditView, ProductEditView, CreateProductView, ProductListView, \
     TableListView, CreateTableView, TableEditView, ProductDeleteView, TableDeleteView, FeedView, ProcessOrder, \
     BusinessListView, ReturnOrders, CreateMenuPoint, MenuPointListView, MenuPointEditView, MenuPointDelete, \
-    BusinessDeleteView
+    BusinessDeleteView, StaffListView
 
 app_name = 'owned'
 
@@ -25,7 +25,7 @@ urlpatterns = [
     path('<slug:slug>/update/menupoints/create', CreateMenuPoint.as_view(), name='create_menu_point'),
     path('<slug:slug>/update/menupoints/<int:pk>', MenuPointEditView.as_view(), name='update_menupoint'),
     path('<slug:slug>/update/menupoints/delete/<int:pk>', MenuPointDelete.as_view(), name='delete_menupoint'),
-
+    path('<slug:slug>/update/staff/', StaffListView.as_view(), name='staff_list'),
     path('<slug:slug>/feed/', FeedView.as_view(), name='feed'),
     path('<slug:slug>/feed/<int:pk>', ProcessOrder.as_view(), name='process_order'),
 ]
