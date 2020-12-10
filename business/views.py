@@ -1,8 +1,8 @@
 import json
 
-from django.db import IntegrityError
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, \
     HttpResponseForbidden
 from django.shortcuts import render, redirect
@@ -20,13 +20,18 @@ from .models import BusinessModel, ProductModel, TableModel, ProductCategory, In
 # Business -----------------------------------------------------
 # List
 class BusinessListView(LoginRequiredMixin, ListView):
-    context_object_name = 'owned'
+    context_object_name = 'your_places'
+    queryset = None
     template_name = 'business/business/business_list.html'
     model = BusinessModel
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(BusinessListView, self).get_context_data(**kwargs)
-        context['owned'] = BusinessModel.objects.filter(manager=self.request.user, is_active=True)
+        user = self.request.user
+        is_admin = user.admins.all()
+        is_staff = user.staff.all()
+        places = (is_admin | is_staff).distinct()
+        context['your_places'] = places
         return context
 
 
@@ -48,6 +53,20 @@ class CreateBusinessView(LoginRequiredMixin, CreateView):
         return super(CreateBusinessView, self).get_success_url()
 
 
+####################################################################################################################
+def check_if_allowed(request, slug, allow_staff=False):
+    business = BusinessModel.objects.get(slug=slug)
+    user = request.user
+    if business.is_active:
+        if business.manager == user or user in business.admins.all():
+            return True
+        if allow_staff:
+            if user in business.staff.all():
+                return True
+        return False
+    return False
+
+
 # Edit
 class BusinessEditView(LoginRequiredMixin, UpdateView):
     model = BusinessModel
@@ -58,19 +77,21 @@ class BusinessEditView(LoginRequiredMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(BusinessEditView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:owned_list")
 
     def post(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug)
+        if allowed:
             return super(BusinessEditView, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
     def get_context_data(self, **kwargs):
         context = super(BusinessEditView, self).get_context_data(**kwargs)
@@ -97,16 +118,18 @@ class BusinessDeleteView(LoginRequiredMixin, DeleteView):
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug)
+        if allowed:
             return super(BusinessDeleteView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug)
+        if allowed:
+            business = BusinessModel.objects.get(slug=slug)
             orders = OrderModel.objects.filter(business=business, status__regex='PL|S')
             tables = TableModel.objects.filter(business=business)
             for order in orders:
@@ -122,7 +145,8 @@ class BusinessDeleteView(LoginRequiredMixin, DeleteView):
             messages.add_message(request, messages.INFO, f'{business.business_name} was deleted successfully')
             return redirect('owned:owned_list')
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 # Product -----------------------------------------------------
@@ -134,11 +158,12 @@ class ProductListView(LoginRequiredMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(ProductListView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def get_context_data(self, **kwargs):
         context = super(ProductListView, self).get_context_data(**kwargs)
@@ -155,20 +180,22 @@ class CreateProductView(LoginRequiredMixin, CreateView):
     form_class = ProductForm
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(CreateProductView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(CreateProductView, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def form_valid(self, form):
         slug = self.kwargs.get('slug')
@@ -206,20 +233,22 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
     form_class = ProductForm
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(ProductEditView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(ProductEditView, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def form_valid(self, form):
         form.instance.save()
@@ -241,8 +270,8 @@ class ProductEditView(LoginRequiredMixin, UpdateView):
 class ProductDeleteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             product = ProductModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
             product.deleted = True
             product.save()
@@ -250,7 +279,8 @@ class ProductDeleteView(LoginRequiredMixin, View):
                                  message=f'Product {product.name} was deleted successfully')
             return redirect('owned:products_list', slug=slug)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action Not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 # Table -----------------------------------------------------
@@ -262,11 +292,12 @@ class TableListView(LoginRequiredMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(TableListView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def get_context_data(self, **kwargs):
         context = super(TableListView, self).get_context_data(**kwargs)
@@ -283,20 +314,22 @@ class CreateTableView(LoginRequiredMixin, CreateView):
     form_class = TableForm
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(CreateTableView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(CreateTableView, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def get_context_data(self, **kwargs):
         context = super(CreateTableView, self).get_context_data(**kwargs)
@@ -332,20 +365,22 @@ class TableEditView(LoginRequiredMixin, UpdateView):
     form_class = UpdateTableForm
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(TableEditView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(TableEditView, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def form_valid(self, form):
         try:
@@ -374,9 +409,17 @@ class TableEditView(LoginRequiredMixin, UpdateView):
 class TableDeleteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
-            table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
+            try:
+                business = BusinessModel.objects.get(sluge=slug)
+                table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            except (BusinessModel.DoesNotExist, TableModel.DoesNotExist):
+                messages.add_message(request, level=messages.INFO,
+                                     message=f'Bad request')
+                messages.add_message(request, messages.ERROR, 'Object does not exist')
+                return redirect("owned:business_update", slug=slug)
+
             if len(table.current_guests.all()) == 0:
                 business.available_tables -= 1
             business.current_guests -= len(table.current_guests.all())
@@ -389,7 +432,8 @@ class TableDeleteView(LoginRequiredMixin, View):
                                  message=f'Table {table.table_nr} was deleted successfully')
             return redirect('owned:tables_list', slug=slug)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 # Menu point -----------------------------------------------------
@@ -401,20 +445,22 @@ class CreateMenuPoint(LoginRequiredMixin, CreateView):
     template_name = 'business/business/create_menupoint.html'
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(CreateMenuPoint, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(CreateMenuPoint, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def form_valid(self, form):
         slug = self.kwargs.get('slug')
@@ -450,11 +496,12 @@ class MenuPointListView(LoginRequiredMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(MenuPointListView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def get_context_data(self, **kwargs):
         context = super(MenuPointListView, self).get_context_data(**kwargs)
@@ -474,20 +521,22 @@ class MenuPointEditView(LoginRequiredMixin, UpdateView):
     form_class = MenuPointForm
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(MenuPointEditView, self).get(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        slug = kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             return super(MenuPointEditView, self).post(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def form_valid(self, form):
         try:
@@ -511,8 +560,8 @@ class MenuPointEditView(LoginRequiredMixin, UpdateView):
 class MenuPointDelete(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
-        business = BusinessModel.objects.get(slug=slug)
-        if request.user == business.manager and business.is_active:
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
             menupoint = ProductCategory.objects.get(business__slug=slug, pk=self.kwargs['pk'])
             products = ProductModel.objects.filter(category=menupoint)
 
@@ -529,7 +578,8 @@ class MenuPointDelete(LoginRequiredMixin, View):
 
             return redirect('owned:menupoints_list', slug=slug)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 class StaffListView(LoginRequiredMixin, FormView):
@@ -538,18 +588,22 @@ class StaffListView(LoginRequiredMixin, FormView):
     form_class = InviteForm
 
     def get(self, request, *args, **kwargs):
-        business = BusinessModel.objects.get(slug=kwargs['slug'])
-        if self.request.user in business.admins.all() and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug)
+        if allowed:
             return super(StaffListView, self).get(request, *args, **kwargs)
         else:
-            HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
 
     def post(self, request, *args, **kwargs):
-        business = BusinessModel.objects.get(slug=kwargs['slug'])
-        if self.request.user in business.admins.all() and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug)
+        if allowed:
             return super(StaffListView, self).post(request, *args, **kwargs)
         else:
-            HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
     def get_context_data(self, **kwargs):
         context = super(StaffListView, self).get_context_data(**kwargs)
@@ -562,10 +616,12 @@ class StaffListView(LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
-        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
-        username = form.cleaned_data['username']
-        current_user = self.request.user
-        if current_user in business.admins.all() and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(self.request, slug)
+        if allowed:
+            business = BusinessModel.objects.get(slug=self.kwargs['slug'])
+            username = form.cleaned_data['username']
+            current_user = self.request.user
             try:
                 invited_user = CustomUser.objects.get(username=username)
                 if invited_user in business.staff.all() or invited_user in business.admins.all():
@@ -596,14 +652,17 @@ class StaffListView(LoginRequiredMixin, FormView):
 
 class StaffListUpdate(View):
     def get(self, request, *args, **kwargs):
-        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
-        user = CustomUser.objects.get(id=self.kwargs['user_pk'])
-        # from_admin evaluates to True if a 0 integer is passed in the url, same with add
-        admin_group = self.kwargs['group']
-        remove = self.kwargs['action']
-        admins = business.admins.all()
-        staff = business.staff.all()
-        if self.request.user in admins and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug)
+        if allowed:
+            business = BusinessModel.objects.get(slug=self.kwargs['slug'])
+            user = CustomUser.objects.get(id=self.kwargs['user_pk'])
+            # from_admin evaluates to True if a 0 integer is passed in the url, same with add
+            admin_group = self.kwargs['group']
+            remove = self.kwargs['action']
+            admins = business.admins.all()
+            staff = business.staff.all()
+
             if remove:
                 if admin_group:
                     if user in admins:
@@ -640,13 +699,16 @@ class StaffListUpdate(View):
                 return redirect('owned:staff_list', slug=business.slug)
 
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 class CancelInvitation(View):
     def get(self, request, *args, **kwargs):
-        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
-        if self.request.user in business.admins.all() and business.is_active:
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug)
+        if allowed:
+            business = BusinessModel.objects.get(slug=slug)
             invitation = Invitation.objects.get(pk=self.kwargs['pk'], business=business)
             if invitation.status != 'C':
                 invitation.status = 'C'
@@ -657,7 +719,8 @@ class CancelInvitation(View):
                 messages.add_message(request, messages.ERROR, 'Invitation was already accepted or declined')
                 return redirect('owned:staff_list', slug=business.slug)
         else:
-            return HttpResponseForbidden()
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 # Feed -----------------------------------------------------

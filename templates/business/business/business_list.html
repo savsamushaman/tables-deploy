@@ -43,33 +43,34 @@
         <button class="create-business" type="button">Create a new business</button>
     </a>
     {% if messages %}
-                        {% for message in messages %}
-                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% else %}
-                                <div id='alert-div' class="alert alert-success" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-    {% if owned %}
-        {% for business in owned %}
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+            {% else %}
+                <div id='alert-div' class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% if your_places %}
+        {% for place in your_places %}
             <li data-aos="fade-up" data-aos-delay="300">
-                <a href="{% url 'owned:business_update' business.slug %}"
-                   style="background-image: url('{{ business.category.icon.url }}')"></a>
+                <a href="{% url 'owned:business_update' place.slug %}"
+                   style="background-image: url('{{ place.category.icon.url }}')"></a>
                 <div>
-                    <h2><a href="{% url 'owned:business_update' business.slug %}">{{ business.business_name }}</a></h2>
-                    <a href="{% url 'owned:feed' business.slug %}">
+                    <h2><a href="{% url 'owned:business_update' place.slug %}">{{ place.business_name }}</a></h2>
+                    <a href="{% url 'owned:feed' place.slug %}">
                         <button id="feed-button">Feed</button>
                     </a>
-                    <p>{% if business.is_open_now %}OPEN NOW {% else %}CLOSED{% endif %}</p>
-                    <p>{{ business.email }}</p>
-                    <p>{{ business.phone_nr }}</p>
-                    <p>{{ business.short_description | slice:100 }}</p>
-                    <a href="{% url 'owned:business_update' business.slug %}" class="read-more">
+                    <p>{% if place.manager == user %} - owner{% else %} - member{% endif %}</p>
+                    <p>{% if place.is_open_now %}OPEN NOW {% else %}CLOSED{% endif %}</p>
+                    <p>{{ place.email }}</p>
+                    <p>{{ place.phone_nr }}</p>
+                    <p>{{ place.short_description | slice:100 }}</p>
+                    <a href="{% url 'owned:business_update' place.slug %}" class="read-more">
                         <button id="feed-button">Details</button>
                     </a>
                 </div>

@@ -46,6 +46,19 @@
     <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
         <div class="container">
             <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Manage Your Place</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                        <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div id='alert-div' class="alert alert-success" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
             <!-- Icon Divider-->
             <div class="divider-custom">
                 <div class="divider-custom-line"></div>
@@ -111,14 +124,6 @@
                              alt=""/>
                     </div>
                 </div>
-                {% if messages %}
-                    <div id='alert-div' class="alert alert-danger" role="alert">
-                        {% for message in messages %}
-                            {{ message }}
-                        {% endfor %}
-                        {{ form.errors }}
-                    </div>
-                {% endif %}
             </div>
         </div>
     </section>
