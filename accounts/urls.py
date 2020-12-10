@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import RegisterUserView, MyLoginView, MyLogoutView, UserDetailView, CustomPasswordResetView, \
     CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetComplete, UpdateUserView, \
-    ChangePasswordView, ChangePasswordDoneView, activate_user
+    ChangePasswordView, ChangePasswordDoneView, activate_user, InvitationsListView, InvitationAction
 
 app_name = 'accounts'
 
@@ -19,5 +19,7 @@ urlpatterns = [
     path('change_userdetails/<slug:slug>/', UpdateUserView.as_view(), name='update_user'),
     path('change_password/', ChangePasswordView.as_view(), name='change_password'),
     path('change_password/done/', ChangePasswordDoneView.as_view(), name='change_password_done'),
+    path('invitations/', InvitationsListView.as_view(), name='invitations_list'),
+    path('invitations/<int:pk>/<int:action>', InvitationAction.as_view(), name='invitation_action')
 
 ]

@@ -42,18 +42,18 @@
             <h1 class="masthead-heading text-uppercase mb-0">Profile</h1>
             <!-- Icon Divider-->
             {% if messages %}
-                        {% for message in messages %}
-                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% else %}
-                                <div id='alert-div' class="alert alert-success" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
+                {% for message in messages %}
+                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                        <div style="background: red" id='alert-div' class="alert alert-success" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div id='alert-div' class="alert alert-success" role="alert">
+                            {{ message }}
+                        </div>
                     {% endif %}
+                {% endfor %}
+            {% endif %}
             <div class="divider-custom divider-light">
                 <div class="divider-custom-line"></div>
                 <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
@@ -77,6 +77,9 @@
                         {{ user.last_name }} {% endif %} {% else %} - {% endif %}</p>
             <a href="{% url 'accounts:update_user' user.slug %}">
                 <button class="btn btn--radius-2 btn--red update-button">Update</button>
+            </a>
+            <a href="{% url 'accounts:invitations_list' %}">
+                <button class="btn btn--radius-2 btn--red update-button">Invitations</button>
             </a>
         </div>
     </header>

@@ -12,10 +12,10 @@ from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
-from django.views.generic import CreateView, UpdateView, TemplateView
+from django.views.generic import CreateView, UpdateView, TemplateView, ListView
 from django.core.exceptions import ObjectDoesNotExist
 
-from business.models import TableModel
+from business.models import TableModel, Invitation
 from tray.models import OrderModel, OrderItem
 from .forms import RegisterUserForm, LoginForm, UpdateUserForm, ChangePasswordForm
 from .models import CustomUser
@@ -186,6 +186,49 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
         messages.add_message(self.request, messages.INFO, 'User was successfully updated')
         form.save()
         return super(UpdateUserView, self).form_valid(form)
+
+
+
+class InvitationsListView(LoginRequiredMixin, ListView):
+    model = Invitation
+    template_name = 'accounts/invitations.html'
+    context_object_name = 'invitations'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(InvitationsListView, self).get_context_data(**kwargs)
+        context['invitations'] = Invitation.objects.filter(to_user=self.request.user, status='S')
+        return context
+
+
+class InvitationAction(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        try:
+            invitation = Invitation.objects.get(pk=self.kwargs['pk'])
+        except Invitation.DoesNotExist:
+            messages.add_message(request, messages.ERROR, 'Non existent invitation')
+            return redirect('accounts:invitations_list')
+        accept = self.kwargs['action']
+        if self.request.user == invitation.to_user:
+            if invitation.status == 'S':
+                if accept:
+                    invitation.business.staff.add(invitation.to_user)
+                    invitation.business.save()
+                    invitation.status = 'A'
+                    invitation.save()
+                    messages.add_message(request, messages.INFO,
+                                         f'You are now part of the {invitation.business} staff ')
+                    return redirect('accounts:invitations_list')
+                else:
+                    invitation.status = 'D'
+                    invitation.save()
+                    messages.add_message(request, messages.INFO,
+                                         f'Invitation declined')
+                    return redirect('accounts:invitations_list')
+            else:
+                messages.add_message(request, messages.ERROR, 'Invitation no longer valid')
+                return redirect('accounts:invitations_list')
+        else:
+            return HttpResponseForbidden()
 
 
 class CustomPasswordResetView(auth_views.PasswordResetView):
