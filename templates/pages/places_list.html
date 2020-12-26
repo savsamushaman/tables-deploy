@@ -84,32 +84,44 @@
 
             <div class="bigbox row" data-aos="fade-up" data-aos-delay="600">
 
-                <div class="col-lg-8 mt-4 mt-lg-0">
-                    <div class="tab-content">
-                        <div class="tab-pane active show" id="">
-                            <div class="row">
-                                <div class="col-lg-8 details order-2 order-lg-1">
-                                    {% if  businesses %}
-                                        <h3>Tap a name</h3>
-                                        <p>for additional information</p>
-                                    {% else %}
-                                        <h3>Sorry</h3>
-                                        <p>...we found nothing</p>
+                <div class="col-lg-8 details order-2 order-lg-1">
+                    {% if  businesses %}
+                        <h3>Tap a name</h3>
+                        <p>for additional information</p>
+                    {% else %}
+                        <h3>Sorry</h3>
+                        <p>...we found nothing</p>
 
-                                    {% endif %}
+                    {% endif %}
 
-                                </div>
-                                <div class="col-lg-4 text-center order-1 order-lg-2">
-                                    <img src="{% static 'img/info.png' %}" alt="" class="img-fluid">
-                                </div>
+                </div>
+                <div class="col-lg-2 text-center order-1 order-lg-2">
+                    <img src="{% static 'img/info.png' %}" alt="" class="img-fluid">
+                </div>
+            </div>
+
+            {% if businesses %}
+                <ul id="accordion" class="nav nav-tabs flex-column">
+                    {% for business in businesses %}
+
+                        <li data-type="entry" data-name="{{ business.business_name }}"
+                            class="place-list-item bigbox nav-item"
+                            data-aos="fade-up">
+                            <a class="nav-link" data-toggle="collapse" data-target="#{{ business.slug }}"
+                               aria-expanded="true"
+                               aria-controls="collapseOne"
+                               href="#{{ business.slug }}">{{ business.business_name }}</a>
+
+                            <div class="col-lg-12 text-center order-1 order-lg-2">
+                                <img src="{{ business.category.icon.url }}"
+                                     alt="" class="img-fluid"
+                                     style="margin-bottom: 3%; height: 200px">
                             </div>
-                        </div>
 
-                        {% for business in businesses %}
-                            <div class="tab-pane" id="{{ business.slug }}">
+                            <div id="{{ business.slug }}" class="collapse" data-parent="#accordion">
                                 <div class="row">
-                                    <div class="col-lg-8 details order-2 order-lg-1">
-                                        <div class="bigbox">
+                                    <div class="col-lg-12 details order-2 order-lg-1">
+                                        <div>
                                             <h3>
                                                 <a href="{% url 'pages:place_detail' business.slug %}">{{ business.business_name }}
                                                     <i class="fas fa-hand-point-left"></i></a>
@@ -132,47 +144,27 @@
                                                 tables: {{ business.available_tables }}/{{ business.all_tables }}
                                             </p>
 
-                                            <p><i class="fas fa-book"></i> Book a table</p>
                                         </div>
-                                    </div>
-                                    <div class="col-lg-4 text-center order-1 order-lg-2">
-                                        <img src="{{ business.category.icon.url }}"
-                                             alt="" class="img-fluid"
-                                             style="margin-bottom: 3%; height: 250px;padding-top: 30px">
                                     </div>
 
                                 </div>
-                                <iframe class="bigbox"
-                                        style="padding: 0;margin-top: 3%;border:0; width: 100%; height: 400px; border-radius: 50px"
+                                <iframe id="mapframe"
                                         src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBcYkbhhKcJCeqqLI7vIy1cV4wE-7eD1Z8
-                                                        &q={{ business.maps_address }}"
+                                        &q={{ business.maps_address }}"
                                         frameborder="0" allowfullscreen></iframe>
                             </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% if businesses %}
-                    <div class="col-lg-4 mt-2">
-                        <ul class="nav nav-tabs flex-column">
-                            {% for business in businesses %}
-                                <li data-type='entry' data-name="{{ business.business_name }}" class="nav-item"
-                                    data-aos="fade-up">
-                                <a class="nav-link" data-toggle="tab"
-                                   href="#{{ business.slug }}">{{ business.business_name }}</a>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% else %}
-                    <div class="col-lg-4 mt-2">
-                        <ul class="nav nav-tabs flex-column">
-                            <li data-type='entry' class="nav-item"
-                                data-aos="fade-up">
-                                <a class="nav-link">No Results</a>
-                        </ul>
-                    </div>
-                {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
 
-            </div>
+                <ul class="nav nav-tabs flex-column">
+                    <li data-type='entry' class="nav-item"
+                        data-aos="fade-up">
+                        <a class="nav-link">No Results</a>
+                </ul>
+
+            {% endif %}
         </div>
     </section>
 {% endblock content %}

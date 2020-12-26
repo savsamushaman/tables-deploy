@@ -43,7 +43,8 @@ class UpdateBusinessForm(ModelForm):
     class Meta:
         model = BusinessModel
         fields = '__all__'
-        exclude = ['manager', 'slug', 'date_created', 'all_tables', 'available_tables', 'is_active', 'current_guests']
+        exclude = ['manager', 'slug', 'date_created', 'all_tables', 'available_tables', 'is_active', 'current_guests',
+                   'staff', 'admins']
 
     business_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input--style-5', }))
     short_description = forms.CharField(required=False,
