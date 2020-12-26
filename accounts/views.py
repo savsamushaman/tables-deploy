@@ -145,6 +145,7 @@ class UserDetailView(LoginRequiredMixin, View):
         user_details = CustomUser.objects.get(pk=request.user.pk)
         finished_orders = OrderModel.objects.filter(customer=self.request.user, status__in='PC').order_by(
             '-date_ordered')
+        invitations = len(Invitation.objects.filter(to_user=self.request.user, status='S'))
         order_history = []
         for order in finished_orders:
             order_items = OrderItem.objects.filter(order=order)
@@ -160,7 +161,7 @@ class UserDetailView(LoginRequiredMixin, View):
 
             })
 
-        context = {'user': user_details, 'order_history': order_history}
+        context = {'user': user_details, 'order_history': order_history, 'active_inv_num': invitations}
         return render(request, template_name, context)
 
 
@@ -186,7 +187,6 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
         messages.add_message(self.request, messages.INFO, 'User was successfully updated')
         form.save()
         return super(UpdateUserView, self).form_valid(form)
-
 
 
 class InvitationsListView(LoginRequiredMixin, ListView):

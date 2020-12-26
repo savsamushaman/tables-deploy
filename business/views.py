@@ -17,6 +17,19 @@ from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableFor
 from .models import BusinessModel, ProductModel, TableModel, ProductCategory, Invitation
 
 
+def check_if_allowed(request, slug, allow_staff=False):
+    business = BusinessModel.objects.get(slug=slug)
+    user = request.user
+    if business.is_active:
+        if business.manager == user or user in business.admins.all():
+            return True
+        if allow_staff:
+            if user in business.staff.all():
+                return True
+        return False
+    return False
+
+
 # Business -----------------------------------------------------
 # List
 class BusinessListView(LoginRequiredMixin, ListView):
@@ -51,20 +64,6 @@ class CreateBusinessView(LoginRequiredMixin, CreateView):
         self.object.admins.add(self.object.manager)
         self.object.save()
         return super(CreateBusinessView, self).get_success_url()
-
-
-####################################################################################################################
-def check_if_allowed(request, slug, allow_staff=False):
-    business = BusinessModel.objects.get(slug=slug)
-    user = request.user
-    if business.is_active:
-        if business.manager == user or user in business.admins.all():
-            return True
-        if allow_staff:
-            if user in business.staff.all():
-                return True
-        return False
-    return False
 
 
 # Edit
@@ -756,7 +755,7 @@ class ProcessOrder(View):
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
-# needs redesigning - add many to many to order instead of order item
+# needs redesigning - add many to many to order instead of order item/ or maybe not
 class ReturnOrders(View):
     def get(self, request, *args, **kwargs):
         return HttpResponseNotAllowed('POST')

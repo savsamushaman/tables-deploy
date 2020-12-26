@@ -79,7 +79,9 @@
                 <button class="btn btn--radius-2 btn--red update-button">Update</button>
             </a>
             <a href="{% url 'accounts:invitations_list' %}">
-                <button class="btn btn--radius-2 btn--red update-button">Invitations</button>
+                <button class="btn btn--radius-2 btn--red update-button notification">Invitations
+                    {% if active_inv_num %}<span class="badge">{{ active_inv_num }}</span>{% endif %}</button>
+
             </a>
         </div>
     </header>
