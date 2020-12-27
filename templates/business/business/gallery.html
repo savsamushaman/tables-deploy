@@ -1,0 +1,166 @@
+{% extends 'page_parts/base.html' %}
+{% load static %}
+
+{% block title %}Your Gallery{% endblock title %}
+
+{% block headspace %}
+    {{ block.super }}
+    <link href="{% static 'register/vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet"
+          media="all">
+    <!-- Icons font CSS-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+    <link href="" rel="stylesheet" media="all">
+    <link href="{% static 'register/vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS-->
+
+    <link href="{% static 'register/vendor/select2/select2.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'register/vendor/datepicker/daterangepicker.css' %}" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+    <link href="{% static 'business/articles/list/upper/styles.css' %}" rel="stylesheet"/>
+    <link href="{% static 'business/articles/list/table/style.css' %}" rel="stylesheet" media="all">
+
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+          type="text/css"/>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <style>
+
+        #alert-div {
+            margin-left: auto;
+            margin-right: auto;
+            width: 70%
+        }
+
+
+    </style>
+
+{% endblock headspace %}
+
+{% block navbar %}
+    {% include 'page_parts/navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+
+    <section class="page-section portfolio" id="portfolio" data-aos="fade-up" data-aos-delay="300">
+        <div class="container">
+            <div class="cancel-button-div">
+                <a style="text-align: center" href="{% url 'owned:business_update' slug %}">
+                    <button class="register-button btn btn--radius-2">Back</button>
+                </a>
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                            <div style="background: red;" id='alert-div'
+                                 class="alert alert-danger" role="alert">
+                                {{ message }}
+                            </div>
+                        {% else %}
+                            <div id='alert-div' class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Gallery</h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+
+            <div class="row justify-content-center">
+
+                <!-- Gallery image -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal6">
+                        <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+                        </div>
+                        <img class="img-fluid"
+                             src="{% static 'img/galler3.png' %}"
+                             alt=""/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <div class="invite-div" data-aos="fade-up">
+        <h4
+                class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5">Update your
+            gallery</h4>
+        <p class="disabled text-center">Here you can add or remove images from your gallery</p>
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.source }}
+            <button id="invite_button" type="submit" value="Upload">UPLOAD IMAGE</button>
+        </form>
+    </div>
+
+
+    <!-- Gallery header -->
+    <h4 data-aos="fade-up" data-aos-delay="100" style="font-size: 25px"
+        class="page-section-heading text-center text-uppercase text-secondary mb-0 mt-5"> {% if gallery %}
+        <i class="fas fa-camera-retro"></i> Your photos
+    {% else %}<i class="fas fa-users"></i> Your gallery is empty {% endif %}</h4>
+
+    <div data-aos="fade-up" data-aos-delay="100" class="divider-custom">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+        <div class="divider-custom-line"></div>
+    </div>
+
+    <!-- Gallery images -->
+    <section id="gallery" class="gallery">
+        <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
+            <div class="row no-gutters">
+                {% for image in gallery %}
+                    <div class="col-lg-3 col-md-4">
+                        <div class="gallery-item">
+                            <a href="{{ image.source.url }}" class="venobox" data-gall="gallery-item">
+                                <img src="{{ image.source.url }}" alt="" class="img-fluid">
+                                <a href="{% url 'owned:delete_gallery_image' slug image.pk %}"><span class="badge"><i
+                                        class="fas fa-trash-alt"></i></span></a>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <!-- End Gallery Images -->
+
+
+{% endblock content %}
+
+{% block preloader %}
+{% endblock preloader %}
+
+
+{% block bottomscript %}
+    <!-- Jquery JS-->
+    <script src="{% static 'register/vendor/jquery/jquery.min.js' %}"></script>
+    <!-- Vendor JS-->
+    <script src="{% static 'register/vendor/select2/select2.min.js' %}"></script>
+    <script src="{% static 'register/vendor/datepicker/moment.min.js' %}"></script>
+    <script src="{% static 'register/vendor/datepicker/daterangepicker.js' %}"></script>
+
+    <script src="{% static 'register/js/global.js' %}"></script>
+
+{% endblock bottomscript %}
+
+
+
+
+

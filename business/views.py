@@ -14,7 +14,7 @@ from accounts.models import CustomUser
 from tray.models import OrderModel, OrderItem
 from .forms import CreateBusinessForm, ProductForm, UpdateBusinessForm, TableForm, UpdateTableForm, MenuPointForm, \
     InviteForm
-from .models import BusinessModel, ProductModel, TableModel, ProductCategory, Invitation
+from .models import BusinessModel, ProductModel, TableModel, ProductCategory, Invitation, GalleryImageModel
 
 
 def check_if_allowed(request, slug, allow_staff=False):
@@ -780,11 +780,58 @@ class ReturnOrders(View):
         else:
             return HttpResponseBadRequest()
 
-# signals
 
-# @receiver(post_save, sender=TableModel)
-# def update_available_table(sender, instance, created, **kwargs):
-#     if not instance.current_guests:
-#         instance.business.available_tables +=1
-#     else:
-#         instance
+class Gallery(LoginRequiredMixin, CreateView):
+    model = GalleryImageModel
+    template_name = 'business/business/gallery.html'
+    fields = ('source',)
+
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
+            return super(Gallery, self).get(request, *args, **kwargs)
+        else:
+            messages.add_message(request, messages.ERROR, 'Access Denied')
+            return redirect("owned:business_update", slug=slug)
+
+    def post(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
+            return super(Gallery, self).post(request, *args, **kwargs)
+        else:
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(Gallery, self).get_context_data(**kwargs)
+        business = BusinessModel.objects.get(slug=self.kwargs['slug'])
+        images = GalleryImageModel.objects.filter(belongs=business)
+        context['gallery'] = images
+        context['slug'] = self.kwargs['slug']
+        return context
+
+    def form_valid(self, form):
+        slug = self.kwargs['slug']
+        form.instance.belongs = BusinessModel.objects.get(slug=slug)
+        return super(Gallery, self).form_valid(form)
+
+    def get_success_url(self):
+        slug = self.kwargs['slug']
+        return reverse_lazy('owned:gallery', kwargs={'slug': slug})
+
+
+class DeleteGalleryItem(View):
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
+            gallery_item = GalleryImageModel.objects.get(belongs__slug=slug, pk=self.kwargs['pk'])
+            gallery_item.delete()
+            messages.add_message(request, level=messages.INFO,
+                                 message=f'Image removed from gallery')
+            return redirect('owned:gallery', slug=slug)
+        else:
+            messages.add_message(request, messages.ERROR, 'Action Not allowed')
+            return redirect("owned:business_update", slug=slug)

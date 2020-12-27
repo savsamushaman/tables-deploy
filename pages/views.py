@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponseNotFound
 from django.views.generic import ListView, DetailView, TemplateView
 
-from business.models import BusinessModel, ProductModel, ProductCategory, TableModel
+from business.models import BusinessModel, ProductModel, ProductCategory, TableModel, GalleryImageModel
 from .filters import BusinessFilter
 
 
@@ -73,11 +73,12 @@ class PlaceDetailView(DetailView):
         except TypeError:
             on_the_tray = []
 
+        context['current_order'] = self.request.session.get('current_order', '')
         context['on_the_tray'] = on_the_tray
+        context['gallery'] = GalleryImageModel.objects.filter(belongs=kwargs['object'])
         context['tables'] = TableModel.objects.filter(business=kwargs['object'])
         context['categories'] = ProductCategory.objects.filter(business=kwargs['object'], deleted=False)
         context['products'] = ProductModel.objects.filter(business=kwargs['object'], deleted=False)
-        context['current_order'] = self.request.session.get('current_order', '')
 
         return context
 

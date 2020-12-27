@@ -25,10 +25,10 @@
                 <br>
                 {% if not current_order.business == place.slug %}
                     {% if messages %}
-                            {% for message in messages %}
-                                <p>{{ message }}</p>
-                            {% endfor %}
-                        {% endif %}
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
 
                     <div class="simulation d-flex justify-content-center" data-aos='fade-up' data-aos-delay="200">
 
@@ -97,6 +97,35 @@
         </div>
     </section><!-- End Menu Section -->
 
+    <!-- ======= Gallery Section ======= -->
+    <section id="gallery" class="gallery">
+
+        <div class="container" data-aos="fade-up">
+            <div class="section-title">
+                <p>{% if gallery %} Gallery {% else %} Gallery Empty {% endif %}</p>
+            </div>
+        </div>
+
+        <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row no-gutters">
+
+                {% for image in gallery %}
+
+                    <div class="col-lg-3 col-md-4">
+                        <div class="gallery-item">
+                            <a href="{{ image.source.url }}" class="venobox" data-gall="gallery-item">
+                                <img src="{{ image.source.url }}" alt="" class="img-fluid">
+                            </a>
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+    </section><!-- End Gallery Section -->
+
     <!-- About Section -->
     <section id="about" class="about">
         <div class="container" data-aos="fade-up">
@@ -115,70 +144,6 @@
 
 
     </section><!-- End About Section -->
-    <!-- ======= Gallery Section ======= -->
-    <section id="gallery" class="gallery">
-
-        <div class="container" data-aos="fade-up">
-            <div class="section-title">
-                <p>Gallery</p>
-            </div>
-        </div>
-
-        <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
-
-            <div class="row no-gutters">
-
-                <div class="col-lg-3 col-md-4">
-                    <div class="gallery-item">
-                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
-                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4">
-                    <div class="gallery-item">
-                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
-                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4">
-                    <div class="gallery-item">
-                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
-                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4">
-                    <div class="gallery-item">
-                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
-                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4">
-                    <div class="gallery-item">
-                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
-                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4">
-                    <div class="gallery-item">
-                        <a href="{% static 'Ry/img/gallery/gallery-1.jpg' %}" class="venobox" data-gall="gallery-item">
-                            <img src="{% static 'Ry/img/gallery/gallery-1.jpg' %}" alt="" class="img-fluid">
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section><!-- End Gallery Section -->
 
 {% endblock content %}
 

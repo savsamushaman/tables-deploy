@@ -68,20 +68,23 @@
 
 
             <div class="row justify-content-center">
-                <!-- Table Tab -->
-                <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
-                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal4">
-                        <a href="{% url 'owned:tables_list' slug %}">
+
+                <!-- Food Tab -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal6">
+                        <a href="{% url 'owned:products_list' slug %}">
                             <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
                                 <div class="portfolio-item-caption-content text-center text-orangered"><i
                                         class="fas fa-plus fa-3x"></i></div>
                             </div>
                         </a>
                         <img class="img-fluid"
-                             src="{% static 'img/table.png' %}"
+                             src="{% static 'img/food.png' %}"
                              alt=""/>
                     </div>
                 </div>
+
+
                 <!-- Menu Tab -->
                 <div class="col-md-6 col-lg-4 mb-5 mb-md-0">
                     <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal5">
@@ -110,20 +113,37 @@
                              alt=""/>
                     </div>
                 </div>
-                <!-- Food Tab -->
-                <div class="col-md-6 col-lg-4">
-                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal6">
-                        <a href="{% url 'owned:products_list' slug %}">
+
+                <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal4">
+                        <a href="{% url 'owned:gallery' slug %}">
                             <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
                                 <div class="portfolio-item-caption-content text-center text-orangered"><i
                                         class="fas fa-plus fa-3x"></i></div>
                             </div>
                         </a>
                         <img class="img-fluid"
-                             src="{% static 'img/food.png' %}"
+                             src="{% static 'img/galler3.png' %}"
                              alt=""/>
                     </div>
                 </div>
+
+                <!-- Table Tab -->
+                <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
+                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#portfolioModal4">
+                        <a href="{% url 'owned:tables_list' slug %}">
+                            <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+                                <div class="portfolio-item-caption-content text-center text-orangered"><i
+                                        class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                        </a>
+                        <img class="img-fluid"
+                             src="{% static 'img/table.png' %}"
+                             alt=""/>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </section>

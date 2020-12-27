@@ -1,5 +1,7 @@
+import os
 from decimal import Decimal
 from pathlib import Path
+from PIL import Image
 
 import requests
 from django.db import models
@@ -156,7 +158,21 @@ class Invitation(models.Model):
     def __str__(self):
         return f'from : {str(self.from_user)} - to : {str(self.to_user)} / {self.business.business_name}'
 
-# class GenericValueModel(models.Model):
-#     assoc = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=255)
-#     value = models.CharField(max_length=255)
+
+class GalleryImageModel(models.Model):
+    source = models.ImageField()
+    belongs = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        super(GalleryImageModel, self).save(*args, **kwargs)
+        img = Image.open(self.source.path)
+        new = img.resize((800, 600), Image.ANTIALIAS)
+        new.save(self.source.path)
+
+    def delete(self, *args, **kwargs):
+        if os.path.isfile(self.source.path):
+            os.remove(self.source.path)
+        super(GalleryImageModel, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.belongs} - {self.pk}'
