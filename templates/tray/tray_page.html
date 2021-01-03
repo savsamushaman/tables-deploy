@@ -291,9 +291,8 @@
                             <ul style="list-style-type: none">
                                 {% for order in active %}
                                     <a href="{% url 'tray:order_detail' order.id %}">
-                                        <li style="margin-top: 5px; color: orangered">ID : {{ order.id }} - Table
-                                            : {{ order.table }}
-                                            - Total : {{ order.total }} - Status : {% if order.status == 'PL' %}
+                                        <li style="margin-top: 5px; color: orangered">
+                                            Total : {{ order.total }} - Status : {% if order.status == 'PL' %}
                                                 Placed {% else %}
                                                 Serving{% endif %}</li>
                                     </a>

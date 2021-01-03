@@ -1,10 +1,7 @@
-import json
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse, HttpResponseBadRequest, \
-    HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -724,10 +721,13 @@ class CancelInvitation(View):
 
 # Feed -----------------------------------------------------
 class FeedView(LoginRequiredMixin, View):
-    template_name = 'business/feed/feed.html'
+    template_name = 'business/feed/feed_page.html'
 
     def get(self, request, *args, **kwargs):
-        order_models = OrderModel.objects.filter(business__slug=self.kwargs['slug'], status__regex='PL|S')
+
+        slug = self.kwargs['slug']
+        business = BusinessModel.objects.get(slug=slug)
+        order_models = OrderModel.objects.filter(business__slug=slug, status__regex='PL|S')
 
         order_information = []
         for order in order_models:
@@ -735,51 +735,18 @@ class FeedView(LoginRequiredMixin, View):
                      'table': order.table,
                      'pk': order.pk,
                      'status': order.status,
-                     'items': OrderItem.objects.filter(order=order), }
+                     'items': OrderItem.objects.filter(order=order),
+                     'total': order.total,
+                     }
 
             order_information.append(entry)
 
-        context = {'orders': order_information, 'slug': self.kwargs['slug']}
+        context = {'orders': order_information, 'slug': slug, 'business_name': business.business_name}
 
         return render(request, self.template_name, context)
 
 
-# Process Order
-class ProcessOrder(View):
-    def get(self, request, *args, **kwargs):
-        print(self.kwargs)
-        order_pk = self.kwargs['pk']
-        order = OrderModel.objects.get(pk=order_pk)
-        order.status = 'S'
-        order.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
-
-
-# needs redesigning - add many to many to order instead of order item/ or maybe not
-class ReturnOrders(View):
-    def get(self, request, *args, **kwargs):
-        return HttpResponseNotAllowed('POST')
-
-    def post(self, request, *args, **kwargs):
-        data = json.loads(self.request.body)
-        business_slug = data.get('business', None)
-        if business_slug:
-            if self.request.user == BusinessModel.objects.get(slug=business_slug).manager:
-                response = OrderModel.objects.filter(business__slug=business_slug, status__regex='PL|S')
-                response = [result.__repr__() for result in response]
-
-                items = dict()
-                for order in response:
-                    items[f'{order["orderid"]}'] = OrderItem.objects.filter(order_id=order['orderid'])
-                    items[f'{order["orderid"]}'] = [result.__repr__() for result in items[f'{order["orderid"]}']]
-                    order['items'] = items[f'{order["orderid"]}']
-
-                return JsonResponse({'results': response})
-            else:
-                return HttpResponseForbidden()
-        else:
-            return HttpResponseBadRequest()
-
+# Gallery -----------------------------------------------------
 
 class Gallery(LoginRequiredMixin, CreateView):
     model = GalleryImageModel

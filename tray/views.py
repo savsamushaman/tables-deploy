@@ -107,6 +107,9 @@ class PlaceOrder(View):
         order.total = total
         order.save()
 
+        messages.add_message(request, messages.INFO,
+                             "Order Placed")
+
         self.request.session['tray'] = []
 
         return redirect('tray:my_tray')
@@ -295,9 +298,17 @@ class CancelActiveOrder(View):
         order = OrderModel.objects.get(id=pk)
 
         if customer == order.customer:
-            order.status = 'C'
-            order.save()
-            return redirect('tray:my_tray')
+            if order.status == 'PL':
+                order.status = 'C'
+                order.save()
+                messages.add_message(request, messages.INFO,
+                                     "Order Cancelled")
+                return redirect('tray:my_tray')
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     "Your order is already being processed or has been cancelled/paid")
+                return redirect('tray:my_tray')
+
         else:
             return HttpResponseForbidden()
 

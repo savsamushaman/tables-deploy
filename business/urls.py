@@ -6,7 +6,6 @@ app_name = 'owned'
 
 urlpatterns = [
     path('', BusinessListView.as_view(), name='owned_list'),
-    path('active_orders/', ReturnOrders.as_view(), name='return_orders'),
     path('create_business/', CreateBusinessView.as_view(), name='create_business'),
     path('delete_business/<slug:slug>', BusinessDeleteView.as_view(), name='delete_business'),
     path('<slug:slug>/update/', BusinessEditView.as_view(), name='business_update'),
@@ -29,5 +28,4 @@ urlpatterns = [
          name='staff_list_update'),
     path('<slug:slug>/udpate/staff/cancelinv/<int:pk>', CancelInvitation.as_view(), name='cancel_invitation'),
     path('<slug:slug>/feed/', FeedView.as_view(), name='feed'),
-    path('<slug:slug>/feed/<int:pk>', ProcessOrder.as_view(), name='process_order'),
 ]

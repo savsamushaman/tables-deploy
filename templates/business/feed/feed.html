@@ -3,10 +3,11 @@
 {% block title %} Feed {% endblock title %}
 
 {% block contet %}
+
     <h1 id="title" data-place="{{ slug }}">{{ slug }}</h1>
     <div id="order_list">
         {% for order in orders %}
-            <div data-orderid="{{ order.pk }}" class="order-div">
+            <div id="{{ order.pk }}" class="order-div">
                 {% if order.status == "PL" %}
 
                     <a href="{% url 'owned:process_order' slug order.pk %}">
@@ -17,9 +18,11 @@
                 <p>Table : {{ order.table }}</p>
                 <p>Customer : {{ order.customer }}</p>
                 <p>Order (id = {{ order.pk }}) :</p>
+                <ul>
                 {% for x in order.items %}
-                    <p>{{ x.product }}</p>
+                    <li>{{ x.product }} x {{ x.quantity }}</li>
                 {% endfor %}
+                </ul>
                 <hr/>
             </div>
         {% endfor %}
@@ -27,6 +30,6 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'js/poll.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/real_time_feed.js' %}"></script>
 {% endblock script %}
 
