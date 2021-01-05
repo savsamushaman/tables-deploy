@@ -721,10 +721,9 @@ class CancelInvitation(View):
 
 # Feed -----------------------------------------------------
 class FeedView(LoginRequiredMixin, View):
-    template_name = 'business/feed/feed_page.html'
+    template_name = 'business/business/feed_page.html'
 
     def get(self, request, *args, **kwargs):
-
         slug = self.kwargs['slug']
         business = BusinessModel.objects.get(slug=slug)
         order_models = OrderModel.objects.filter(business__slug=slug, status__regex='PL|S')
@@ -737,6 +736,7 @@ class FeedView(LoginRequiredMixin, View):
                      'status': order.status,
                      'items': OrderItem.objects.filter(order=order),
                      'total': order.total,
+                     'handler': order.handler,
                      }
 
             order_information.append(entry)

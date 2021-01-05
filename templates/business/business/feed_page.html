@@ -30,7 +30,6 @@
 {% include 'page_parts/navbar.html' %}
 
 <body id="page-top">
-
 {% block content %}
 
     {{ slug|json_script:'slug' }}
@@ -64,50 +63,73 @@
         </div>
     </header>
 
-    <!-- About Section-->
+    <!-- Feed Section-->
     <section class="page-section bg-primary text-white mb-0" id="about" data-aos="fade-up">
         <div class="container">
-            <!-- About Section Heading-->
-            {% if orders %}
-                <!-- About Section Content-->
-
-                <div id="order-feed-div"
-                     data-aos="fade-up">
+            <div id="order-feed-div"
+                 data-aos="fade-up">
+                {% if orders %}
                     {% for order in orders %}
-                        <div id="{{ order.pk }}" class="container d-flex align-items-center flex-column bigbox">
-                            <p class="masthead-subheading mb-0">By : {{ order.customer }}</p>
-                            <p class="masthead-subheading mb-0">id : {{ order.pk }}</p>
+                        <div id="order-{{ order.pk }}"
+                             class="container d-flex align-items-center flex-column bigbox order-div">
+                            <p class="masthead-subheading mb-0">(id : {{ order.pk }})</p>
+                            {% if order.handler %}
+                                <i class="fas fa-user-cog"></i>
+                                <p id="handler-{{ order.pk }}" class="masthead-subheading mb-0 handled">Handled by
+                                    : {{ order.handler }}</p>
+                            {% else %}
+                                <i class="fas fa-user-cog"></i>
+                                <p id="handler-{{ order.pk }}" class="masthead-subheading mb-0 unhandled">Handled by :
+                                    None</p>
+                            {% endif %}
+                            <i class="fas fa-user"></i>
+                            <p class="masthead-subheading mb-0"> Customer username : {{ order.customer }}</p>
+                            <p class="masthead-subheading mb-0"> Customer name
+                                : {{ order.customer.first_name }} {{ order.customer.last_name }} </p>
+                            <i class="fas fa-chair"></i>
                             <p class="masthead-subheading mb-0">Table : {{ order.table }}</p>
-                            <p class="masthead-subheading mb-0">Status : {% if order.status == "PL" %}
-                                <span class="paid"> Placed </span> {% elif order.status == 'S' %}
-                                <span class="serving"> Serving </span> {% endif %}
+                            <i class="fas fa-star-half-alt"></i>
+                            <p class="masthead-subheading mb-0"> Status :
+                                {% if order.status == "PL" %}
+                                    <span id="status-{{ order.pk }}"
+                                          class="placed"> Placed </span> {% elif order.status == 'S' %}
+                                    <span id="status-{{ order.pk }}" class="serving"> Serving </span> {% endif %}
                             </p>
+                            <i class="fas fa-dollar-sign"></i>
                             <p class="masthead-subheading mb-0">Total : {{ order.total }}</p>
                             <p style="font-weight: 600">Order contains :</p>
-                            <div id="order-items-div">
-                                {% for item in order.items %}
-                                    <p>{{ item.quantity }} x {{ item.product }} </p>
-                                {% endfor %}
+                            <div class="order-items-div">
+                                <ul>
+                                    {% for item in order.items %}
+                                        <li class="font-italic">{{ item.quantity }} x {{ item.product }} </li>
+                                    {% endfor %}
+                                </ul>
                             </div>
 
-                            <div class="divider-custom divider-light">
-                                <div class="divider-custom-line"></div>
-                                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-                                <div class="divider-custom-line"></div>
+                            <div id="buttons-div-{{ order.pk }}" class="display-contents">
+                                {% if not order.handler %}
+                                    <button id="handle-button-{{ order.pk }}" value="{{ order.pk }}"
+                                            class="btn btn--radius-2 btn--green update-button interaction-button">Handle
+                                    </button>
+                                {% elif order.handler == user %}
+                                    <button id="done-button-{{ order.pk }}" value="{{ order.pk }}"
+                                            class="btn btn--radius-2 btn--red done-button interaction-button">Mark as
+                                        done
+                                    </button>
+                                    <button id="reject-button-{{ order.pk }}" value="{{ order.pk }}"
+                                            class="btn btn--radius-2 btn--green reject-button interaction-button">Reject
+                                        order
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% else %}
-                <h2 class="page-section-heading text-center text-uppercase text-white">No active orders</h2>
-                <!-- Icon Divider-->
-                <div class="divider-custom divider-light">
-                    <div class="divider-custom-line"></div>
-                    <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-                    <div class="divider-custom-line"></div>
-                </div>
-            {% endif %}
-        </div>
+                    </div>
+                {% else %}
+                    <h2 id='empty-feed' class="page-section-heading text-center text-uppercase text-white">No active
+                        orders</h2>
+                {% endif %}
+            </div>
     </section>
 
 {% endblock content %}

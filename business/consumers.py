@@ -15,7 +15,6 @@ class FeedConsumer(WebsocketConsumer):
         feed_slug = self.scope['url_route']['kwargs']['biz_slug']
         self.feed_group_name = 'feed_%s' % feed_slug
         user = self.scope['user']
-
         try:
             business = BusinessModel.objects.get(slug=feed_slug)
             if business.is_active:
@@ -65,6 +64,7 @@ class FeedConsumer(WebsocketConsumer):
                             'user': user.username
                         }
                     )
+
                 else:
 
                     self.send(text_data=json.dumps({
@@ -112,7 +112,7 @@ class FeedConsumer(WebsocketConsumer):
                         {
                             'type': 'feed_update',
                             'message': message,
-                            'event': 'mark_as_done_by_someone',
+                            'event': 'mark_as_done_success',
                         }
                     )
 
@@ -160,6 +160,8 @@ def update_order_feed(sender, instance, created, **kwargs):
 
             order_dict = {
                 'customer': instance.customer.username,
+                'customer_first_name': instance.customer.first_name,
+                'customer_last_name': instance.customer.last_name,
                 'table': instance.table.table_nr,
                 'pk': instance.pk,
                 'status': instance.status,
