@@ -1,9 +1,10 @@
 import os
 from decimal import Decimal
 from pathlib import Path
+
+import qrcode
 from PIL import Image
 
-import requests
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -82,7 +83,7 @@ class TableModel(models.Model):
     table_nr = models.IntegerField()
     qr_code = models.ImageField(blank=True, null=True)
     locked = models.BooleanField(default=False)
-    current_guests = models.ManyToManyField(CustomUser, blank=True)
+    current_guests = models.ManyToManyField(CustomUser, blank=True, related_name='current_guests')
 
     def __init__(self, *args, **kwargs):
         super(TableModel, self).__init__(*args, **kwargs)
@@ -90,23 +91,31 @@ class TableModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.qr_code or self.old_table_nr != self.table_nr:
-            url = f'https://api.qrserver.com/v1/create-qr-code/?data=http://127.0.0.1:8000/tray/generate_order/{self.business.slug}/{self.table_nr}&size=300x300&format=png'
-            req = requests.get(url)
+            # !!!!!!!!!!!!!! this needs to be changed on launch
+            input_data = f'http://127.0.0.1:8000/tray/generate_order/{self.business.slug}/{self.table_nr}'
+            qr_code = qrcode.QRCode(version=1,
+                                    box_size=10,
+                                    border=5)
+            qr_code.add_data(input_data)
+            qr_code.make(fit=True)
+            img = qr_code.make_image(fill='black', back_color='white')
             path = f'..\\media\\qr\\{self.business.business_name}'
             Path(path).mkdir(exist_ok=True)
 
-            image = open(f'{path}\\{self.business.slug}_{self.table_nr}.png', 'wb+')
-            image.write(req.content)
-            image.close()
-
+            img.save(f'{path}\\{self.business.slug}_{self.table_nr}.png')
             self.qr_code = f'{path}\\{self.business.slug}_{self.table_nr}.png'
 
         super(TableModel, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return str(self.table_nr)
+    def delete(self, *args, **kwargs):
+        if os.path.isfile(self.qr_code.path):
+            os.remove(self.qr_code.path)
+        super(TableModel, self).delete(*args, **kwargs)
 
     def str_table_nr(self):
+        return str(self.table_nr)
+
+    def __str__(self):
         return str(self.table_nr)
 
     class Meta:

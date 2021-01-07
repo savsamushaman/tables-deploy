@@ -408,7 +408,7 @@ class TableDeleteView(LoginRequiredMixin, View):
         allowed = check_if_allowed(request, slug, allow_staff=True)
         if allowed:
             try:
-                business = BusinessModel.objects.get(sluge=slug)
+                business = BusinessModel.objects.get(slug=slug)
                 table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
             except (BusinessModel.DoesNotExist, TableModel.DoesNotExist):
                 messages.add_message(request, level=messages.INFO,

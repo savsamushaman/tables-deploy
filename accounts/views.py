@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.signals import user_logged_out
+from django.contrib.auth.signals import user_logged_out, user_logged_in
 from django.contrib.auth.views import LogoutView, LoginView, PasswordChangeView
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
@@ -267,3 +267,20 @@ def cleanup_logout(sender, user, request, **kwargs):
 
 
 user_logged_out.connect(cleanup_logout)
+
+
+def cleanup_login(sender, user, request, **kwargs):
+    still_guest = user.current_guests.all()
+
+    if still_guest:
+        for table in still_guest:
+            table.current_guests.remove(user)
+            table.business.current_guests -= 1
+            if len(table.current_guests.all()) == 0:
+                table.locked = False
+                table.business.available_tables += 1
+                table.business.save()
+            table.save()
+
+
+user_logged_in.connect(cleanup_login)
