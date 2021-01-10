@@ -36,7 +36,7 @@ class BusinessCategory(models.Model):
         verbose_name_plural = 'Business Category models'
 
     def __str__(self):
-        return str(self.category_name)
+        return str(self.category_name).capitalize()
 
 
 class BusinessModel(models.Model):
