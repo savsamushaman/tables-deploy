@@ -172,11 +172,11 @@ class GalleryImageModel(models.Model):
     source = models.ImageField()
     belongs = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        super(GalleryImageModel, self).save(*args, **kwargs)
-        img = Image.open(self.source.path)
-        new = img.resize((800, 600), Image.ANTIALIAS)
-        new.save(self.source.path)
+    # def save(self, *args, **kwargs):
+    #     super(GalleryImageModel, self).save(*args, **kwargs)
+    #     img = Image.open(self.source.path)
+    #     new = img.resize((800, 600), Image.ANTIALIAS)
+    #     new.save(self.source.path)
 
     def delete(self, *args, **kwargs):
         if os.path.isfile(self.source.path):
