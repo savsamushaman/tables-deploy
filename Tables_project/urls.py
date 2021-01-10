@@ -25,4 +25,4 @@ urlpatterns = [
                   path('owned/', include('business.urls', namespace='owned')),
                   path('tray/', include('tray.urls', namespace='tray')),
 
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+              ]

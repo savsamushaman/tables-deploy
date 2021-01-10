@@ -111,8 +111,7 @@
                             <div class="name">Table Number</div>
                             <div class="value">
                                 <div class="input-group">
-                                    {{ form.table_nr }}
-                                    {{ form.table_nr.errors }}
+                                    {{ table.table_nr }}
                                 </div>
                             </div>
                         </div>
@@ -136,16 +135,10 @@
                             </div>
                         </div>
 
-
-                        <div class="button-div">
-                            <button class="register-button btn btn--radius-2 btn--red" type="submit">Update Table
-                            </button>
-                        </div>
-
                     </form>
                     <div class="cancel-button-div">
                         <a style="text-align: center" href="{% url 'owned:tables_list' table.business.slug %}">
-                            <button class="register-button btn btn--radius-2">Cancel</button>
+                            <button class="register-button btn btn--radius-2">Back</button>
                         </a>
                     </div>
 

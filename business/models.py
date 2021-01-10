@@ -1,9 +1,8 @@
 import os
 from decimal import Decimal
-from pathlib import Path
 
-import qrcode
-from PIL import Image
+import boto3
+
 
 from django.db import models
 from django.utils import timezone
@@ -28,9 +27,13 @@ INVITATION_CHOICES = (
 )
 
 
+def admin_images(instance, filename):
+    return f'admin_upped/business_category_images/{filename}'
+
+
 class BusinessCategory(models.Model):
     category_name = models.CharField(choices=BUSINESS_CATEGORY_CHOICES, default='Other', max_length=20)
-    icon = models.ImageField(null=True, blank=True)
+    icon = models.ImageField(null=True, blank=True, upload_to=admin_images)
 
     class Meta:
         verbose_name_plural = 'Business Category models'
@@ -76,8 +79,6 @@ class BusinessModel(models.Model):
         ]
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ must change URL ON RELEASE
-
 class TableModel(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     table_nr = models.IntegerField()
@@ -89,28 +90,13 @@ class TableModel(models.Model):
         super(TableModel, self).__init__(*args, **kwargs)
         self.old_table_nr = self.table_nr
 
-    def save(self, *args, **kwargs):
-        if not self.qr_code or self.old_table_nr != self.table_nr:
-            # !!!!!!!!!!!!!! this needs to be changed on launch
-            input_data = f'http://127.0.0.1:8000/tray/generate_order/{self.business.slug}/{self.table_nr}'
-            qr_code = qrcode.QRCode(version=1,
-                                    box_size=10,
-                                    border=5)
-            qr_code.add_data(input_data)
-            qr_code.make(fit=True)
-            img = qr_code.make_image(fill='black', back_color='white')
-            path = f'..\\media\\qr\\{self.business.business_name}'
-            Path(path).mkdir(exist_ok=True)
-
-            img.save(f'{path}\\{self.business.slug}_{self.table_nr}.png')
-            self.qr_code = f'{path}\\{self.business.slug}_{self.table_nr}.png'
-
-        super(TableModel, self).save(*args, **kwargs)
-
     def delete(self, *args, **kwargs):
-        if os.path.isfile(self.qr_code.path):
-            os.remove(self.qr_code.path)
-        super(TableModel, self).delete(*args, **kwargs)
+        s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
+                          aws_secret_access_key=os.environ.get('AWS_KEY2'))
+
+        s3.delete_object(Bucket=os.environ.get('AWS_BUCKET_NAME'),
+                         Key=f'media/qr/{self.business.business_name}/{self.business.slug + "_" + str(self.table_nr)}.png')
+        return super(TableModel, self).delete(*args, **kwargs)
 
     def str_table_nr(self):
         return str(self.table_nr)
@@ -126,7 +112,6 @@ class ProductCategory(models.Model):
     business = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
     category_name = models.CharField(max_length=25)
     slug = models.SlugField(blank=True, null=True)
-    icon = models.ImageField(null=True, blank=True)
     deleted = models.BooleanField(default=False)
 
     def __str__(self):
@@ -168,20 +153,20 @@ class Invitation(models.Model):
         return f'from : {str(self.from_user)} - to : {str(self.to_user)} / {self.business.business_name}'
 
 
+def gallery_image_up(instance, filename):
+    return f'gallery/{instance.belongs.slug}/{filename}'
+
+
 class GalleryImageModel(models.Model):
-    source = models.ImageField()
+    source = models.ImageField(upload_to=gallery_image_up)
     belongs = models.ForeignKey(BusinessModel, on_delete=models.CASCADE)
-
-    # def save(self, *args, **kwargs):
-    #     super(GalleryImageModel, self).save(*args, **kwargs)
-    #     img = Image.open(self.source.path)
-    #     new = img.resize((800, 600), Image.ANTIALIAS)
-    #     new.save(self.source.path)
-
-    def delete(self, *args, **kwargs):
-        if os.path.isfile(self.source.path):
-            os.remove(self.source.path)
-        super(GalleryImageModel, self).delete(*args, **kwargs)
 
     def __str__(self):
         return f'{self.belongs} - {self.pk}'
+
+    def delete(self, *args, **kwargs):
+        s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
+                          aws_secret_access_key=os.environ.get('AWS_KEY2'))
+        s3.delete_object(Bucket=os.environ.get('AWS_BUCKET_NAME'),
+                         Key=f'media/{self.source.name}')
+        return super(GalleryImageModel, self).delete(*args, **kwargs)

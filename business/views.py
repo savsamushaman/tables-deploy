@@ -1,6 +1,13 @@
+import os
+from pathlib import Path
+
+import boto3
+import qrcode
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -802,3 +809,31 @@ class DeleteGalleryItem(View):
         else:
             messages.add_message(request, messages.ERROR, 'Action Not allowed')
             return redirect("owned:business_update", slug=slug)
+
+
+@receiver(post_save, sender=TableModel)
+def generate_qr_code(sender, instance, created, **kwargs):
+    if created:
+        input_data = f'https://tables-django.herokuapp.com/tray/generate_order/{instance.business.slug}/{instance.table_nr}'
+        qr_code = qrcode.QRCode(version=1,
+                                box_size=10,
+                                border=5)
+        qr_code.add_data(input_data)
+        qr_code.make(fit=True)
+        img = qr_code.make_image(fill='black', back_color='white')
+        path = f'..\\media\\qr\\{instance.business.business_name}'
+
+        Path(path).mkdir(exist_ok=True)
+        img.save(f'{path}\\{instance.business.slug}_{instance.table_nr}.png')
+        instance.qr_code = f'{path}\\{instance.business.slug}_{instance.table_nr}.png'
+
+        s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
+                          aws_secret_access_key=os.environ.get('AWS_KEY2'))
+
+        bucket = os.environ.get('AWS_BUCKET_NAME')
+        file_name = f'{path}\\{instance.business.slug}_{instance.table_nr}.png'
+        key = f'media/qr/{instance.business.business_name}/{instance.business.slug}_{instance.table_nr}.png'
+
+        s3.upload_file(file_name, bucket, key)
+
+        instance.save()
