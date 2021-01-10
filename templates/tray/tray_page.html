@@ -209,7 +209,7 @@
                                                                 class="fas fa-trash-alt mr-1"></i> Remove item </a>
                                                     </div>
                                                     <p class="mb-0"><span><strong
-                                                            id='subtotal-{{ item.product.id }}'>{{ item.total_price }}$</strong></span>
+                                                            id='subtotal-{{ item.product.id }}'>{{ item.total_price }}{{ order.business.country.currency }}</strong></span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -252,7 +252,7 @@
                                             </strong>
                                         </div>
                                         <span><strong id="grand_total"
-                                                      style="font-weight: 700;color: black">{{ total }}$</strong></span>
+                                                      style="font-weight: 700;color: black">{{ total }}</strong>{{ order.business.country.currency }}</span>
                                     </li>
                                 {% endif %}
                             </ul>
