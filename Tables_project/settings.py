@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['tables-django.herokuapp.com', '127.0.0.1:8000']
+ALLOWED_HOSTS = ['tables-django.herokuapp.com', 'localhost']
 
 # Application definition
 
@@ -82,7 +82,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [os.environ.get('REDIS_URL'), ('127.0.0.1', 6379)],
+            "hosts": [os.environ.get('REDIS_URL')],
         },
     },
 }
