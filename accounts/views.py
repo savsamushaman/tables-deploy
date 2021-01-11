@@ -1,3 +1,4 @@
+import uuid
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,7 +23,7 @@ from .models import CustomUser
 from .tokens import account_activation_token
 
 
-def check_user(request):
+def check_user(request, order_generation=False):
     if request.user.is_authenticated:
         customer = request.user
         return customer
@@ -32,7 +33,9 @@ def check_user(request):
             customer, created = CustomUser.objects.get_or_create(device=device)
             return customer
         else:
-            print('here')
+            if order_generation:
+                customer = CustomUser.objects.create(device=str(uuid.uuid4()))
+                return customer
             return HttpResponseBadRequest
 
 

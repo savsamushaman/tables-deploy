@@ -17,10 +17,7 @@ class GenerateOrder(View):
 
     def get(self, request, *args, **kwargs):
 
-        customer = check_user(request)
-        if customer == HttpResponseBadRequest:
-            return HttpResponseBadRequest()
-
+        customer = check_user(request, order_generation=True)
         slug = self.kwargs['place']
         try:
             table = TableModel.objects.get(table_nr=self.kwargs['table_nr'], business__slug=slug)
@@ -48,7 +45,14 @@ class GenerateOrder(View):
         self.request.session['current_order'] = order
         self.request.session['tray'] = []
 
-        return redirect('pages:place_detail', slug=slug)
+        has_cookie = request.COOKIES.get('device')
+
+        if has_cookie:
+            return redirect('pages:place_detail', slug=slug)
+        else:
+            response = redirect('pages:place_detail', slug=slug)
+            response.set_cookie('device', customer.device)
+            return response
 
 
 class CancelOrder(View):
