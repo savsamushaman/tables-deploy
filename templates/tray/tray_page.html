@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="{% static 'tray/css/tray_list_style.css' %}">
 
     <!-- Favicons  experi-->
-    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}" />
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}"/>
     <link href="{% static 'Ry/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
     <!-- Vendor CSS Files -->
     <link href="{% static 'Ry/vendor/icofont/icofont.min.css' %}" rel="stylesheet">
@@ -209,7 +209,7 @@
                                                                 class="fas fa-trash-alt mr-1"></i> Remove item </a>
                                                     </div>
                                                     <p class="mb-0"><span><strong
-                                                            id='subtotal-{{ item.product.id }}'>{{ item.total_price }}{{ order.business.country.currency }}</strong></span>
+                                                            id='subtotal-{{ item.product.id }}'>{{ item.total_price }}</strong>{{ order.business.country.currency }}</span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -293,8 +293,8 @@
                                     <a href="{% url 'tray:order_detail' order.id %}">
                                         <li style="margin-top: 5px; color: orangered">
                                             Total : {{ order.total }} - Status : {% if order.status == 'PL' %}
-                                                Placed {% else %}
-                                                Serving{% endif %}</li>
+                                            Placed {% else %}
+                                            Serving{% endif %}</li>
                                     </a>
                                 {% endfor %}
                             </ul>
