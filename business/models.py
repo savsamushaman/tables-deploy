@@ -90,13 +90,13 @@ class TableModel(models.Model):
         super(TableModel, self).__init__(*args, **kwargs)
         self.old_table_nr = self.table_nr
 
-    def delete(self, *args, **kwargs):
-        s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
-                          aws_secret_access_key=os.environ.get('AWS_KEY2'))
-
-        s3.delete_object(Bucket=os.environ.get('AWS_BUCKET_NAME'),
-                         Key=f'media/qr/{self.business.business_name}/{self.business.slug + "_" + str(self.table_nr)}.png')
-        return super(TableModel, self).delete(*args, **kwargs)
+    # def delete(self, *args, **kwargs):
+    #     s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
+    #                       aws_secret_access_key=os.environ.get('AWS_KEY2'))
+    #
+    #     s3.delete_object(Bucket=os.environ.get('AWS_BUCKET_NAME'),
+    #                      Key=f'media/qr/{self.business.business_name}/{self.business.slug + "_" + str(self.table_nr)}.png')
+    #     return super(TableModel, self).delete(*args, **kwargs)
 
     def str_table_nr(self):
         return str(self.table_nr)
@@ -164,9 +164,9 @@ class GalleryImageModel(models.Model):
     def __str__(self):
         return f'{self.belongs} - {self.pk}'
 
-    def delete(self, *args, **kwargs):
-        s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
-                          aws_secret_access_key=os.environ.get('AWS_KEY2'))
-        s3.delete_object(Bucket=os.environ.get('AWS_BUCKET_NAME'),
-                         Key=f'media/{self.source.name}')
-        return super(GalleryImageModel, self).delete(*args, **kwargs)
+    # def delete(self, *args, **kwargs):
+    #     s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
+    #                       aws_secret_access_key=os.environ.get('AWS_KEY2'))
+    #     s3.delete_object(Bucket=os.environ.get('AWS_BUCKET_NAME'),
+    #                      Key=f'media/{self.source.name}')
+    #     return super(GalleryImageModel, self).delete(*args, **kwargs)
