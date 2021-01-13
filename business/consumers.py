@@ -84,7 +84,7 @@ class FeedConsumer(WebsocketConsumer):
             try:
                 order = OrderModel.objects.get(id=message)
                 if order.status == 'S' and order.handler.username == user.username:
-                    order.status = 'C'
+                    order.status = 'R'
                     order.save()
                 else:
                     self.send(text_data=json.dumps({
@@ -178,7 +178,7 @@ def update_order_feed(sender, instance, created, **kwargs):
                 }
             )
 
-        elif instance.status == 'C':
+        elif instance.status == 'C' or instance.status == 'R':
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 f'feed_{instance.business.slug}',

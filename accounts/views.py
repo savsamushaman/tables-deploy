@@ -146,7 +146,7 @@ class UserDetailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         template_name = 'accounts/user_details.html'
         user_details = CustomUser.objects.get(pk=request.user.pk)
-        finished_orders = OrderModel.objects.filter(customer=self.request.user, status__in='PC').order_by(
+        finished_orders = OrderModel.objects.filter(customer=self.request.user, status__in='PCR').order_by(
             '-date_ordered')
         invitations = len(Invitation.objects.filter(to_user=self.request.user, status='S'))
         order_history = []

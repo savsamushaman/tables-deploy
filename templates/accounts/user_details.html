@@ -9,7 +9,7 @@
     <meta name="author" content=""/>
     <title>{% block title %}Your account - {{ user.username }}{% endblock title %}</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}" />
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}"/>
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v5.15.1/js/all.js" crossorigin="anonymous"></script>
     <!-- Google fonts-->
@@ -110,9 +110,14 @@
                         <p class="masthead-subheading mb-0">Order Id : {{ order.order_id }}</p>
                         <p class="masthead-subheading mb-0">By : {{ order.customer }}</p>
                         <p class="masthead-subheading mb-0">On : {{ order.date_ordered }}</p>
-                        <p class="masthead-subheading mb-0">Status : {% if order.status == "P" %}
-                            <span class="paid"> Paid </span> {% else %}
-                            <span class="cancelled"> Cancelled </span> {% endif %}
+                        <p class="masthead-subheading mb-0">Status :
+                            {% if order.status == 'P' %}
+                                <span class="paid"> Paid </span>
+                            {% elif order.status == 'C' %}
+                                <span class="cancelled"> Cancelled </span>
+                            {% elif order.status == 'R' %}
+                                <span class="cancelled"> Rejected </span>
+                            {% endif %}
                         </p>
                         <p class="masthead-subheading mb-0">Total : {{ order.total }}</p>
                         <p style="font-weight: 600">You ordered the following:</p>

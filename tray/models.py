@@ -8,7 +8,8 @@ ORDER_STATUS_CHOICES = (
     ('PL', 'Placed'),
     ('S', 'Serving'),
     ('P', 'Paid'),
-    ('C', 'Cancelled')
+    ('C', 'Cancelled'),
+    ('R', 'Rejected'),
 )
 
 

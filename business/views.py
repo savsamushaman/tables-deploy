@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, UpdateView, ListView, DeleteView, FormView
+from django.views.generic import CreateView, UpdateView, ListView, DeleteView, FormView, DetailView
 
 from accounts.models import CustomUser
 from tray.models import OrderModel, OrderItem
@@ -360,10 +360,10 @@ class CreateTableView(LoginRequiredMixin, CreateView):
         return reverse_lazy('owned:create_table', kwargs={'slug': self.kwargs['slug']})
 
 
-# Update
-class TableEditView(LoginRequiredMixin, UpdateView):
+# View Table
+class TableDetailView(LoginRequiredMixin, DetailView):
     model = TableModel
-    template_name = 'business/business/update_table.html'
+    template_name = 'business/business/view_table.html'
     context_object_name = 'table'
     form_class = UpdateTableForm
 
@@ -371,41 +371,51 @@ class TableEditView(LoginRequiredMixin, UpdateView):
         slug = self.kwargs.get('slug')
         allowed = check_if_allowed(request, slug, allow_staff=True)
         if allowed:
-            return super(TableEditView, self).get(request, *args, **kwargs)
+            return super(TableDetailView, self).get(request, *args, **kwargs)
         else:
             messages.add_message(request, messages.ERROR, 'Access Denied')
             return redirect("owned:business_update", slug=slug)
 
-    def post(self, request, *args, **kwargs):
-        slug = self.kwargs.get('slug')
-        allowed = check_if_allowed(request, slug, allow_staff=True)
-        if allowed:
-            return super(TableEditView, self).post(request, *args, **kwargs)
-        else:
-            messages.add_message(request, messages.ERROR, 'Action not allowed')
-            return redirect("owned:business_update", slug=slug)
-
-    def form_valid(self, form):
-        try:
-            form.instance.save()
-        except IntegrityError:
-            form.add_error('table_nr', 'Table already exists')
-            messages.add_message(self.request, messages.ERROR,
-                                 f'Table with number {form.instance.table_nr} already exists ')
-            return super(TableEditView, self).get(self.request, self.args, self.kwargs)
-
-        messages.add_message(self.request, messages.INFO, f'Table {form.instance.table_nr} was updated successfully')
-        return super(TableEditView, self).form_valid(form)
-
     def get_context_data(self, **kwargs):
-        context = super(TableEditView, self).get_context_data(**kwargs)
+        context = super(TableDetailView, self).get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
         context['table'] = TableModel.objects.get(pk=self.kwargs['pk'], business__slug=self.kwargs['slug'])
         return context
 
-    def get_success_url(self):
-        slug = self.kwargs['slug']
-        return reverse_lazy('owned:tables_list', kwargs={'slug': slug})
+
+# Reset
+class ResetTable(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        allowed = check_if_allowed(request, slug, allow_staff=True)
+        if allowed:
+            try:
+                business = BusinessModel.objects.get(slug=slug)
+                table = TableModel.objects.get(business__slug=slug, pk=self.kwargs['pk'])
+            except (BusinessModel.DoesNotExist, TableModel.DoesNotExist):
+                messages.add_message(request, level=messages.INFO,
+                                     message=f'Bad request')
+                messages.add_message(request, messages.ERROR, 'Object does not exist')
+                return redirect("owned:business_update", slug=slug)
+
+            business.available_tables += 1
+            business.current_guests -= len(table.current_guests.all())
+            for guest in table.current_guests.all():
+                orders = OrderModel.objects.filter(customer=guest, table=table, status__regex='PL|S')
+                for order in orders:
+                    order.status = 'R'
+                    order.save()
+            table.current_guests.clear()
+            table.locked = False
+            business.save()
+            table.save()
+            messages.add_message(request, level=messages.INFO,
+                                 message=f'Table {table.table_nr} was reset successfully')
+            return redirect('owned:tables_list', slug=slug)
+
+        else:
+            messages.add_message(request, messages.ERROR, 'Action not allowed')
+            return redirect("owned:business_update", slug=slug)
 
 
 # Delete
@@ -425,15 +435,19 @@ class TableDeleteView(LoginRequiredMixin, View):
 
             if len(table.current_guests.all()) == 0:
                 business.available_tables -= 1
-            business.current_guests -= len(table.current_guests.all())
-            table.current_guests.clear()
-            business.all_tables -= 1
+                business.current_guests -= len(table.current_guests.all())
+                table.current_guests.clear()
+                business.all_tables -= 1
 
-            business.save()
-            table.delete()
-            messages.add_message(request, level=messages.INFO,
-                                 message=f'Table {table.table_nr} was deleted successfully')
-            return redirect('owned:tables_list', slug=slug)
+                business.save()
+                table.delete()
+                messages.add_message(request, level=messages.INFO,
+                                     message=f'Table {table.table_nr} was deleted successfully')
+                return redirect('owned:tables_list', slug=slug)
+            else:
+                messages.add_message(request, level=messages.ERROR,
+                                     message=f'Table {table.table_nr} is not empty. Please first reset the table to delete')
+                return redirect('owned:tables_list', slug=slug)
         else:
             messages.add_message(request, messages.ERROR, 'Action not allowed')
             return redirect("owned:business_update", slug=slug)

@@ -111,15 +111,19 @@
                     <tr>
                         <th scope="col">Table Number</th>
                         <th scope="col">Table Status</th>
+                        <th scope="col">Table Reset</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for table in tables %}
                         <tr>
                             <td>
-                                <a href="{% url 'owned:update_table' table.business.slug table.pk %}">{{ table.table_nr }}</a>
+                                <a href="{% url 'owned:view_table' table.business.slug table.pk %}">{{ table.table_nr }}</a>
                             </td>
                             <td>{% if table.locked %} Locked {% else %} Free {% endif %}</td>
+                            <td>
+                                <a href="{% url 'owned:reset_table' table.business.slug table.pk %}">RESET {{ table.table_nr }} now</a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
