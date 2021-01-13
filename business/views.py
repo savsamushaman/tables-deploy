@@ -841,13 +841,13 @@ def generate_qr_code(sender, instance, created, **kwargs):
         img.save(f'{path}\\{instance.business.slug}_{instance.table_nr}.png')
         instance.qr_code = f'{path}\\{instance.business.slug}_{instance.table_nr}.png'
 
-        # s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
-        #                   aws_secret_access_key=os.environ.get('AWS_KEY2'))
-        #
-        # bucket = os.environ.get('AWS_BUCKET_NAME')
-        # file_name = f'{path}\\{instance.business.slug}_{instance.table_nr}.png'
-        # key = f'media/qr/{instance.business.business_name}/{instance.business.slug}_{instance.table_nr}.png'
-        #
-        # s3.upload_file(file_name, bucket, key)
+        s3 = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_KEY1'),
+                          aws_secret_access_key=os.environ.get('AWS_KEY2'))
+
+        bucket = os.environ.get('AWS_BUCKET_NAME')
+        file_name = f'{path}\\{instance.business.slug}_{instance.table_nr}.png'
+        key = f'media/qr/{instance.business.business_name}/{instance.business.slug}_{instance.table_nr}.png'
+
+        s3.upload_file(file_name, bucket, key)
 
         instance.save()

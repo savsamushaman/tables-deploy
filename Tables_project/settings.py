@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['tables-django.herokuapp.com', 'localhost']
 
@@ -79,12 +79,10 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [os.environ.get('REDIS_URL')],
         },
     },
 }
-
-#os.environ.get('REDIS_URL'),
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -127,19 +125,22 @@ USE_L10N = True
 
 USE_TZ = True
 
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
-MEDIA_URL = '/media/'
+# Media config
+
+# MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
+# MEDIA_URL = '/media/'
+
 
 # AWS  config
 
-# AWS_ACCESS_KEY_ID = os.environ.get('AWS_KEY1')
-# AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_KEY2')
-# AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_BUCKET_NAME')
-# AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-# AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-# AWS_DEFAULT_ACL = 'public-read'
-#
-# AWS_LOCATION = 'static'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_KEY1')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_KEY2')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_DEFAULT_ACL = 'public-read'
+
+AWS_LOCATION = 'static'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
@@ -150,10 +151,9 @@ STATICFILES_DIRS = [
 
 # Storage config
 
-# DEFAULT_FILE_STORAGE = 'Tables_project.storages.MediaStore'
-# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-STATIC_URL = '/static/'
+DEFAULT_FILE_STORAGE = 'Tables_project.storages.MediaStore'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
 
 LOGIN_REDIRECT_URL = 'pages:places'
 
